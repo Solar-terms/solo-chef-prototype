@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食</title>
+<style>
+:root{
+  --bg:#fbf7f0;
+  --surface:#fffdf8;
+  --fg:#1f1a16;
+  --muted:#7d7168;
+  --accent:#3f7a4e;
+  --border:#ded3c5;
+  --border-soft:#eee5da;
+  --danger:#b33a3a;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --text-xs:12px;--text-sm:14px;--text-base:18px;--text-lg:21px;--text-xl:30px;
+  --space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-12:48px;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-pill:9999px;
+  --motion-fast:180ms;
+  --ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  background:#e9e2d8;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+@media (max-width:430px){
+  body{background:var(--bg);}
+  .device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+}
+
+.topbar{
+  flex:0 0 auto;
+  display:flex;align-items:center;
+  padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);
+  height:56px;
+}
+.brand{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.08em;}
+.back-btn{text-decoration:none;color:var(--fg);display:flex;align-items:center;margin-right:10px;}
+.back-btn:active{opacity:.5;}
+.list-count{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-left:auto;}
+
+.main{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:0 var(--space-6) var(--space-12);
+}
+
+/* 搜索 */
+.search-bar{
+  padding:var(--space-4) 0 var(--space-5);
+}
+.search-bar input{
+  width:100%;font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--fg);background:transparent;
+  border:none;border-bottom:1px solid var(--border);
+  padding:10px 2px;outline:none;
+  transition:border-color var(--motion-fast) var(--ease-standard);
+}
+.search-bar input:focus{border-bottom-color:var(--accent);}
+.search-bar input::placeholder{color:var(--muted);}
+
+/* 食材条目 */
+.items{display:flex;flex-direction:column;}
+.item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-4) 0;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  transition:padding var(--motion-fast) var(--ease-standard);
+}
+.item:active{padding-left:4px;}
+.item.hidden{display:none;}
+.item .i-icon{
+  width:40px;height:40px;border-radius:var(--radius-md);
+  background:color-mix(in oklab,var(--accent),transparent 88%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex:0 0 auto;
+}
+.item .i-meta{flex:1;min-width:0;margin:0 var(--space-3);}
+.item .i-name{
+  font-family:var(--font-body);font-size:var(--text-base);color:var(--fg);
+}
+.item .i-aliases{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;
+  color:var(--muted);margin-top:2px;
+}
+.item .i-arrow{color:var(--muted);display:flex;align-items:center;}
+
+/* 分类标题 */
+.cat-header{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  color:var(--muted);padding:var(--space-6) 0 var(--space-3);
+  border-bottom:1px solid var(--border);
+}
+.cat-header:first-child{padding-top:0;}
+
+/* 分类筛选 */
+.cat-filter{
+  display:flex;gap:8px;padding:var(--space-4) 0;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.cat-filter::-webkit-scrollbar{display:none;}
+.cat-pill{
+  flex:0 0 auto;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;
+  color:var(--muted);white-space:nowrap;
+  padding:6px 14px;border-radius:var(--radius-pill);
+  border:1px solid var(--border);
+  background:transparent;cursor:pointer;
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.cat-pill.active{
+  color:var(--accent);border-color:var(--accent);
+  background:color-mix(in oklab,var(--accent),transparent 92%);
+}
+.cat-pill:active{opacity:.6;}
+
+/* 新增按钮 */
+.add-btn{
+  display:flex;align-items:center;gap:8px;
+  width:100%;padding:var(--space-4) 0;
+  font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--accent);background:none;border:none;
+  cursor:pointer;transition:opacity var(--motion-fast) var(--ease-standard);
+}
+.add-btn:active{opacity:.6;}
+
+/* modal */
+.modal-overlay{
+  position:absolute;inset:0;z-index:10;
+  background:rgba(31,26,22,.35);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 220ms var(--ease-standard);
+}
+.modal-overlay.show{opacity:1;pointer-events:auto;}
+.modal-box{
+  background:var(--surface);border-radius:var(--radius-lg);
+  padding:var(--space-8) var(--space-6);
+  width:290px;
+  box-shadow:0 20px 60px rgba(31,26,22,.18);
+  transform:translateY(8px);
+  transition:transform 220ms var(--ease-standard);
+}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-box .m-title{
+  font-family:var(--font-display);font-size:var(--text-lg);
+  color:var(--fg);margin-bottom:var(--space-5);
+}
+.modal-box .m-field+.m-field{margin-top:var(--space-4);}
+.modal-box .m-field input{
+  width:100%;font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--fg);background:transparent;
+  border:none;border-bottom:1px solid var(--border);
+  padding:10px 2px;outline:none;
+}
+.modal-box .m-field input:focus{border-bottom-color:var(--accent);}
+.modal-box .m-field input::placeholder{color:var(--muted);}
+
+/* 分类管理 */
+.cat-mgr-btn{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;
+  color:var(--muted);background:none;border:none;
+  padding:4px 18px 4px 0;cursor:pointer;margin-top:4px;
+  position:relative;
+  transition:color var(--motion-fast) var(--ease-standard);
+}
+.cat-mgr-btn:active{color:var(--accent);}
+.cat-mgr-btn::after{
+  content:'';position:absolute;right:0;top:50%;
+  margin-top:-3px;
+  width:0;height:0;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  border-top:5px solid var(--muted);
+  transition:transform var(--motion-fast) var(--ease-standard);
+}
+.cat-mgr-btn.active::after{transform:rotate(180deg);}
+.cat-mgr{
+  display:none;margin-top:var(--space-3);
+}
+.cat-mgr.show{display:block;}
+.cat-mgr .cm-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;border-bottom:1px solid var(--border-soft);
+}
+.cat-mgr .cm-item:last-child{border-bottom:none;}
+.cat-mgr .cm-name{
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
+}
+.cat-mgr .cm-del{
+  font-family:var(--font-mono);font-size:10px;color:var(--danger);
+  background:none;border:none;cursor:pointer;
+}
+.cat-mgr .cm-add{
+  display:flex;gap:6px;margin-top:8px;
+}
+.cat-mgr .cm-add input{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
+  background:transparent;border:none;border-bottom:1px solid var(--border);
+  padding:6px 2px;color:var(--fg);outline:none;
+}
+.cat-mgr .cm-add input:focus{border-bottom-color:var(--accent);}
+.cat-mgr .cm-add .cm-ok{
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--accent);background:none;border:none;cursor:pointer;
+}
+
+.modal-btns{
+  display:flex;gap:12px;margin-top:var(--space-6);
+}
+.modal-btns button{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
+  padding:10px 0;border-radius:var(--radius-lg);border:none;cursor:pointer;
+}
+.modal-btns .btn-cancel{
+  background:transparent;color:var(--muted);border:1px solid var(--border);
+}
+.modal-btns .btn-save{
+  background:var(--accent);color:#fff;
+}
+.btn-delete{
+  display:block;width:100%;margin-top:12px;
+  font-family:var(--font-body);font-size:var(--text-sm);
+  padding:8px 0;border-radius:var(--radius-lg);
+  background:transparent;color:var(--danger);
+  border:1px solid var(--border);cursor:pointer;
+  transition:opacity var(--motion-fast) var(--ease-standard);
+}
+.btn-delete:active{opacity:.6;}
+
+.toast{
+  position:absolute;bottom:60px;left:50%;transform:translate(-50%,12px);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  background:var(--fg);color:var(--bg);padding:8px 20px;
+  border-radius:var(--radius-pill);
+  opacity:0;transition:opacity 280ms var(--ease-standard),transform 280ms var(--ease-standard);
+  z-index:99;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+/* 自定义分类下拉 */
+.cat-field{position:relative;}
+.cat-dropdown{
+  position:absolute;top:100%;left:0;right:0;z-index:20;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);box-shadow:0 8px 30px rgba(31,26,22,.12);
+  max-height:200px;overflow-y:auto;display:none;
+  -webkit-overflow-scrolling:touch;
+}
+.cat-dropdown.show{display:block;animation:fadeIn 150ms var(--ease-standard) both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.cat-dropdown .cd-item{
+  padding:10px 14px;cursor:pointer;
+  font-family:var(--font-body);font-size:var(--text-sm);
+  color:var(--fg);border-bottom:1px solid var(--border-soft);
+  transition:background var(--motion-fast) var(--ease-standard);
+}
+.cat-dropdown .cd-item:last-child{border-bottom:none;}
+.cat-dropdown .cd-item:active{background:color-mix(in oklab,var(--accent),transparent 90%);}
+.cat-field .arrow{
+  position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;pointer-events:none;
+  color:var(--muted);transition:transform var(--motion-fast) var(--ease-standard);
+}
+.cat-field .arrow.open{transform:translateY(-50%) rotate(180deg);}
+/* 方案标签徽标 */
+.tag{
+  display:inline-block;font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.04em;
+  padding:1px 8px;border-radius:var(--radius-pill);
+  margin-left:6px;vertical-align:middle;
+  line-height:1.6;border:1px solid;background:transparent;
+}
+.tag-allow{color:var(--accent);border-color:color-mix(in oklab,var(--accent),transparent 60%);background:color-mix(in oklab,var(--accent),transparent 92%);}
+.tag-forbid{color:var(--danger);border-color:color-mix(in oklab,var(--danger),transparent 60%);background:color-mix(in oklab,var(--danger),transparent 92%);}
+/* 标签选择 */
+.tag-select{margin-top:var(--space-5);}
+.tag-select .tag-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;
+  color:var(--muted);margin-bottom:8px;display:block;
+}
+.tag-options{display:flex;flex-wrap:wrap;gap:8px;}
+.tag-pill{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;
+  padding:5px 12px;border-radius:var(--radius-pill);
+  cursor:pointer;border:1px solid var(--border);
+  color:var(--muted);background:transparent;
+  transition:all var(--motion-fast) var(--ease-standard);
+  user-select:none;
+}
+.tag-pill.active{color:#fff;background:var(--accent);border-color:var(--accent);}
+</style>
+</head>
+<body>
+  <div class="device">
+    <header class="topbar" data-od-id="topbar">
+      <a class="back-btn" href="zuo_home.html" data-od-id="back-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <span class="brand">一作一食</span>
+      <span class="list-count" id="listCount">60 种</span>
+    </header>
+
+    <main class="main" data-od-id="ingredients-main">
+      <div class="search-bar">
+        <input id="searchInput" type="text" autocomplete="off" placeholder="搜索食材或别名">
+      </div>
+
+      <div class="cat-filter" id="catFilter">
+        <!-- JS 动态填充 -->
+      </div>
+
+      <button class="add-btn" id="addBtn">+ 新增食材</button>
+
+      <div class="items" id="itemList">
+        <!-- items rendered by JS -->
+      </div>
+    </main>
+
+    <!-- 新增/编辑弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-box">
+        <div class="m-title" id="modalTitle">新增食材</div>
+        <div class="m-field"><input id="modalName" type="text" autocomplete="off" placeholder="名称"></div>
+        <div class="m-field"><input id="modalAlias" type="text" autocomplete="off" placeholder="别名（用 · 分隔）"></div>
+        <div class="m-field cat-field">
+          <input id="modalCat" type="text" autocomplete="off" placeholder="点击选择分类" readonly>
+          <svg class="arrow" id="catArrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          <div class="cat-dropdown" id="catDropdown"></div>
+        </div>
+        <button type="button" class="cat-mgr-btn" id="catMgrBtn">管理分类</button>
+        <div class="cat-mgr" id="catMgr">
+          <div id="catMgrList"></div>
+          <div class="cm-add">
+            <input id="catMgrNew" type="text" autocomplete="off" placeholder="新增分类">
+            <button class="cm-ok" id="catMgrAdd">添加</button>
+          </div>
+        </div>
+        <div class="tag-select" id="tagSelect">
+          <span class="tag-label">方案标签</span>
+          <div class="tag-options" id="tagOptions"></div>
+        </div>
+        <div class="modal-btns">
+          <button class="btn-cancel" id="modalCancel">取消</button>
+          <button class="btn-save" id="modalSave">保存</button>
+        </div>
+        <button class="btn-delete" id="modalDelete" style="display:none;">删除</button>
+      </div>
+    </div>
+
+    <!-- 确认删除弹窗 -->
+    <div class="modal-overlay" id="confirmOverlay">
+      <div class="modal-box" style="width:260px;text-align:center;">
+        <div class="m-title" style="font-size:var(--text-base);margin-bottom:var(--space-3);">确认删除</div>
+        <p style="font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg-2);line-height:1.6;margin-bottom:var(--space-5);" id="confirmMsg"></p>
+        <div class="modal-btns">
+          <button class="btn-cancel" id="confirmCancel">取消</button>
+          <button class="btn-save" id="confirmOk" style="background:var(--danger);">删除</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+<script>
+  (function () {
+    var emoji = ['🥚','🍅','🫘','🧅','🧄','🥬','🥕','🍄','🧂','🍚'];
+    function randEmoji() { return emoji[Math.floor(Math.random() * emoji.length)]; }
+
+    var items = [
+      { id: 1, name: '燕麦', cat: '主食', aliases: ['即食燕麦','钢切燕麦','燕麦片'], icon: '🌾' },
+      { id: 2, name: '大米', cat: '主食', aliases: ['粳米','香米','稻米'], icon: '🍚' },
+      { id: 3, name: '面条', cat: '主食', aliases: ['挂面','手擀面','拉面'], icon: '🍜' },
+      { id: 4, name: '馒头', cat: '主食', aliases: ['蒸馍','白面馒头'], icon: '🍞' },
+      { id: 5, name: '米饭', cat: '主食', aliases: ['白米饭','白饭'], icon: '🍚' },
+      { id: 6, name: '包子', cat: '主食', aliases: ['肉包','菜包','豆沙包'], icon: '🥟' },
+      { id: 7, name: '水饺', cat: '主食', aliases: ['饺子','馄饨'], icon: '🥟' },
+      { id: 8, name: '鸡蛋', cat: '蛋白', aliases: ['土鸡蛋','草鸡蛋','柴鸡蛋'], icon: '🥚' },
+      { id: 9, name: '鸡胸肉', cat: '蛋白', aliases: ['鸡胸','鸡脯肉'], icon: '🍗' },
+      { id: 10, name: '牛腩', cat: '蛋白', aliases: ['牛胸肉','牛肉'], icon: '🥩' },
+      { id: 11, name: '牛肉', cat: '蛋白', aliases: ['黄牛肉','水牛肉'], icon: '🥩' },
+      { id: 12, name: '鸭肉', cat: '蛋白', aliases: ['鸭胸','鸭腿'], icon: '🦆' },
+      { id: 13, name: '鱼肉', cat: '蛋白', aliases: ['鲈鱼','鲫鱼','草鱼'], icon: '🐟' },
+      { id: 14, name: '豆腐', cat: '蛋白', aliases: ['嫩豆腐','老豆腐','内酯豆腐'], icon: '🫘' },
+      { id: 15, name: '黄瓜', cat: '蔬果', aliases: ['青瓜','胡瓜'], icon: '🥒' },
+      { id: 16, name: '番茄', cat: '蔬果', aliases: ['西红柿','洋柿子'], icon: '🍅' },
+      { id: 17, name: '圣女果', cat: '蔬果', aliases: ['小番茄','樱桃番茄','千禧果'], icon: '🍅' },
+      { id: 18, name: '苹果', cat: '蔬果', aliases: ['红富士','蛇果','青苹果'], icon: '🍎' },
+      { id: 19, name: '蓝莓', cat: '蔬果', aliases: ['蓝莓干'], icon: '🫐' },
+      { id: 20, name: '草莓', cat: '蔬果', aliases: ['洋莓','红莓'], icon: '🍓' },
+      { id: 21, name: '火龙果', cat: '蔬果', aliases: ['红心火龙果','白心火龙果'], icon: '🐉' },
+      { id: 22, name: '西梅', cat: '蔬果', aliases: ['加州西梅','欧洲李'], icon: '🍑' },
+      { id: 23, name: '脐橙', cat: '蔬果', aliases: ['赣南脐橙','甜橙'], icon: '🍊' },
+      { id: 24, name: '猕猴桃', cat: '蔬果', aliases: ['奇异果','毛桃'], icon: '🥝' },
+      { id: 25, name: '木瓜', cat: '蔬果', aliases: ['番木瓜','宣木瓜'], icon: '🥭' },
+      { id: 26, name: '哈密瓜', cat: '蔬果', aliases: ['甜瓜','网纹瓜'], icon: '🍈' },
+      { id: 27, name: '牛油果', cat: '蔬果', aliases: ['鳄梨','油梨'], icon: '🥑' },
+      { id: 28, name: '西柚', cat: '蔬果', aliases: ['葡萄柚','红西柚'], icon: '🍊' },
+      { id: 29, name: '柠檬', cat: '蔬果', aliases: ['青柠','黄柠檬'], icon: '🍋' },
+      { id: 30, name: '芹菜', cat: '蔬果', aliases: ['西芹','旱芹','药芹'], icon: '🥬' },
+      { id: 31, name: '秋葵', cat: '蔬果', aliases: ['羊角豆','咖啡黄葵'], icon: '🌿' },
+      { id: 32, name: '苦瓜', cat: '蔬果', aliases: ['凉瓜','癞瓜'], icon: '🥒' },
+      { id: 33, name: '西兰花', cat: '蔬果', aliases: ['青花菜','西蓝花','花椰菜'], icon: '🥦' },
+      { id: 34, name: '莴苣', cat: '蔬果', aliases: ['莴笋','生菜'], icon: '🥬' },
+      { id: 35, name: '紫甘蓝', cat: '蔬果', aliases: ['紫包菜','红甘蓝'], icon: '🥬' },
+      { id: 36, name: '茄子', cat: '蔬果', aliases: ['紫茄','长茄','圆茄'], icon: '🍆' },
+      { id: 37, name: '冬瓜', cat: '蔬果', aliases: ['白瓜','枕瓜'], icon: '🥒' },
+      { id: 38, name: '芦笋', cat: '蔬果', aliases: ['石刁柏','龙须菜'], icon: '🌿' },
+      { id: 39, name: '紫菜', cat: '蔬果', aliases: ['海苔','坛紫菜'], icon: '🌊' },
+      { id: 40, name: '木耳', cat: '蔬果', aliases: ['黑木耳','云耳','耳子'], icon: '🍄' },
+      { id: 41, name: '茼蒿', cat: '蔬果', aliases: ['蓬蒿','菊花菜'], icon: '🥬' },
+      { id: 42, name: '生菜', cat: '蔬果', aliases: ['叶莴苣','散叶生菜'], icon: '🥬' },
+      { id: 43, name: '苦菊', cat: '蔬果', aliases: ['苦苣','苦菜'], icon: '🥬' },
+      { id: 44, name: '菜心', cat: '蔬果', aliases: ['菜薹','白菜薹'], icon: '🥬' },
+      { id: 45, name: '山楂', cat: '蔬果', aliases: ['红果','山里红'], icon: '🍎' },
+      { id: 46, name: '红枣', cat: '蔬果', aliases: ['大枣','干枣','若羌红枣'], icon: '🌰' },
+      { id: 47, name: '花生', cat: '坚果', aliases: ['长生果','落花生'], icon: '🥜' },
+      { id: 48, name: '核桃', cat: '坚果', aliases: ['胡桃','山核桃'], icon: '🌰' },
+      { id: 49, name: '葡萄干', cat: '坚果', aliases: ['提子干','葡萄干'], icon: '🍇' },
+      { id: 50, name: '巴旦木', cat: '坚果', aliases: ['扁桃仁','巴旦杏'], icon: '🌰' },
+      { id: 51, name: '杏仁', cat: '坚果', aliases: ['南杏仁','北杏仁','甜杏仁'], icon: '🌰' },
+      { id: 52, name: '开心果', cat: '坚果', aliases: ['绿仁果','必思答'], icon: '🥜' },
+      { id: 53, name: '榛子', cat: '坚果', aliases: ['山板栗','尖栗'], icon: '🌰' },
+      { id: 54, name: '牛奶', cat: '乳饮', aliases: ['纯牛奶','鲜牛奶','全脂牛奶'], icon: '🥛' },
+      { id: 55, name: '酸奶', cat: '乳饮', aliases: ['无糖酸奶','酸牛乳','凝固型酸奶'], icon: '🥛' },
+      { id: 56, name: '豆浆', cat: '乳饮', aliases: ['无糖豆浆','黄豆浆','黑豆浆'], icon: '🥛' },
+      { id: 57, name: '盐', cat: '调味', aliases: ['食盐','海盐','低钠盐'], icon: '🧂' },
+      { id: 58, name: '蛋白粉', cat: '调味', aliases: ['乳清蛋白','大豆蛋白粉'], icon: '💪' },
+      { id: 59, name: '葱', cat: '调味', aliases: ['小葱','香葱','大葱','京葱'], icon: '🧅' },
+      { id: 60, name: '姜', cat: '调味', aliases: ['生姜','老姜','嫩姜','子姜'], icon: '🧄' }
+    ];
+    var nextId = 61;
+    var editingId = null;
+
+    var itemList = document.getElementById('itemList');
+    var searchInput = document.getElementById('searchInput');
+    var listCount = document.getElementById('listCount');
+    var overlay = document.getElementById('modalOverlay');
+    var modalTitle = document.getElementById('modalTitle');
+    var modalName = document.getElementById('modalName');
+    var modalAlias = document.getElementById('modalAlias');
+    var modalCat = document.getElementById('modalCat');
+    var catDropdown = document.getElementById('catDropdown');
+    var catArrow = document.getElementById('catArrow');
+
+    var modalDelete = document.getElementById('modalDelete');
+    var catFilterEl = document.getElementById('catFilter');
+    var activeCat = ''; /* '' = 全部 */
+
+    /* 分类管理 */
+    var catMgrBtn = document.getElementById('catMgrBtn');
+    var catMgr = document.getElementById('catMgr');
+    var catMgrList = document.getElementById('catMgrList');
+    var catMgrNew = document.getElementById('catMgrNew');
+    var catMgrAdd = document.getElementById('catMgrAdd');
+
+    /* ===== 方案标签（从 localStorage 读取） ===== */
+    var planTags = {};
+    try { var saved = localStorage.getItem('yzys_plan_tags'); if (saved) planTags = JSON.parse(saved); } catch (e) {}
+    var tagOptions = document.getElementById('tagOptions');
+    var currentTag = '';
+
+    function refreshTagOptions() {
+      tagOptions.innerHTML = '';
+      var keys = Object.keys(planTags).reduce(function (arr, k) {
+        var v = planTags[k];
+        if (arr.indexOf(v) < 0) arr.push(v);
+        return arr;
+      }, []);
+      keys.forEach(function (tag) {
+        var el = document.createElement('span');
+        el.className = 'tag-pill' + (tag === currentTag ? ' active' : '');
+        el.textContent = tag;
+        el.addEventListener('click', function () {
+          currentTag = (currentTag === tag) ? '' : tag;
+          refreshTagOptions();
+        });
+        tagOptions.appendChild(el);
+      });
+    }
+
+    function getTagForName(name) { return planTags[name] || ''; }
+
+    function render() {
+      var cats = [];
+      items.forEach(function (it) { if (cats.indexOf(it.cat) < 0) cats.push(it.cat); });
+      catMgrList.innerHTML = '';
+      cats.forEach(function (c) {
+        var row = document.createElement('div');
+        row.className = 'cm-item';
+        row.innerHTML = '<span class="cm-name">' + c + '</span><button class="cm-del">删除</button>';
+        row.querySelector('.cm-del').addEventListener('click', function () {
+          items.forEach(function (it) { if (it.cat === c) it.cat = '其他'; });
+          renderCatMgr();
+          populateCatDatalist();
+          buildCatFilter();
+          render();
+          modalCat.value = '';
+        });
+        catMgrList.appendChild(row);
+      });
+    }
+    catMgrBtn.addEventListener('click', function () {
+      var expanded = catMgr.classList.toggle('show');
+      renderCatMgr();
+      catMgrBtn.textContent = expanded ? '收起分类' : '管理分类';
+      catMgrBtn.classList.toggle('active', expanded);
+    });
+    catMgrAdd.addEventListener('click', function () {
+      var v = catMgrNew.value.trim();
+      if (!v) return;
+      modalCat.value = v;
+      catMgrNew.value = '';
+      renderCatMgr();
+      populateCatDatalist();
+    });
+
+    /* 构建分类筛选条 */
+    function buildCatFilter() {
+      var cats = [];
+      items.forEach(function (it) {
+        if (cats.indexOf(it.cat) < 0) cats.push(it.cat);
+      });
+      catFilterEl.innerHTML = '';
+      var all = document.createElement('span');
+      all.className = 'cat-pill' + (activeCat ? '' : ' active');
+      all.textContent = '全部';
+      all.addEventListener('click', function () { activeCat = ''; buildCatFilter(); render(); });
+      catFilterEl.appendChild(all);
+      cats.forEach(function (c) {
+        var p = document.createElement('span');
+        p.className = 'cat-pill' + (activeCat === c ? ' active' : '');
+        p.textContent = c;
+        p.addEventListener('click', function () { activeCat = c; buildCatFilter(); render(); });
+        catFilterEl.appendChild(p);
+      });
+    }
+
+    /* 填充分类下拉 */
+    function populateCatDatalist() {
+      var cats = [];
+      items.forEach(function (it) { if (cats.indexOf(it.cat) < 0) cats.push(it.cat); });
+      catDropdown.innerHTML = '';
+      cats.forEach(function (c) {
+        var el = document.createElement('div');
+        el.className = 'cd-item';
+        el.textContent = c;
+        el.addEventListener('click', function (e) {
+          e.stopPropagation();
+          modalCat.value = c;
+          catDropdown.classList.remove('show');
+          catArrow.classList.remove('open');
+        });
+        catDropdown.appendChild(el);
+      });
+    }
+
+    function render() {
+      var q = (searchInput.value || '').trim().toLowerCase();
+      var visible = 0;
+      var lastCat = '';
+      itemList.innerHTML = '';
+      items.forEach(function (it) {
+        var text = (it.name + ' ' + it.aliases.join(' ')).toLowerCase();
+        var match = (!q || text.indexOf(q) !== -1) && (!activeCat || it.cat === activeCat);
+        /* 分类标题 */
+        if (match && lastCat !== it.cat) {
+          lastCat = it.cat;
+          var h = document.createElement('div');
+          h.className = 'cat-header';
+          h.textContent = it.cat;
+          itemList.appendChild(h);
+        }
+        if (match) visible++;
+        var el = document.createElement('div');
+        el.className = 'item' + (match ? '' : ' hidden');
+        el.setAttribute('data-od-id', 'ingredient-' + it.id);
+        el.innerHTML =
+          '<div class="i-icon">' + it.icon + '</div>' +
+          '<div class="i-meta">' +
+            '<div class="i-name">' + it.name + (function(){ var t = getTagForName(it.name); return t ? '<span class="tag tag-' + (t.indexOf('允许')>=0?'allow':'forbid') + '">' + t + '</span>' : ''; })() + '</div>' +
+            '<div class="i-aliases">' + it.aliases.join(' · ') + '</div>' +
+          '</div>' +
+          '<span class="i-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>';
+        el.addEventListener('click', function () {
+          modalTitle.textContent = '编辑食材';
+          populateCatDatalist();
+          modalName.value = it.name;
+          modalAlias.value = it.aliases.join(' · ');
+          modalCat.value = it.cat || '';
+          currentTag = getTagForName(it.name);
+          refreshTagOptions();
+          editingId = it.id;
+          modalDelete.style.display = 'block';
+          overlay.classList.add('show');
+        });
+        itemList.appendChild(el);
+      });
+      listCount.textContent = visible + ' 种';
+    }
+
+    /* 搜索 */
+    searchInput.addEventListener('input', render);
+
+    /* 新增 */
+    document.getElementById('addBtn').addEventListener('click', function () {
+      editingId = null;
+      modalDelete.style.display = 'none';
+      modalTitle.textContent = '新增食材';
+      populateCatDatalist();
+      modalName.value = '';
+      modalAlias.value = '';
+      modalCat.value = '';
+      currentTag = '';
+      refreshTagOptions();
+      overlay.classList.add('show');
+    });
+
+    /* 保存 */
+    document.getElementById('modalSave').addEventListener('click', function () {
+      var name = modalName.value.trim();
+      var aliases = modalAlias.value.trim().split(/[·,，、\s]+/).filter(Boolean);
+      if (!name) { showToast('请输入名称'); return; }
+      /* 查重：名称 */
+      var nameDup = items.find(function (x) {
+        return x.name === name && (!editingId || x.id !== editingId);
+      });
+      if (nameDup) { showToast('「' + name + '」已存在，请勿重复添加'); return; }
+      /* 查重：别名 */
+      var aliasDup = items.find(function (x) {
+        if (editingId && x.id === editingId) return false;
+        return x.aliases.indexOf(name) >= 0;
+      });
+      if (aliasDup) {
+        showToast('「' + name + '」在「' + aliasDup.name + '」中已作为别名存在，请勿重复添加');
+        return;
+      }
+      var cat = modalCat.value.trim() || '其他';
+      /* 旧名称（编辑时用于清理旧标签） */
+      var oldName = '';
+      if (editingId) {
+        var idx = items.findIndex(function (x) { return x.id === editingId; });
+        if (idx >= 0) {
+          oldName = items[idx].name;
+          items[idx].name = name;
+          items[idx].aliases = aliases;
+          items[idx].cat = cat;
+        }
+      } else {
+        items.push({ id: nextId++, name: name, cat: cat, aliases: aliases, icon: randEmoji() });
+      }
+      /* 更新标签 */
+      if (oldName && oldName !== name) delete planTags[oldName];
+      if (currentTag) planTags[name] = currentTag;
+      else delete planTags[name];
+      try { localStorage.setItem('yzys_plan_tags', JSON.stringify(planTags)); } catch (e) {}
+      overlay.classList.remove('show');
+      buildCatFilter();
+      if (currentTag) showToast('已更新标签');
+      else if (editingId) showToast('已更新');
+      else showToast('已添加');
+    render();
+    });
+
+    /* 取消 */
+    document.getElementById('modalCancel').addEventListener('click', function () {
+      overlay.classList.remove('show');
+    });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.classList.remove('show');
+    });
+
+    /* 删除 */
+    var confirmOverlay = document.getElementById('confirmOverlay');
+    var confirmMsg = document.getElementById('confirmMsg');
+    var confirmOk = document.getElementById('confirmOk');
+
+    modalDelete.addEventListener('click', function () {
+      if (!editingId) return;
+      var delItem = items.find(function (x) { return x.id === editingId; });
+      confirmMsg.textContent = '确定删除「' + (delItem ? delItem.name : '') + '」？\n此操作无法撤销。';
+      confirmOverlay.classList.add('show');
+    });
+
+    document.getElementById('confirmCancel').addEventListener('click', function () {
+      confirmOverlay.classList.remove('show');
+    });
+    confirmOverlay.addEventListener('click', function (e) {
+      if (e.target === confirmOverlay) confirmOverlay.classList.remove('show');
+    });
+    confirmOk.addEventListener('click', function () {
+      if (!editingId) { confirmOverlay.classList.remove('show'); return; }
+      var delItem = items.find(function (x) { return x.id === editingId; });
+      if (delItem) delete planTags[delItem.name];
+      try { localStorage.setItem('yzys_plan_tags', JSON.stringify(planTags)); } catch (e) {}
+      items = items.filter(function (x) { return x.id !== editingId; });
+      confirmOverlay.classList.remove('show');
+      overlay.classList.remove('show');
+      showToast('已删除');
+      buildCatFilter();
+    render();
+    });
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(function () { t.classList.remove('show'); }, 2000);
+    }
+
+    /* 分类下拉切换 */
+    modalCat.addEventListener('click', function (e) {
+      e.stopPropagation();
+      populateCatDatalist();
+      catDropdown.classList.toggle('show');
+      catArrow.classList.toggle('open');
+    });
+    document.addEventListener('click', function () {
+      catDropdown.classList.remove('show');
+      catArrow.classList.remove('open');
+    });
+    catDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    buildCatFilter();
+    render();
+  })();
+</script>
+</body>
+</html>

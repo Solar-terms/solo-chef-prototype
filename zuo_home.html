@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食 · 作</title>
+<style>
+:root{
+  --bg:#fbf7f0;
+  --surface:#fffdf8;
+  --fg:#1f1a16;
+  --fg-2:#4b4038;
+  --muted:#7d7168;
+  --accent:#3f7a4e;
+  --border:#ded3c5;
+  --danger:#b33a3a;
+  --warn:#c9822f;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --text-xs:12px;--text-sm:14px;--text-base:18px;--text-lg:21px;--text-xl:30px;
+  --space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-12:48px;
+  --radius-md:8px;--radius-lg:12px;--radius-pill:9999px;
+  --motion-fast:180ms;
+  --ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  background:#e9e2d8;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+@media (max-width:430px){
+  body{background:var(--bg);}
+  .device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+}
+
+.topbar{
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);
+  height:56px;
+}
+.topbar .brand{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.08em;}
+.user-btn{
+  text-decoration:none;color:var(--accent);
+  display:flex;align-items:center;
+  transition:opacity var(--motion-fast) var(--ease-standard);
+}
+.user-btn:active{opacity:.6;}
+
+.main{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:var(--space-8) var(--space-6);
+  display:flex;flex-direction:column;
+}
+
+.greeting{margin-bottom:var(--space-8);}
+.greeting .say{
+  font-family:var(--font-display);font-size:var(--text-xl);
+  color:var(--fg);letter-spacing:.04em;margin-bottom:6px;
+}
+.greeting .hint{font-size:var(--text-sm);color:var(--muted);}
+
+.entry-grid{display:flex;flex-direction:column;gap:var(--space-5);}
+.entry{
+  display:flex;align-items:center;gap:var(--space-5);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);
+  cursor:pointer;text-decoration:none;color:inherit;
+  transition:border-color var(--motion-fast) var(--ease-standard),
+             box-shadow var(--motion-fast) var(--ease-standard);
+}
+.entry:active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(63,122,78,.08);
+}
+.entry .e-icon{
+  width:52px;height:52px;border-radius:var(--radius-md);
+  background:color-mix(in oklab,var(--accent),transparent 90%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex:0 0 auto;
+}
+.entry .e-meta{flex:1;min-width:0;}
+.entry .e-name{
+  font-family:var(--font-display);font-size:var(--text-lg);
+  color:var(--fg);margin-bottom:4px;
+}
+.entry .e-stat{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
+  color:var(--muted);
+}
+.entry .e-stat .warn{color:var(--danger);}
+.entry .e-arrow{
+  font-family:var(--font-mono);font-size:14px;color:var(--muted);
+  flex:0 0 auto;
+}
+
+.toast{
+  position:absolute;bottom:60px;left:50%;transform:translate(-50%,12px);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  background:var(--fg);color:var(--bg);padding:8px 20px;
+  border-radius:var(--radius-pill);
+  opacity:0;transition:opacity 280ms var(--ease-standard),transform 280ms var(--ease-standard);
+  z-index:99;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+  <div class="device">
+    <header class="topbar" data-od-id="topbar">
+      <span class="brand">一作一食</span>
+      <a class="user-btn" href="profile.html" data-od-id="user-entry">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+      </a>
+    </header>
+
+    <main class="main" data-od-id="home-main">
+      <div class="greeting" data-od-id="greeting">
+        <p class="say">今晚做点什么呢</p>
+        <p class="hint">打开菜谱，从库存里找一找</p>
+      </div>
+
+      <div class="entry-grid">
+        <a class="entry" href="ingredients.html" data-od-id="entry-ingredients">
+          <div class="e-icon">🥬</div>
+          <div class="e-meta">
+            <div class="e-name">食材管理</div>
+            <div class="e-stat">共 60 种</div>
+          </div>
+          <span class="e-arrow">→</span>
+        </a>
+
+        <a class="entry" href="plan-manage.html" data-od-id="entry-plans">
+          <div class="e-icon">📋</div>
+          <div class="e-meta">
+            <div class="e-name">方案管理</div>
+            <div class="e-stat">营养与运动减重方案</div>
+          </div>
+          <span class="e-arrow">→</span>
+        </a>
+
+        <a class="entry" href="#" data-od-id="entry-recipes">
+          <div class="e-icon">📖</div>
+          <div class="e-meta">
+            <div class="e-name">菜谱管理</div>
+            <div class="e-stat">共 3 道菜谱</div>
+          </div>
+          <span class="e-arrow">→</span>
+        </a>
+
+        <a class="entry" href="#" data-od-id="entry-inventory">
+          <div class="e-icon">🧺</div>
+          <div class="e-meta">
+            <div class="e-name">库存管理</div>
+            <div class="e-stat">共 5 种 · <span class="warn">1 项不足</span></div>
+          </div>
+          <span class="e-arrow">→</span>
+        </a>
+
+        <a class="entry" href="#" data-od-id="entry-history" style="opacity:.55;">
+          <div class="e-icon">📅</div>
+          <div class="e-meta">
+            <div class="e-name">做饭记录</div>
+            <div class="e-stat">即将推出</div>
+          </div>
+          <span class="e-arrow">→</span>
+        </a>
+      </div>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+</body>
+</html>

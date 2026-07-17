@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食 · 受邀登录</title>
+<style>
+:root{
+  --bg:#fbf7f0;
+  --surface:#fffdf8;
+  --fg:#1f1a16;
+  --fg-2:#4b4038;
+  --muted:#7d7168;
+  --accent:#9a5a2f;
+  --accent-on:#ffffff;
+  --accent-hover:color-mix(in oklab,var(--accent),black 8%);
+  --accent-active:color-mix(in oklab,var(--accent),black 14%);
+  --border:#ded3c5;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --focus-ring:0 0 0 4px color-mix(in oklab,var(--accent),transparent 76%);
+  --motion-fast:200ms;
+  --ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:#e9e2d8;
+  color:var(--fg);
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+@media (max-width:430px){
+  body{background:var(--bg);}
+  .device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+}
+.invitee{
+  flex:1;
+  display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 88px) 36px calc(env(safe-area-inset-bottom) + 36px);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  animation:arrive 1000ms var(--ease-standard) both;
+}
+@keyframes arrive{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.step{display:none;}
+.step.active{display:block;animation:stepin 360ms var(--ease-standard) both;}
+@keyframes stepin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.app-name{
+  font-family:var(--font-display);
+  font-weight:400;font-size:32px;
+  letter-spacing:.22em;text-indent:.22em;
+  text-align:center;
+  color:var(--fg);
+  margin-bottom:14px;
+}
+.app-en{
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:var(--muted);
+  text-indent:.34em;
+  margin-bottom:52px;
+}
+.invite-banner{
+  text-align:center;
+  font-family:var(--font-body);
+  font-size:15px;line-height:1.7;color:var(--fg-2);
+  margin-bottom:44px;
+}
+.invite-banner b{color:var(--accent);font-weight:400;}
+.step-title{
+  text-align:center;
+  font-family:var(--font-display);
+  font-size:24px;letter-spacing:.04em;
+  color:var(--fg);
+  margin-bottom:32px;
+}
+.block-q{
+  text-align:center;
+  font-family:var(--font-body);
+  font-size:15px;color:var(--muted);
+  margin-bottom:24px;
+}
+/* 表单 —— 仅下划线 */
+.field{position:relative;}
+.field input{
+  font-family:var(--font-body);
+  font-size:18px;color:var(--fg);
+  background:transparent;
+  border:none;border-bottom:1px solid var(--border);
+  border-radius:0;padding:10px 2px;width:100%;
+  transition:border-color var(--motion-fast) var(--ease-standard),
+             box-shadow var(--motion-fast) var(--ease-standard);
+}
+.field input::placeholder{color:var(--muted);}
+.field input:focus{outline:none;border-bottom-color:var(--accent);box-shadow:0 1px 0 0 var(--accent);}
+.code-row{display:flex;align-items:center;gap:14px;margin-top:30px;}
+.code-row input{flex:1;}
+.code-btn{
+  flex:0 0 auto;
+  font-family:var(--font-body);font-size:14px;color:var(--muted);
+  background:none;border:none;white-space:nowrap;cursor:pointer;padding:4px 0;
+  transition:color var(--motion-fast) var(--ease-standard);
+}
+.code-btn:not(:disabled):active{color:var(--accent);}
+.code-btn:disabled{color:var(--border);cursor:not-allowed;}
+.btn-primary{
+  margin-top:40px;width:100%;
+  font-family:var(--font-body);
+  font-size:17px;letter-spacing:.4em;text-indent:.4em;
+  color:var(--accent-on);
+  background:var(--accent);
+  border:none;border-radius:8px;padding:16px;cursor:pointer;
+  transition:background var(--motion-fast) var(--ease-standard),
+             transform var(--motion-fast) var(--ease-standard);
+}
+.btn-primary:not(:disabled):active{background:var(--accent-active);transform:translateY(1px);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+
+/* 多邀请者列表 */
+.inviter-list{display:flex;flex-direction:column;gap:14px;}
+.inviter-card{
+  display:flex;align-items:center;gap:14px;
+  padding:16px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);
+}
+.inviter-actions{
+  display:flex;flex-direction:column;gap:8px;
+  flex:0 0 auto;
+}
+.inviter-agree,.inviter-ignore{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  padding:5px 12px;border-radius:var(--radius-pill);
+  border:1px solid;cursor:pointer;
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.inviter-agree{
+  color:var(--accent-on);background:var(--accent);
+  border-color:var(--accent);
+}
+.inviter-agree:active{
+  background:var(--accent-hover);
+}
+.inviter-ignore{
+  color:var(--muted);background:transparent;
+  border-color:var(--border-soft);
+}
+.inviter-ignore:active{
+  border-color:var(--muted);
+  color:var(--fg-2);
+}
+.inviter-avatar{
+  width:44px;height:44px;border-radius:50%;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:20px;line-height:1;
+  color:var(--accent);
+  background:color-mix(in oklab,var(--accent),transparent 88%);
+}
+.inviter-meta{flex:1;min-width:0;}
+.inviter-name{
+  font-family:var(--font-display);font-size:17px;color:var(--fg);
+  margin-bottom:2px;
+}
+.inviter-names{
+  font-family:var(--font-body);font-size:13px;color:var(--accent);
+  margin-bottom:4px;
+}
+.inviter-names b{font-weight:400;}
+.inviter-hint{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;
+  color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* 成功反馈页 */
+.done{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:0 8px;
+  animation:stepin 360ms var(--ease-standard) both;
+  display:none;
+}
+.done.show{display:flex;}
+.vanish{display:none!important;}
+.done-mark{
+  width:72px;height:72px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:32px;line-height:1;
+  color:#cf3a2e;
+  border:1px solid #cf3a2e;
+  background:color-mix(in oklab,#cf3a2e,transparent 90%);
+  margin-bottom:24px;
+}
+.done-title{
+  font-family:var(--font-display);font-size:28px;letter-spacing:.06em;
+  color:var(--fg);margin-bottom:14px;
+}
+.done-desc{
+  font-family:var(--font-body);font-size:15px;line-height:1.7;
+  color:var(--muted);max-width:260px;margin-bottom:28px;
+}
+.done-link{
+  font-family:var(--font-body);font-size:15px;color:var(--accent);
+  text-decoration:none;border-bottom:1px solid color-mix(in oklab,var(--accent),transparent 55%);
+  padding-bottom:1px;
+}
+.toast{
+  position:absolute;
+  left:50%;bottom:calc(env(safe-area-inset-bottom) + 44px);
+  transform:translate(-50%,12px);
+  background:var(--fg);color:var(--bg);
+  font-size:13px;padding:10px 18px;border-radius:9999px;
+  opacity:0;pointer-events:none;
+  transition:opacity var(--motion-fast) var(--ease-standard),
+             transform var(--motion-fast) var(--ease-standard);
+  z-index:10;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+  <div class="device">
+    <main class="invitee" data-od-id="invitee-screen">
+
+      <!-- 第一步：被邀请进入 + 输入自己的手机号登录 -->
+      <section class="step active" data-step="1" data-od-id="step-login">
+        <h1 class="app-name">一作一食</h1>
+        <p class="app-en">solo chef · sole love</p>
+        <p class="invite-banner" id="inviteBanner">有人邀请你一起用《一作一食》<br>先登录你自己的账号</p>
+
+        <div class="field">
+          <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" placeholder="你的手机号">
+        </div>
+        <div class="field">
+          <div class="code-row">
+            <input id="code" type="tel" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="验证码">
+            <button type="button" class="code-btn" id="codeBtn">获取验证码</button>
+          </div>
+        </div>
+        <button type="button" class="btn-primary" id="loginBtn" disabled>登 录</button>
+      </section>
+
+      <!-- 第二步：出现多个邀请者，择一配对 -->
+      <section class="step" data-step="2" data-od-id="step-choose">
+        <p class="step-title">有几位邀请了你</p>
+        <p class="block-q" id="chooseQ"></p>
+        <div class="inviter-list" id="inviterList"></div>
+      </section>
+
+      <!-- 第三步：成一对 -->
+      <section class="done" id="doneScreen" data-od-id="done-pair">
+        <div class="done-mark">囍</div>
+        <h2 class="done-title">已成一对</h2>
+        <p class="done-desc" id="doneDesc"></p>
+        <a class="done-link" href="login.html">进入一作一食</a>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+  </div>
+<script>
+  (function () {
+    var urlP = new URLSearchParams(location.search);
+    var callerName = (urlP.get('callMe') || '').trim();
+    var calleeName = (urlP.get('callTa') || '').trim();
+    var inviteCode = (urlP.get('invite') || '').trim();
+    var hasDirectInvite = !!inviteCode && !!callerName && !!calleeName;
+    /* Mock：无真实邀请时，用王二邀请大周展示效果 */
+    if (!hasDirectInvite) {
+      inviteCode = 'YZ7F3K';
+      callerName = '二子';
+      calleeName = '王二';
+      hasDirectInvite = true;
+    }
+    var bannerEl = document.getElementById('inviteBanner');
+    bannerEl.textContent = calleeName + '邀请大周，请输入手机号登录';
+
+    var phone = document.getElementById('phone');
+    var code = document.getElementById('code');
+    var codeBtn = document.getElementById('codeBtn');
+    var loginBtn = document.getElementById('loginBtn');
+    var chooseQ = document.getElementById('chooseQ');
+    var inviterList = document.getElementById('inviterList');
+    var doneScreen = document.getElementById('doneScreen');
+    var doneDesc = document.getElementById('doneDesc');
+    var root = document.querySelector('.invitee');
+
+    /* 模拟：该手机号登录后，发现有多位待确认的邀请者 */
+    var inviters = [
+      { name: '王二', glyph: '二', callMe: '二子', callTa: '王二' },
+      { name: '大周', glyph: '周', callMe: '阿周', callTa: '大周' }
+    ];
+
+    function validPhone(v) { return /^1\d{10}$/.test(v.trim()); }
+    function showStep(n) {
+      root.querySelectorAll('.step').forEach(function (el) {
+        el.classList.toggle('active', +el.dataset.step === n);
+      });
+    }
+    function refresh() {
+      loginBtn.disabled = !(validPhone(phone.value) && code.value.trim().length >= 4);
+    }
+
+    /* 渲染邀请者列表（多邀请者场景） */
+    chooseQ.textContent = '系统发现了 ' + inviters.length + ' 位邀请';
+    inviters.forEach(function (it) {
+      var card = document.createElement('div');
+      card.className = 'inviter-card';
+      card.setAttribute('data-od-id', 'inviter-' + it.glyph);
+      card.innerHTML =
+        '<div class="inviter-avatar">' + it.glyph + '</div>' +
+        '<div class="inviter-meta">' +
+          '<div class="inviter-name">' + it.name + '</div>' +
+          '<div class="inviter-names">ta 叫你「<b>' + it.callMe + '</b>」· 你叫 ta「<b>' + it.callTa + '</b>」</div>' +
+          '<div class="inviter-hint">只有你们俩知道的小名</div>' +
+        '</div>' +
+        '<div class="inviter-actions">' +
+          '<button type="button" class="inviter-agree">同意</button>' +
+          '<button type="button" class="inviter-ignore">忽略</button>' +
+        '</div>';
+      card.querySelector('.inviter-agree').addEventListener('click', function (e) {
+        e.stopPropagation();
+        doneDesc.textContent = '你和「' + it.name + '」已成一对 —— ta 叫你「' + it.callMe + '」，你叫 ta「' + it.callTa + '」。开始做饭与吃饭吧。';
+        root.querySelectorAll('.step').forEach(function (s) { s.classList.add('vanish'); });
+        doneScreen.classList.add('show');
+      });
+      card.querySelector('.inviter-ignore').addEventListener('click', function (e) {
+        e.stopPropagation();
+        card.style.opacity = '0.3';
+        card.style.pointerEvents = 'none';
+        showToast('已忽略 ' + it.name + ' 的邀请');
+      });
+      inviterList.appendChild(card);
+    });
+
+    phone.addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); refresh(); });
+    code.addEventListener('input', function () { this.value = this.value.replace(/\D/g, ''); refresh(); });
+
+    codeBtn.addEventListener('click', function () {
+      if (!validPhone(phone.value)) { showToast('请输入正确的手机号'); return; }
+      var left = 60;
+      codeBtn.disabled = true;
+      codeBtn.textContent = left + 's';
+      var timer = setInterval(function () {
+        left--;
+        if (left <= 0) {
+          clearInterval(timer);
+          codeBtn.disabled = false;
+          codeBtn.textContent = '获取验证码';
+          refresh();
+        } else {
+          codeBtn.textContent = left + 's';
+        }
+      }, 1000);
+    });
+
+    loginBtn.addEventListener('click', function () {
+      if (loginBtn.disabled) return;
+      if (hasDirectInvite) {
+        /* 点链接进来：已知邀请者，跳过选择，直接成对 */
+        doneDesc.textContent = '你和「' + calleeName + '」已成一对 —— ta 叫你「' + callerName + '」。开始做饭与吃饭吧。';
+        showStep(1);
+        root.querySelectorAll('.step').forEach(function (e) { e.classList.add('vanish'); });
+        doneScreen.classList.add('show');
+      } else {
+        /* 自己登录：出现多个待确认邀请者的选择列表 */
+        showStep(2);
+      }
+    });
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(function () { t.classList.remove('show'); }, 2000);
+    }
+
+    refresh();
+  })();
+</script>
+</body>
+</html>

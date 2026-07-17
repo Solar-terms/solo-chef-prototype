@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食 · 方案管理</title>
+<style>
+:root{
+  --bg:#fbf7f0;
+  --surface:#fffdf8;
+  --fg:#1f1a16;
+  --fg-2:#4b4038;
+  --muted:#7d7168;
+  --accent:#3f7a4e;
+  --danger:#b33a3a;
+  --border:#ded3c5;
+  --border-soft:#eee5da;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --text-xs:12px;--text-sm:14px;--text-base:18px;--text-lg:21px;--text-xl:26px;
+  --space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-12:48px;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-pill:9999px;
+  --motion-fast:180ms;
+  --ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  background:#e9e2d8;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;width:390px;height:844px;
+  background:var(--bg);
+  border-radius:46px;box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+@media (max-width:430px){
+  body{background:var(--bg);}
+  .device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+}
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;
+  padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);height:56px;
+}
+.brand{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.08em;}
+.back-btn{text-decoration:none;color:var(--fg);display:flex;align-items:center;margin-right:10px;}
+.back-btn:active{opacity:.5;}
+
+/* ===== Tab ===== */
+.tab-bar{
+  flex:0 0 auto;display:flex;gap:0;
+  padding:0 var(--space-6);border-bottom:1px solid var(--border);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab{
+  flex:0 0 auto;font-family:var(--font-mono);font-size:13px;letter-spacing:.08em;
+  color:var(--muted);padding:12px 18px 10px;
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;
+  transition:color var(--motion-fast) var(--ease-standard),border-color var(--motion-fast) var(--ease-standard);
+}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab.add-tab{color:var(--accent);opacity:.5;padding:12px 14px 10px;font-size:18px;}
+
+.main{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:var(--space-5) var(--space-6) var(--space-12);
+}
+
+/* ===== 方案名栏 ===== */
+.plan-head{
+  margin-bottom:var(--space-6);
+}
+.plan-head .ph-name{
+  font-family:var(--font-display);font-size:var(--text-xl);letter-spacing:.06em;
+  color:var(--fg);margin-bottom:4px;
+}
+.plan-head .ph-name input{
+  font-family:var(--font-display);font-size:var(--text-xl);letter-spacing:.06em;
+  color:var(--fg);background:transparent;border:none;border-bottom:1.5px solid var(--accent);
+  padding:2px 4px;width:220px;outline:none;
+}
+.plan-head .ph-sub{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;
+  color:var(--muted);
+}
+.plan-head .ph-row{
+  display:flex;align-items:center;gap:12px;margin-top:10px;
+}
+.plan-head .ph-row button{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;
+  border-radius:var(--radius-sm);cursor:pointer;
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.ph-edit{
+  color:var(--accent);background:none;border:1px solid var(--accent);padding:6px 16px;
+}
+.ph-edit:active{background:color-mix(in oklab,var(--accent),transparent 90%);}
+.ph-cancel{color:var(--muted);background:none;border:1px solid var(--border);padding:6px 16px;}
+.ph-cancel:active{border-color:var(--accent);}
+.ph-save{color:#fff;background:var(--accent);border:none;padding:7px 20px;}
+.ph-save:active{opacity:.85;}
+.ph-del{color:var(--danger);background:none;border:1px solid var(--border);padding:6px 16px;}
+.ph-del:active{border-color:var(--danger);}
+
+/* ===== 分类卡片（禁食/各餐次） ===== */
+.section-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5);
+  margin-bottom:var(--space-5);
+}
+.section-card .sc-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:var(--space-4);
+}
+.section-card .sc-label{
+  font-family:var(--font-display);font-size:var(--text-base);letter-spacing:.04em;
+}
+.section-card .sc-label .sc-sub{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;
+  color:var(--muted);display:block;margin-top:2px;
+}
+.section-card .sc-badge{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;
+  padding:2px 10px;border-radius:var(--radius-pill);
+  flex:0 0 auto;border:1px solid;background:transparent;
+}
+.sc-badge.forbid{color:var(--danger);border-color:color-mix(in oklab,var(--danger),transparent 60%);background:color-mix(in oklab,var(--danger),transparent 92%);}
+.sc-badge.allow{color:var(--accent);border-color:color-mix(in oklab,var(--accent),transparent 60%);background:color-mix(in oklab,var(--accent),transparent 92%);}
+
+/* 食材芯片网格 */
+.food-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.food-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
+  padding:4px 11px;border-radius:var(--radius-pill);line-height:1.3;
+  border:1px solid;background:transparent;
+}
+.food-chip .fc-icon{font-size:14px;}
+.food-chip.allow{color:var(--accent);border-color:color-mix(in oklab,var(--accent),transparent 60%);background:color-mix(in oklab,var(--accent),transparent 92%);}
+.food-chip.forbid{color:var(--danger);border-color:color-mix(in oklab,var(--danger),transparent 60%);background:color-mix(in oklab,var(--danger),transparent 92%);}
+.food-chip .fc-del{
+  font-size:13px;cursor:pointer;opacity:.7;margin-left:2px;line-height:1;
+  background:none;border:none;color:inherit;padding:0;
+}
+.food-chip .fc-del:active{opacity:1;}
+
+/* 食用说明 */
+/* 餐次项 */
+.meal-item{
+  background:var(--bg);border:1px solid var(--border-soft);
+  border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);
+  margin-bottom:var(--space-3);
+}
+.meal-item .mi-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
+}
+.meal-item .mi-desc{
+  font-family:var(--font-body);font-size:var(--text-sm);line-height:1.6;
+  color:var(--fg-2);white-space:pre-wrap;flex:1;margin-right:8px;
+}
+.meal-item .mi-desc-input{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);line-height:1.5;
+  color:var(--fg-2);background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:var(--radius-sm);
+  padding:8px 10px;outline:none;resize:vertical;min-height:40px;
+}
+.meal-item .mi-desc-input:focus{border-color:var(--accent);}
+.meal-item .mi-del{
+  font-family:var(--font-mono);font-size:10px;color:var(--muted);
+  background:none;border:1px solid var(--border-soft);border-radius:var(--radius-pill);
+  cursor:pointer;padding:3px 12px;transition:all var(--motion-fast) var(--ease-standard);
+}
+.meal-item .mi-del:active{border-color:var(--danger);color:var(--danger);}
+.meal-item .mi-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+.meal-item .mi-add-btn{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;
+  color:var(--accent);background:none;border:1px dashed var(--border);
+  border-radius:var(--radius-pill);padding:3px 12px;cursor:pointer;
+  transition:opacity var(--motion-fast) var(--ease-standard);
+}
+.meal-item .mi-add-btn:active{opacity:.6;}
+.add-item-btn{
+  display:block;width:100%;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;
+  color:var(--muted);background:none;border:1px dashed var(--border);
+  border-radius:var(--radius-md);padding:10px;cursor:pointer;margin-top:var(--space-2);
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.add-item-btn:active{border-color:var(--accent);color:var(--accent);}
+
+/* + 添加食材按钮 */
+.add-food-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
+  color:var(--accent);background:none;border:1px dashed var(--border);
+  border-radius:var(--radius-pill);padding:7px 16px;cursor:pointer;margin-top:var(--space-3);
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.add-food-btn:active{border-color:var(--accent);background:color-mix(in oklab,var(--accent),transparent 92%);}
+
+/* ===== 备注段 ===== */
+.note-card{
+  background:var(--bg);border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);
+  margin-bottom:var(--space-3);
+}
+.note-card .nc-title{
+  font-family:var(--font-display);font-size:var(--text-sm);letter-spacing:.04em;
+  color:var(--fg);margin-bottom:6px;
+}
+.note-card .nc-title input{
+  font-family:var(--font-display);font-size:var(--text-sm);letter-spacing:.04em;
+  color:var(--fg);background:transparent;border:none;border-bottom:1px solid var(--border-soft);
+  padding:2px 2px;width:100%;outline:none;
+}
+.note-card .nc-title input:focus{border-bottom-color:var(--accent);}
+.note-card .nc-body{
+  font-family:var(--font-body);font-size:var(--text-xs);line-height:1.7;
+  color:var(--fg-2);white-space:pre-wrap;
+}
+.note-card .nc-body textarea{
+  width:100%;font-family:var(--font-mono);font-size:11px;line-height:1.7;
+  color:var(--fg-2);background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:var(--radius-sm);
+  padding:10px;outline:none;resize:vertical;min-height:60px;
+}
+.note-card .nc-body textarea:focus{border-color:var(--accent);}
+.nc-del{
+  font-family:var(--font-mono);font-size:9px;color:var(--danger);
+  background:none;border:none;cursor:pointer;padding:4px 0;margin-top:4px;
+}
+.nc-del:active{opacity:.7;}
+.add-note-btn{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;
+  color:var(--muted);background:none;border:1px dashed var(--border);
+  border-radius:var(--radius-md);padding:10px;cursor:pointer;width:100%;
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.add-note-btn:active{border-color:var(--accent);color:var(--accent);}
+
+/* ===== 食材选择器弹窗 ===== */
+.picker-overlay{
+  position:absolute;inset:0;z-index:30;
+  background:rgba(31,26,22,.35);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 220ms var(--ease-standard);
+}
+.picker-overlay.show{opacity:1;pointer-events:auto;}
+.picker-box{
+  background:var(--surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  width:100%;height:65%;display:flex;flex-direction:column;
+  box-shadow:0 -4px 30px rgba(31,26,22,.12);
+  transform:translateY(20px);
+  transition:transform 260ms var(--ease-standard);
+}
+.picker-overlay.show .picker-box{transform:translateY(0);}
+.picker-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--border-soft);
+}
+.picker-head .ph-title{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);}
+.picker-head .ph-close{
+  font-size:18px;color:var(--muted);
+  background:none;border:none;cursor:pointer;padding:4px;
+}
+.picker-search{
+  padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border-soft);
+}
+.picker-search input{
+  width:100%;font-family:var(--font-body);font-size:var(--text-sm);
+  color:var(--fg);background:var(--bg);
+  border:none;border-radius:var(--radius-pill);padding:10px 14px;outline:none;
+}
+.picker-search input:focus{box-shadow:0 0 0 2px color-mix(in oklab,var(--accent),transparent 76%);}
+.picker-list{
+  flex:1;display:flex;overflow:hidden;
+}
+.picker-cats{
+  width:82px;flex:0 0 auto;overflow-y:auto;
+  border-right:1px solid var(--border-soft);
+  -webkit-overflow-scrolling:touch;
+}
+.picker-cats .pc-item{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  color:var(--muted);padding:14px 8px;cursor:pointer;text-align:center;
+  border-bottom:1px solid var(--border-soft);
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.picker-cats .pc-item.active{
+  color:var(--accent);
+  background:color-mix(in oklab,var(--accent),transparent 92%);
+}
+.picker-items{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.picker-items .pli-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px var(--space-4);border-bottom:1px solid var(--border-soft);cursor:pointer;
+  transition:background var(--motion-fast) var(--ease-standard);
+}
+.picker-items .pli-item:active{background:color-mix(in oklab,var(--accent),transparent 94%);}
+.picker-items .pli-item .plii-icon{
+  width:28px;height:28px;border-radius:var(--radius-sm);
+  background:color-mix(in oklab,var(--accent),transparent 88%);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto;
+}
+.picker-items .pli-item .plii-meta{flex:1;min-width:0;}
+.picker-items .pli-item .plii-meta .plii-name{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);}
+.picker-items .pli-item .plii-meta .plii-alias{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
+.picker-items .pli-item .plii-check{
+  width:20px;height:20px;border-radius:50%;flex:0 0 auto;
+  border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--accent);transition:all var(--motion-fast) var(--ease-standard);
+}
+.picker-items .pli-item.selected .plii-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+.picker-noresult{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--muted);
+}
+.picker-foot{
+  display:flex;gap:12px;padding:var(--space-4) var(--space-6) calc(var(--space-4) + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border-soft);
+}
+.picker-foot button{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
+  padding:12px 0;border-radius:var(--radius-lg);border:none;cursor:pointer;
+}
+.picker-foot .pf-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.picker-foot .pf-confirm{background:var(--accent);color:#fff;}
+
+.toast{
+  position:absolute;bottom:60px;left:50%;transform:translate(-50%,12px);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  background:var(--fg);color:var(--bg);padding:8px 20px;
+  border-radius:var(--radius-pill);
+  opacity:0;transition:opacity 280ms var(--ease-standard),transform 280ms var(--ease-standard);
+  z-index:99;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+  <div class="device">
+    <header class="topbar">
+      <a class="back-btn" href="zuo_home.html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </a>
+      <span class="brand">方案管理</span>
+    </header>
+
+    <div class="tab-bar" id="tabBar"></div>
+
+    <main class="main" id="contentArea">
+      <div id="viewContent"></div>
+    </main>
+
+    <!-- 食材选择器（底部弹出） -->
+    <div class="picker-overlay" id="pickerOverlay">
+      <div class="picker-box">
+        <div class="picker-head">
+          <span class="ph-title" id="pickerTitle">选择食材</span>
+          <button class="ph-close" id="pickerClose">✕</button>
+        </div>
+        <div class="picker-search">
+          <input id="pickerSearch" type="text" autocomplete="off" placeholder="搜索食材或别名">
+        </div>
+        <div class="picker-list">
+          <div class="picker-cats" id="pickerCats"></div>
+          <div class="picker-items" id="pickerItems"></div>
+        </div>
+        <div class="picker-foot">
+          <button class="pf-cancel" id="pickerCancel">取消</button>
+          <button class="pf-confirm" id="pickerConfirm">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+<script>
+(function () {
+  var allIngredients = [
+    { id:1,name:'燕麦',cat:'主食',aliases:['即食燕麦','钢切燕麦','燕麦片'],icon:'🌾' },
+    { id:2,name:'大米',cat:'主食',aliases:['粳米','香米','稻米'],icon:'🍚' },
+    { id:3,name:'面条',cat:'主食',aliases:['挂面','手擀面','拉面'],icon:'🍜' },
+    { id:4,name:'馒头',cat:'主食',aliases:['蒸馍','白面馒头'],icon:'🍞' },
+    { id:5,name:'米饭',cat:'主食',aliases:['白米饭','白饭'],icon:'🍚' },
+    { id:6,name:'包子',cat:'主食',aliases:['肉包','菜包','豆沙包'],icon:'🥟' },
+    { id:7,name:'水饺',cat:'主食',aliases:['饺子','馄饨'],icon:'🥟' },
+    { id:8,name:'鸡蛋',cat:'蛋白',aliases:['土鸡蛋','草鸡蛋','柴鸡蛋'],icon:'🥚' },
+    { id:9,name:'鸡胸肉',cat:'蛋白',aliases:['鸡胸','鸡脯肉'],icon:'🍗' },
+    { id:10,name:'牛腩',cat:'蛋白',aliases:['牛胸肉','牛肉'],icon:'🥩' },
+    { id:11,name:'牛肉',cat:'蛋白',aliases:['黄牛肉','水牛肉'],icon:'🥩' },
+    { id:12,name:'鸭肉',cat:'蛋白',aliases:['鸭胸','鸭腿'],icon:'🦆' },
+    { id:13,name:'鱼肉',cat:'蛋白',aliases:['鲈鱼','鲫鱼','草鱼'],icon:'🐟' },
+    { id:14,name:'豆腐',cat:'蛋白',aliases:['嫩豆腐','老豆腐','内酯豆腐'],icon:'🫘' },
+    { id:15,name:'黄瓜',cat:'蔬果',aliases:['青瓜','胡瓜'],icon:'🥒' },
+    { id:16,name:'番茄',cat:'蔬果',aliases:['西红柿','洋柿子'],icon:'🍅' },
+    { id:17,name:'圣女果',cat:'蔬果',aliases:['小番茄','樱桃番茄','千禧果'],icon:'🍅' },
+    { id:18,name:'苹果',cat:'蔬果',aliases:['红富士','蛇果','青苹果'],icon:'🍎' },
+    { id:19,name:'蓝莓',cat:'蔬果',aliases:['蓝莓干'],icon:'🫐' },
+    { id:20,name:'草莓',cat:'蔬果',aliases:['洋莓','红莓'],icon:'🍓' },
+    { id:21,name:'火龙果',cat:'蔬果',aliases:['红心火龙果','白心火龙果'],icon:'🐉' },
+    { id:22,name:'西梅',cat:'蔬果',aliases:['加州西梅','欧洲李'],icon:'🍑' },
+    { id:23,name:'脐橙',cat:'蔬果',aliases:['赣南脐橙','甜橙'],icon:'🍊' },
+    { id:24,name:'猕猴桃',cat:'蔬果',aliases:['奇异果','毛桃'],icon:'🥝' },
+    { id:25,name:'木瓜',cat:'蔬果',aliases:['番木瓜','宣木瓜'],icon:'🥭' },
+    { id:26,name:'哈密瓜',cat:'蔬果',aliases:['甜瓜','网纹瓜'],icon:'🍈' },
+    { id:27,name:'牛油果',cat:'蔬果',aliases:['鳄梨','油梨'],icon:'🥑' },
+    { id:28,name:'西柚',cat:'蔬果',aliases:['葡萄柚','红西柚'],icon:'🍊' },
+    { id:29,name:'柠檬',cat:'蔬果',aliases:['青柠','黄柠檬'],icon:'🍋' },
+    { id:30,name:'芹菜',cat:'蔬果',aliases:['西芹','旱芹','药芹'],icon:'🥬' },
+    { id:31,name:'秋葵',cat:'蔬果',aliases:['羊角豆','咖啡黄葵'],icon:'🌿' },
+    { id:32,name:'苦瓜',cat:'蔬果',aliases:['凉瓜','癞瓜'],icon:'🥒' },
+    { id:33,name:'西兰花',cat:'蔬果',aliases:['青花菜','西蓝花','花椰菜'],icon:'🥦' },
+    { id:34,name:'莴苣',cat:'蔬果',aliases:['莴笋','生菜'],icon:'🥬' },
+    { id:35,name:'紫甘蓝',cat:'蔬果',aliases:['紫包菜','红甘蓝'],icon:'🥬' },
+    { id:36,name:'茄子',cat:'蔬果',aliases:['紫茄','长茄','圆茄'],icon:'🍆' },
+    { id:37,name:'冬瓜',cat:'蔬果',aliases:['白瓜','枕瓜'],icon:'🥒' },
+    { id:38,name:'芦笋',cat:'蔬果',aliases:['石刁柏','龙须菜'],icon:'🌿' },
+    { id:39,name:'紫菜',cat:'蔬果',aliases:['海苔','坛紫菜'],icon:'🌊' },
+    { id:40,name:'木耳',cat:'蔬果',aliases:['黑木耳','云耳','耳子'],icon:'🍄' },
+    { id:41,name:'茼蒿',cat:'蔬果',aliases:['蓬蒿','菊花菜'],icon:'🥬' },
+    { id:42,name:'生菜',cat:'蔬果',aliases:['叶莴苣','散叶生菜'],icon:'🥬' },
+    { id:43,name:'苦菊',cat:'蔬果',aliases:['苦苣','苦菜'],icon:'🥬' },
+    { id:44,name:'菜心',cat:'蔬果',aliases:['菜薹','白菜薹'],icon:'🥬' },
+    { id:45,name:'山楂',cat:'蔬果',aliases:['红果','山里红'],icon:'🍎' },
+    { id:46,name:'红枣',cat:'蔬果',aliases:['大枣','干枣','若羌红枣'],icon:'🌰' },
+    { id:47,name:'花生',cat:'坚果',aliases:['长生果','落花生'],icon:'🥜' },
+    { id:48,name:'核桃',cat:'坚果',aliases:['胡桃','山核桃'],icon:'🌰' },
+    { id:49,name:'葡萄干',cat:'坚果',aliases:['提子干','葡萄干'],icon:'🍇' },
+    { id:50,name:'巴旦木',cat:'坚果',aliases:['扁桃仁','巴旦杏'],icon:'🌰' },
+    { id:51,name:'杏仁',cat:'坚果',aliases:['南杏仁','北杏仁','甜杏仁'],icon:'🌰' },
+    { id:52,name:'开心果',cat:'坚果',aliases:['绿仁果','必思答'],icon:'🥜' },
+    { id:53,name:'榛子',cat:'坚果',aliases:['山板栗','尖栗'],icon:'🌰' },
+    { id:54,name:'牛奶',cat:'乳饮',aliases:['纯牛奶','鲜牛奶','全脂牛奶'],icon:'🥛' },
+    { id:55,name:'酸奶',cat:'乳饮',aliases:['无糖酸奶','酸牛乳','凝固型酸奶'],icon:'🥛' },
+    { id:56,name:'豆浆',cat:'乳饮',aliases:['无糖豆浆','黄豆浆','黑豆浆'],icon:'🥛' },
+    { id:57,name:'盐',cat:'调味',aliases:['食盐','海盐','低钠盐'],icon:'🧂' },
+    { id:58,name:'蛋白粉',cat:'调味',aliases:['乳清蛋白','大豆蛋白粉'],icon:'💪' },
+    { id:59,name:'葱',cat:'调味',aliases:['小葱','香葱','大葱','京葱'],icon:'🧅' },
+    { id:60,name:'姜',cat:'调味',aliases:['生姜','老姜','嫩姜','子姜'],icon:'🧄' }
+  ];
+  var ingMap = {}; allIngredients.forEach(function (it) { ingMap[it.id] = it; });
+  var ingByCat = {};
+  allIngredients.forEach(function (it) {
+    if (!ingByCat[it.cat]) ingByCat[it.cat] = [];
+    ingByCat[it.cat].push(it);
+  });
+
+  var plans = [{
+    id: 1, name: '方案一',
+    forbidIds: [1,2,3,4,5,6,7,18,19,20,21,22,23,24,25,26,27,28,29,45,46,47,49],
+    meals: [
+      { key:'breakfast', title:'早餐', time:'6:00 - 8:00', items: [
+        { id:101, desc:'鸡蛋 1 个 + 蛋白 2 个', ingredientIds:[8] },
+        { id:102, desc:'牛奶 250mL / 无糖普通酸奶 250mL / 无糖希腊酸奶 150mL / 自制豆浆（黄豆 40g）/ 纯豆浆粉 40g', ingredientIds:[54,55,56] },
+        { id:103, desc:'蔬菜 ≥100g（生重）', ingredientIds:[15,16,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,17] },
+        { id:104, desc:'植物油 5g，盐 1g', ingredientIds:[57] }
+      ]},
+      { key:'lunch', title:'午餐', time:'11:00 - 13:00', items: [
+        { id:105, desc:'蔬菜 ≥250g（生重）', ingredientIds:[15,16,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,17] },
+        { id:106, desc:'蛋白质（男性 150g / 女性 100g）', ingredientIds:[9,10,11,12,13,14] },
+        { id:107, desc:'植物油 10g，盐 2.5g', ingredientIds:[57] }
+      ]},
+      { key:'dinner', title:'晚餐', time:'17:00 - 19:00', items: [
+        { id:108, desc:'蔬菜 ≥250g（生重）', ingredientIds:[15,16,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,17] },
+        { id:109, desc:'肉类 100g / 鱼 160g / 虾 160g / 豆腐 200-300g', ingredientIds:[9,10,11,12,13,14] },
+        { id:110, desc:'植物油 10g，盐 2.5g', ingredientIds:[57] }
+      ]},
+      { key:'snack', title:'加餐', time:'两餐之间', items: [
+        { id:111, desc:'西红柿 / 黄瓜 100g（如不饿可不加）', ingredientIds:[15,16] }
+      ]}
+    ],
+    notes: [
+      { title:'有氧运动', content:'种类：快走、慢跑、游泳、骑车、椭圆机等\n时间：每周 3 - 5 天，总计 150 - 300min\n要求：达到最大心率（220 - 年龄）的 50% - 60% 以上' },
+      { title:'抗阻运动', content:'哑铃：3 - 5kg，每个训练日选择不同肌群\n靠墙静蹲：0.5 - 2min / 组 × 3 - 4 组\n平板支撑：0.5 - 2min / 组 × 3 - 4 组\n屈膝俯卧撑：10 - 20 个 / 组 × 3 - 4 组' },
+      { title:'饮水与饮品', content:'水：每日 ≥2000mL\n咖啡：可饮用美式、拿铁、馥芮白\n茶：可饮用淡茶水、原味无糖苏打水\n无糖饮料：尽量少喝' },
+      { title:'补充与注意事项', content:'适当选用膳食营养素补充剂（善存、鱼油、乳清蛋白粉）\n尿酸高者：忌荤汤、海鲜、内脏、酒\n出现便秘者：适当选用益生菌、膳食纤维粉\n每周记录 1 - 2 次晨起空腹体重' }
+    ]
+  }];
+  var nextPlanId = 2, nextItemId = 200;
+
+  var activePlanId = 1, isEditing = false, isNewPlan = false;
+  var tabBar = document.getElementById('tabBar');
+  var viewContent = document.getElementById('viewContent');
+  var pickerCtx = null, pickerSelected = [], activePickerCat = '';
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+  function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* 同步标签映射到 localStorage，供食材管理页面读取 */
+  function syncPlanTags() {
+    var tags = {};
+    plans.forEach(function (p) {
+      var n = p.name;
+      p.forbidIds.forEach(function (id) { var ing = ingMap[id]; if (ing) tags[ing.name] = n + '禁止'; });
+      p.meals.forEach(function (m) {
+        m.items.forEach(function (it) {
+          it.ingredientIds.forEach(function (id) { var ing = ingMap[id]; if (ing) tags[ing.name] = n + '允许'; });
+        });
+      });
+    });
+    try { localStorage.setItem('yzys_plan_tags', JSON.stringify(tags)); } catch (e) {}
+  }
+
+  function renderTabs() {
+    tabBar.innerHTML = '';
+    plans.forEach(function (p) {
+      var el = document.createElement('span');
+      el.className = 'tab' + (p.id === activePlanId ? ' active' : '');
+      el.textContent = p.name;
+      el.addEventListener('click', function () {
+        if (isEditing) { showToast('请先保存或取消当前编辑'); return; }
+        activePlanId = p.id; renderTabs(); renderContent();
+      });
+      tabBar.appendChild(el);
+    });
+    var addTab = document.createElement('span');
+    addTab.className = 'tab add-tab'; addTab.textContent = '+';
+    addTab.addEventListener('click', function () {
+      if (isEditing) { showToast('请先保存或取消当前编辑'); return; }
+      var np = { id: nextPlanId++, name: '新方案', forbidIds: [], meals: [
+        { key:'breakfast', title:'早餐', time:'', items:[{id:nextItemId++, desc:'示例：鸡蛋 2 个', ingredientIds:[]}] },
+        { key:'lunch', title:'午餐', time:'', items:[{id:nextItemId++, desc:'示例：鸡胸肉 150g', ingredientIds:[]}] },
+        { key:'dinner', title:'晚餐', time:'', items:[{id:nextItemId++, desc:'示例：鱼肉 160g', ingredientIds:[]}] },
+        { key:'snack', title:'加餐', time:'', items:[{id:nextItemId++, desc:'示例：黄瓜 100g', ingredientIds:[]}] }
+      ], notes: [] };
+      plans.push(np); activePlanId = np.id; renderTabs(); isNewPlan = true; enterEdit();
+    });
+    tabBar.appendChild(addTab);
+  }
+
+  function chipsHtml(ids, cls, allowDel) {
+    var h = '';
+    ids.forEach(function (id) {
+      var ing = ingMap[id]; if (!ing) return;
+      h += '<span class="food-chip ' + cls + '"><span class="fc-icon">' + ing.icon + '</span>' + esc(ing.name);
+      if (allowDel) h += '<button class="fc-del" data-id="' + id + '">✕</button>';
+      h += '</span>';
+    });
+    return h;
+  }
+
+  function renderContent() {
+    var plan = plans.find(function (p) { return p.id === activePlanId; });
+    if (!plan) { viewContent.innerHTML = ''; return; }
+    if (isEditing) renderEdit(plan); else renderView(plan);
+  }
+
+  function renderView(plan) {
+    var h = '';
+    h += '<div class="plan-head">';
+    h += '  <div class="ph-name">' + esc(plan.name) + '</div>';
+    h += '  <div class="ph-sub">营养与运动减重方案</div>';
+    h += '  <div class="ph-row"><button class="ph-edit" id="enterEditBtn">✎ 编辑</button></div>';
+    h += '</div>';
+
+    if (plan.forbidIds.length) {
+      h += '<div class="section-card">';
+      h += '  <div class="sc-head"><span class="sc-label">🚫 禁食食材</span><span class="sc-badge forbid">' + plan.forbidIds.length + ' 种</span></div>';
+      h += '  <div class="food-grid">' + chipsHtml(plan.forbidIds, 'forbid') + '</div>';
+      h += '</div>';
+    }
+
+    plan.meals.forEach(function (m) {
+      var totalIng = 0; m.items.forEach(function (it) { totalIng += it.ingredientIds.length; });
+      h += '<div class="section-card">';
+      h += '  <div class="sc-head"><span class="sc-label">' + esc(m.title) + '<span class="sc-sub">' + esc(m.time) + '</span></span><span class="sc-badge allow">' + m.items.length + ' 项</span></div>';
+      m.items.forEach(function (it) {
+        h += '<div class="meal-item">';
+        h += '  <div class="mi-head"><div class="mi-desc">' + esc(it.desc) + '</div></div>';
+        if (it.ingredientIds.length) h += '  <div class="mi-chips">' + chipsHtml(it.ingredientIds, 'allow') + '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+    });
+
+    if (plan.notes.length) {
+      h += '<div style="margin-top:var(--space-6);"><div class="sc-head" style="margin-bottom:var(--space-3);"><span class="sc-label" style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);">📌 备注</span></div>';
+      plan.notes.forEach(function (n) {
+        h += '<div class="note-card"><div class="nc-title">' + esc(n.title) + '</div><div class="nc-body">' + esc(n.content) + '</div></div>';
+      });
+      h += '</div>';
+    }
+
+    viewContent.innerHTML = h;
+    document.getElementById('enterEditBtn').addEventListener('click', enterEdit);
+  }
+
+  function enterEdit() { isEditing = true; renderContent(); }
+  function exitEdit() { isEditing = false; renderContent(); }
+
+  function renderEdit(plan) {
+    var h = '';
+    h += '<div class="plan-head">';
+    h += '  <div class="ph-name"><input id="editName" value="' + esc(plan.name) + '"></div>';
+    h += '  <div class="ph-row">';
+    h += '    <button class="ph-save" id="editSave">保存</button>';
+    h += '    <button class="ph-cancel" id="editCancel">取消</button>';
+    h += '    <button class="ph-del" id="editDel">删除</button>';
+    h += '  </div>';
+    h += '</div>';
+
+    h += '<div class="section-card">';
+    h += '  <div class="sc-head"><span class="sc-label">🚫 禁食食材</span><span class="sc-badge forbid">' + plan.forbidIds.length + ' 种</span></div>';
+    h += '  <div class="food-grid" id="efGrid">' + chipsHtml(plan.forbidIds, 'forbid', true) + '</div>';
+    h += '  <button class="add-food-btn" id="addForbidBtn">+ 添加禁食食材</button>';
+    h += '</div>';
+
+    plan.meals.forEach(function (m) {
+      h += '<div class="section-card" data-key="' + m.key + '">';
+      h += '  <div class="sc-head"><span class="sc-label">' + esc(m.title) + '</span></div>';
+      h += '  <div style="margin-bottom:10px;"><input class="em-time" data-key="' + m.key + '" value="' + esc(m.time) + '" placeholder="时间区间，如 6:00 - 8:00" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);background:transparent;border:none;border-bottom:1px solid var(--border-soft);padding:4px 2px;width:100%;outline:none;"></div>';
+      /* 逐项渲染 */
+      m.items.forEach(function (it, idx) {
+        h += '<div class="meal-item" data-mkey="' + m.key + '" data-iid="' + it.id + '">';
+        h += '  <div class="mi-head">';
+        h += '    <textarea class="mi-desc-input" placeholder="描述，如：鸡蛋 2 个">' + esc(it.desc) + '</textarea>';
+        h += '  </div>';
+        h += '  <div class="mi-chips mi-grid" data-mkey="' + m.key + '" data-iid="' + it.id + '">' + chipsHtml(it.ingredientIds, 'allow', true) + '</div>';
+        h += '  <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">';
+        h += '    <button class="mi-add-btn" data-mkey="' + m.key + '" data-iid="' + it.id + '">+ 添加食材</button>';
+        h += '    <button class="mi-del" data-mkey="' + m.key + '" data-iid="' + it.id + '">移除此项</button>';
+        h += '  </div>';
+        h += '</div>';
+      });
+      h += '  <button class="add-item-btn" data-key="' + m.key + '">+ 添加项目</button>';
+      h += '</div>';
+    });
+
+    h += '<div style="margin-top:var(--space-6);">';
+    h += '  <div class="sc-head" style="margin-bottom:var(--space-3);"><span class="sc-label" style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);">📌 备注</span></div>';
+    plan.notes.forEach(function (n, i) {
+      h += '<div class="note-card">';
+      h += '  <div class="nc-title"><input class="en-title" value="' + esc(n.title) + '" placeholder="备注标题" data-idx="' + i + '"></div>';
+      h += '  <div class="nc-body"><textarea class="en-body" placeholder="备注内容" data-idx="' + i + '">' + esc(n.content) + '</textarea></div>';
+      h += '  <button class="nc-del" data-idx="' + i + '">删除此备注</button>';
+      h += '</div>';
+    });
+    h += '  <button class="add-note-btn" id="addNoteBtn" style="margin-top:var(--space-3);">+ 添加备注</button>';
+    h += '</div>';
+
+    viewContent.innerHTML = h;
+    bindEditEvents(plan);
+  }
+
+  function bindEditEvents(plan) {
+    document.querySelectorAll('#efGrid .fc-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        plan.forbidIds = plan.forbidIds.filter(function (id) { return id !== +btn.dataset.id; });
+        renderEdit(plan);
+      });
+    });
+    /* 餐次项：删除食材 */
+    document.querySelectorAll('.mi-grid .fc-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mkey = btn.closest('.mi-grid').dataset.mkey;
+        var iid = +btn.closest('.mi-grid').dataset.iid;
+        var meal = plan.meals.find(function (m) { return m.key === mkey; });
+        if (meal) {
+          var item = meal.items.find(function (it) { return it.id === iid; });
+          if (item) item.ingredientIds = item.ingredientIds.filter(function (id) { return id !== +btn.dataset.id; });
+        }
+        renderEdit(plan);
+      });
+    });
+    /* 餐次项：删除整个项 */
+    document.querySelectorAll('.mi-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mkey = btn.dataset.mkey;
+        var iid = +btn.dataset.iid;
+        var meal = plan.meals.find(function (m) { return m.key === mkey; });
+        if (meal) meal.items = meal.items.filter(function (it) { return it.id !== iid; });
+        renderEdit(plan);
+      });
+    });
+    /* 餐次项：描述同步 */
+    document.querySelectorAll('.mi-desc-input').forEach(function (ta) {
+      ta.addEventListener('input', function () {
+        var mkey = this.closest('.meal-item').dataset.mkey;
+        var iid = +this.closest('.meal-item').dataset.iid;
+        var meal = plan.meals.find(function (m) { return m.key === mkey; });
+        if (meal) {
+          var item = meal.items.find(function (it) { return it.id === iid; });
+          if (item) item.desc = this.value;
+        }
+      });
+    });
+    /* 餐次项：添加食材（打开选择器） */
+    document.querySelectorAll('.mi-add-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mkey = btn.dataset.mkey;
+        var iid = +btn.dataset.iid;
+        var meal = plan.meals.find(function (m) { return m.key === mkey; });
+        if (!meal) return;
+        var item = meal.items.find(function (it) { return it.id === iid; });
+        if (!item) return;
+        openPicker('meal-item', { item: item }, function (ids) {
+          ids.forEach(function (id) { if (item.ingredientIds.indexOf(id) < 0) item.ingredientIds.push(id); });
+          renderEdit(plan);
+        });
+      });
+    });
+    /* 餐次项：添加新项目 */
+    document.querySelectorAll('.add-item-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mkey = btn.dataset.key;
+        var meal = plan.meals.find(function (m) { return m.key === mkey; });
+        if (meal) meal.items.push({ id: nextItemId++, desc: '', ingredientIds: [] });
+        renderEdit(plan);
+      });
+    });
+    /* 时间同步 */
+    document.querySelectorAll('.em-time').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        var meal = plan.meals.find(function (m) { return m.key === inp.dataset.key; });
+        if (meal) meal.time = this.value;
+      });
+    });
+    document.querySelectorAll('.en-title').forEach(function (inp) {
+      inp.addEventListener('input', function () { var n = plan.notes[+this.dataset.idx]; if (n) n.title = this.value; });
+    });
+    document.querySelectorAll('.en-body').forEach(function (ta) {
+      ta.addEventListener('input', function () { var n = plan.notes[+this.dataset.idx]; if (n) n.content = this.value; });
+    });
+    document.querySelectorAll('.nc-del').forEach(function (btn) {
+      btn.addEventListener('click', function () { plan.notes.splice(+this.dataset.idx, 1); renderEdit(plan); });
+    });
+
+    document.getElementById('addForbidBtn').addEventListener('click', function () {
+      openPicker('forbid', null, function (ids) {
+        ids.forEach(function (id) { if (plan.forbidIds.indexOf(id) < 0) plan.forbidIds.push(id); });
+        renderEdit(plan);
+      });
+    });
+    document.getElementById('addNoteBtn').addEventListener('click', function () {
+      plan.notes.push({ title: '', content: '' });
+      renderEdit(plan);
+    });
+
+    document.getElementById('editCancel').addEventListener('click', function () {
+      if (isNewPlan) {
+        plans = plans.filter(function (p) { return p.id !== plan.id; });
+        activePlanId = plans.length ? plans[plans.length - 1].id : 0;
+        isNewPlan = false; isEditing = false; renderTabs();
+        if (plans.length === 0) viewContent.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:var(--text-sm);">暂无方案，点击 + 新增</div>';
+        else renderContent();
+      } else {
+        exitEdit();
+      }
+    });
+    document.getElementById('editDel').addEventListener('click', function () {
+      var itemIngCount = 0; plan.meals.forEach(function (m) { m.items.forEach(function (it) { itemIngCount += it.ingredientIds.length; }); });
+      if (plan.forbidIds.length || itemIngCount > 0) {
+        showToast('此方案下有食材关联，请先在食材管理中取消标签后再删除');
+        return;
+      }
+      plans = plans.filter(function (p) { return p.id !== plan.id; });
+      activePlanId = plans.length ? plans[Math.min(activePlanId - 1, plans.length - 1)].id : 0;
+      isEditing = false; renderTabs();
+      if (plans.length === 0) viewContent.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted);font-size:var(--text-sm);">暂无方案，点击 + 新增</div>';
+      else renderContent();
+      showToast('已删除');
+    });
+    document.getElementById('editSave').addEventListener('click', function () {
+      var name = document.getElementById('editName').value.trim();
+      if (!name) { showToast('请输入方案名称'); return; }
+      var dup = plans.find(function (p) { return p.name === name && p.id !== plan.id; });
+      if (dup) { showToast('方案名称「' + name + '」已存在'); return; }
+      plan.name = name; isNewPlan = false;
+      showToast('已保存');
+      syncPlanTags(); renderTabs(); exitEdit();
+    });
+  }
+
+  function openPicker(target, opt, callback) {
+    pickerCtx = { target: target, opt: opt, callback: callback };
+    var plan = plans.find(function (p) { return p.id === activePlanId; });
+    if (!plan) return;
+    var exist = [];
+    if (target === 'forbid') exist = plan.forbidIds;
+    else if (target === 'meal-item' && opt && opt.item) exist = opt.item.ingredientIds;
+    pickerSelected = exist.slice();
+    activePickerCat = '';
+    document.getElementById('pickerTitle').textContent = target === 'forbid' ? '选择禁食食材' : '选择可食食材';
+    renderPickerList('');
+    document.getElementById('pickerOverlay').classList.add('show');
+  }
+
+  function renderPickerList(q) {
+    var catsEl = document.getElementById('pickerCats');
+    var itemsEl = document.getElementById('pickerItems');
+    q = (q || '').trim().toLowerCase();
+    var cats = Object.keys(ingByCat).sort();
+
+    /* 搜索模式：隐藏左栏，右侧直接显示全部匹配 */
+    if (q) {
+      catsEl.innerHTML = '';
+      itemsEl.innerHTML = '';
+      var hasAny = false;
+      cats.forEach(function (cat) {
+        var arr = ingByCat[cat].filter(function (it) {
+          return (it.name + ' ' + it.aliases.join(' ') + ' ' + it.cat).toLowerCase().indexOf(q) >= 0;
+        });
+        arr.forEach(function (it) { addItemEl(itemsEl, it); hasAny = true; });
+      });
+      if (!hasAny) itemsEl.innerHTML = '<div class="picker-noresult">无匹配食材</div>';
+      return;
+    }
+
+    /* 级联模式 */
+    /* 左栏：类目 */
+    catsEl.innerHTML = '';
+    if (!activePickerCat || cats.indexOf(activePickerCat) < 0) activePickerCat = cats[0];
+    cats.forEach(function (cat) {
+      var el = document.createElement('div');
+      el.className = 'pc-item' + (cat === activePickerCat ? ' active' : '');
+      el.textContent = cat;
+      el.addEventListener('click', function () {
+        activePickerCat = cat;
+        renderPickerList('');
+      });
+      catsEl.appendChild(el);
+    });
+
+    /* 右栏：当前类目下的食材 */
+    itemsEl.innerHTML = '';
+    ingByCat[activePickerCat].forEach(function (it) { addItemEl(itemsEl, it); });
+  }
+
+  function addItemEl(parent, it) {
+    var sel = pickerSelected.indexOf(it.id) >= 0;
+    var el = document.createElement('div');
+    el.className = 'pli-item' + (sel ? ' selected' : '');
+    el.innerHTML =
+      '<div class="plii-icon">' + it.icon + '</div>' +
+      '<div class="plii-meta"><div class="plii-name">' + esc(it.name) + '</div><div class="plii-alias">' + esc(it.aliases.join(' · ')) + '</div></div>' +
+      '<div class="plii-check">' + (sel ? '✓' : '') + '</div>';
+    el.addEventListener('click', function () {
+      var idx = pickerSelected.indexOf(it.id);
+      if (idx >= 0) pickerSelected.splice(idx, 1);
+      else pickerSelected.push(it.id);
+      renderPickerList(document.getElementById('pickerSearch').value);
+    });
+    parent.appendChild(el);
+  }
+
+  document.getElementById('pickerSearch').addEventListener('input', function () { renderPickerList(this.value); });
+  document.getElementById('pickerConfirm').addEventListener('click', function () {
+    if (pickerCtx && pickerCtx.callback) pickerCtx.callback(pickerSelected);
+    document.getElementById('pickerOverlay').classList.remove('show'); pickerCtx = null;
+  });
+  document.getElementById('pickerCancel').addEventListener('click', function () {
+    document.getElementById('pickerOverlay').classList.remove('show'); pickerCtx = null;
+  });
+  document.getElementById('pickerClose').addEventListener('click', function () {
+    document.getElementById('pickerOverlay').classList.remove('show'); pickerCtx = null;
+  });
+
+  syncPlanTags();
+  renderTabs();  renderContent();
+})();
+</script>
+</body>
+</html>

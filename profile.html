@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食</title>
+<style>
+:root{
+  --bg:#fbf7f0;
+  --surface:#fffdf8;
+  --fg:#1f1a16;
+  --muted:#7d7168;
+  --accent:#3f7a4e;
+  --border:#ded3c5;
+  --danger:#b33a3a;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --text-xs:12px;--text-sm:14px;--text-base:18px;--text-lg:21px;--text-xl:30px;
+  --space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-12:48px;
+  --radius-lg:12px;
+  --motion-fast:180ms;
+  --ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  background:#e9e2d8;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+@media (max-width:430px){
+  body{background:var(--bg);}
+  .device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+}
+
+.topbar{
+  flex:0 0 auto;
+  display:flex;align-items:center;
+  padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);
+  height:56px;
+}
+.brand{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.08em;}
+.back-btn{text-decoration:none;color:var(--fg);display:flex;align-items:center;margin-right:10px;}
+.back-btn:active{opacity:.5;}
+
+.main{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:0 var(--space-6);
+  display:flex;flex-direction:column;
+  padding-bottom:var(--space-12);
+}
+
+/* 头像 */
+.avatar{
+  display:flex;flex-direction:column;align-items:center;
+  padding:var(--space-12) 0 var(--space-8);
+}
+.avatar .ring{
+  width:88px;height:88px;border-radius:50%;
+  background:color-mix(in oklab,var(--accent),transparent 88%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:34px;color:var(--accent);
+}
+.avatar .name{
+  font-family:var(--font-display);font-size:26px;
+  color:var(--fg);letter-spacing:.08em;
+  margin-top:var(--space-5);
+}
+.avatar .mode{
+  font-family:var(--font-display);font-size:var(--text-base);
+  color:var(--accent);margin-top:6px;letter-spacing:.12em;
+}
+
+/* 行式入口 — 同主页风格 */
+.entries{display:flex;flex-direction:column;}
+.entry{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-4) 0;
+  text-decoration:none;color:inherit;
+  cursor:pointer;border-bottom:1px solid var(--border);
+  transition:padding var(--motion-fast) var(--ease-standard);
+}
+.entry:last-child{border-bottom:none;}
+.entry:active{padding-left:4px;}
+.entry .e-label{
+  font-family:var(--font-body);font-size:var(--text-base);color:var(--fg);
+}
+.entry .e-extra{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
+  color:var(--muted);text-align:right;
+}
+.entry .e-char{
+  width:28px;height:28px;border-radius:50%;
+  background:color-mix(in oklab,#b5392f,transparent 88%);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:13px;color:#b5392f;
+  margin-right:8px;vertical-align:middle;
+}
+
+/* 危险 */
+.danger .e-label{color:var(--danger);}
+
+/* modal */
+.modal-overlay{
+  position:absolute;inset:0;z-index:10;
+  background:rgba(31,26,22,.35);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 220ms var(--ease-standard);
+}
+.modal-overlay.show{opacity:1;pointer-events:auto;}
+.modal-box{
+  background:var(--surface);border-radius:var(--radius-lg);
+  padding:var(--space-8) var(--space-6) var(--space-6);
+  width:280px;text-align:center;
+  box-shadow:0 20px 60px rgba(31,26,22,.18);
+  transform:translateY(8px);
+  transition:transform 220ms var(--ease-standard);
+}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-box .m-msg{
+  font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--fg);line-height:1.6;margin-bottom:var(--space-6);
+}
+.modal-btns{display:flex;gap:12px;}
+.modal-btns button{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
+  padding:10px 0;border-radius:var(--radius-lg);border:none;cursor:pointer;
+  transition:opacity var(--motion-fast) var(--ease-standard);
+}
+.modal-btns button:active{opacity:.7;}
+.modal-btns .btn-cancel{
+  background:transparent;color:var(--muted);
+  border:1px solid var(--border);
+}
+.modal-btns .btn-confirm{
+  background:var(--danger);color:#fff;
+}
+
+.foot-gap{flex:1;}
+
+.toast{
+  position:absolute;bottom:60px;left:50%;transform:translate(-50%,12px);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  background:var(--fg);color:var(--bg);padding:8px 20px;
+  border-radius:9999px;
+  opacity:0;transition:opacity 280ms var(--ease-standard),transform 280ms var(--ease-standard);
+  z-index:99;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+  <div class="device">
+    <header class="topbar" data-od-id="topbar">
+      <a class="back-btn" href="zuo_home.html" data-od-id="back-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </a>
+      <span class="brand">一作一食</span>
+    </header>
+
+    <main class="main" data-od-id="profile-main">
+
+      <div class="avatar" data-od-id="avatar">
+        <div class="ring">王</div>
+        <div class="name">王二</div>
+        <div class="mode">作</div>
+      </div>
+
+      <div class="entries" data-od-id="entries">
+        <div class="entry" data-od-id="row-pair">
+          <span class="e-label"><span class="e-char">周</span>大周</span>
+          <span class="e-extra">另一半</span>
+        </div>
+        <div class="entry" data-od-id="row-about">
+          <span class="e-label">关于</span>
+          <span class="e-extra">一作一食</span>
+        </div>
+      </div>
+
+      <div class="foot-gap"></div>
+
+      <div class="entries" data-od-id="entries-danger">
+        <div class="entry danger" id="row-logout" data-od-id="row-logout">
+          <span class="e-label">退出登录</span>
+        </div>
+        <div class="entry danger" id="row-delete" data-od-id="row-delete">
+          <span class="e-label">注销账号</span>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-box">
+        <p class="m-msg" id="modalMsg"></p>
+        <div class="modal-btns">
+          <button class="btn-cancel" id="modalCancel">取消</button>
+          <button class="btn-confirm" id="modalConfirm">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+<script>
+  (function () {
+    var overlay = document.getElementById('modalOverlay');
+    var msg = document.getElementById('modalMsg');
+    var cancelBtn = document.getElementById('modalCancel');
+    var confirmBtn = document.getElementById('modalConfirm');
+    var pending = null; /* 'logout' | 'delete' */
+
+    function open(type) {
+      if (type === 'logout') {
+        msg.textContent = '退出后需要重新登录，确认退出？';
+        confirmBtn.textContent = '退出';
+      } else {
+        msg.textContent = '注销后所有数据将被清除，无法恢复。确认注销？';
+        confirmBtn.textContent = '注销';
+      }
+      pending = type;
+      overlay.classList.add('show');
+    }
+    function close() { overlay.classList.remove('show'); pending = null; }
+    function doAction() {
+      if (pending === 'logout') { window.location.href = 'login.html'; }
+      if (pending === 'delete') { window.location.href = 'login.html'; }
+      close();
+    }
+
+    document.getElementById('row-logout').addEventListener('click', function () { open('logout'); });
+    document.getElementById('row-delete').addEventListener('click', function () { open('delete'); });
+    cancelBtn.addEventListener('click', close);
+    confirmBtn.addEventListener('click', doAction);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食</title>
+<style>
+:root{
+  --bg:#f5efe5;
+  --fg:#1f1a16;
+  --muted:#7d7168;
+  --accent:#9a5a2f;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:#e0d8cc;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;
+}
+@media (max-width:430px){
+  body{background:var(--bg);}
+  .device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+}
+.welcome{
+  position:relative;
+  width:100%;height:100%;
+  background:var(--bg);
+  transition:opacity 1200ms ease;
+}
+.welcome.leaving{opacity:0;}
+.welcome-bg{
+  position:absolute;inset:0;
+  background-image:url("natural_lip_logo_transparent.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  animation:drift 9s ease-in-out infinite;
+  filter:brightness(1.02) saturate(1.04);
+}
+@keyframes drift{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.025);}
+}
+.welcome-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    to bottom,
+    transparent 35%,
+    rgba(245,239,229,0) 55%,
+    rgba(245,239,229,.7) 75%,
+    var(--bg) 100%
+  );
+}
+.welcome-copy{
+  position:absolute;
+  bottom:14%;
+  left:0;right:0;
+  display:flex;flex-direction:column;
+  align-items:center;
+  gap:12px;
+  z-index:2;
+}
+.app-name{
+  font-family:var(--font-display);
+  font-weight:400;
+  font-size:42px;
+  letter-spacing:.24em;
+  text-indent:.24em;
+  color:var(--fg);
+  line-height:1.1;
+}
+.app-en{
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:var(--muted);
+  text-indent:.34em;
+  margin-top:2px;
+}
+</style>
+</head>
+<body>
+  <div class="device">
+    <main class="welcome" id="welcome" data-od-id="welcome-screen">
+      <div class="welcome-bg"></div>
+      <div class="welcome-overlay"></div>
+      <div class="welcome-copy">
+        <h1 class="app-name">一作一食</h1>
+        <p class="app-en">solo chef · sole love</p>
+      </div>
+    </main>
+  </div>
+<script>
+  (function () {
+    var el = document.getElementById('welcome');
+    var target = 'login.html';
+    var hold = 2800;
+    setTimeout(function () {
+      el.classList.add('leaving');
+      setTimeout(function () { window.location.href = target; }, 1200);
+    }, hold);
+  })();
+</script>
+</body>
+</html>
