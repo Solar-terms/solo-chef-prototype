@@ -574,7 +574,7 @@ body{
 <body>
   <div class="device">
     <header class="topbar">
-      <a class="back-btn" href="recipe-manage.html">
+      <a class="back-btn" href="recipe-manage.html" id="backLink">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </a>
       <span class="brand" id="pageTitle">新增菜谱</span>
@@ -842,6 +842,9 @@ body{
   var q = new URLSearchParams(location.search);
   var idParam = q.get('id');
   if (idParam) { editingId = +idParam; }
+
+  /* 查看页来 → 返回回到查看页 */
+  (function(){try{var ref=document.referrer;if(ref&&ref.indexOf('recipe-view.html')!==-1){document.getElementById('backLink').href=ref;}}catch(e){}})();
 
   /* DOM */
   var pageTitle = document.getElementById('pageTitle');
@@ -1708,7 +1711,7 @@ body{
     }
     saveRecipes(recipes);
     clearDraft();
-    setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
+    setTimeout(function(){ var ref=document.referrer; location.href=(ref&&ref.indexOf('recipe-view.html')!==-1)?ref:'recipe-manage.html'; }, 600);
   }
 
   if (isEdit) {
@@ -1763,7 +1766,7 @@ body{
       saveRecipes(recipes);
       clearDraft();
       showToast('已删除');
-      setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
+      setTimeout(function(){ var ref=document.referrer; location.href=(ref&&ref.indexOf('recipe-view.html')!==-1)?ref:'recipe-manage.html'; }, 600);
     });
   });
 })();
