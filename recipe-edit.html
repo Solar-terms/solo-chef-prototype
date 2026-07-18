@@ -1012,7 +1012,7 @@ body{
         });
         row.querySelector('.pe-act').addEventListener('change', function () { entry.action = this.value; saveDraft(); });
         row.querySelector('.pe-note').addEventListener('input', function () { entry.note = this.value; saveDraft(); });
-        row.querySelector('.entry-del').addEventListener('click', function () { phase.entries.splice(ei, 1); renderStepRows(); saveDraft(); });
+        row.querySelector('.entry-del').addEventListener('click', function () { showConfirm('确定删除此条目？\n此操作无法撤销。', function () { phase.entries.splice(ei, 1); renderStepRows(); saveDraft(); }); });
         card.appendChild(row);
       });
       var addBtn = document.createElement('button');
