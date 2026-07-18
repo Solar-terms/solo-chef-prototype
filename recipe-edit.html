@@ -885,6 +885,7 @@ body{
     document.getElementById('phaseOverlay').classList.remove('show');
     phaseEditIdx = -1;
   }
+  document.getElementById('phaseOverlay').addEventListener('click', function (e) { if (e.target === this) closePhaseOverlay(); });
   document.getElementById('phaseOverlayClose').addEventListener('click', closePhaseOverlay);
   document.getElementById('phaseOverlayCancel').addEventListener('click', closePhaseOverlay);
 
@@ -1062,6 +1063,7 @@ body{
     document.getElementById('pickerOverlay').classList.remove('show');
     pickerCallback = null;
   }
+  document.getElementById('pickerOverlay').addEventListener('click', function (e) { if (e.target === this) closePicker(); });
   function renderPickerList(kw) {
     var catsEl = document.getElementById('pickerCats');
     var itemsEl = document.getElementById('pickerItems');
