@@ -942,74 +942,133 @@ body{
     {name:'收汁',desc:'浓缩汤汁'}
   ];
 
-  /* ===== 起锅模板（阶段首步） ===== */
-  /* 字段类型：select（单选下拉）、multi（多选 chip） */
-  /* multi 字段可加 source:'aromatics'，动态从 currentIngredients 中筛 */
+  /* ===== 固定模块系统（每个阶段的一组固定首步卡片） ===== */
+  /* 字段类型：select（单选下拉）、multi（多选 chip）、mainIng（主料单选，存 ingredientId） */
+  /* source 取值：aromatics(爆香料) / main(主料) / seasonings(调料) / garnish(点缀) */
   var AROMATIC_NAMES = ['葱','姜','蒜','干辣椒','花椒','八角','桂皮','香叶','小葱','大葱','香葱','生姜'];
+  var GARNISH_NAMES = ['葱','小葱','大葱','香葱','香菜','蒜','香油'];
   function getAromaticOptions() {
     return currentIngredients
       .map(function (x) { return ingMap[x.ingredientId]; })
       .filter(function (m) { return m && AROMATIC_NAMES.indexOf(m.name) >= 0; })
       .map(function (m) { return m.name; });
   }
-  var phaseStarters = {
-    '炒制': {
-      title:'起锅',
-      fields:[
+  function getSeasoningOptions() {
+    return currentIngredients
+      .map(function (x) { return ingMap[x.ingredientId]; })
+      .filter(function (m) { return m && m.cat === '调味'; })
+      .map(function (m) { return m.name; });
+  }
+  function getMainIngOptions() {
+    return currentIngredients
+      .map(function (x) { return ingMap[x.ingredientId]; })
+      .filter(function (m) { return m && AROMATIC_NAMES.indexOf(m.name) < 0 && m.cat !== '调味'; });
+  }
+  function getGarnishOptions() {
+    return currentIngredients
+      .map(function (x) { return ingMap[x.ingredientId]; })
+      .filter(function (m) { return m && GARNISH_NAMES.indexOf(m.name) >= 0; })
+      .map(function (m) { return m.name; });
+  }
+  function getSourceOptions(sourceName) {
+    if (sourceName === 'aromatics') return getAromaticOptions();
+    if (sourceName === 'seasonings') return getSeasoningOptions();
+    if (sourceName === 'garnish') return getGarnishOptions();
+    return [];
+  }
+
+  var phaseModules = {
+    '炒制': [
+      { type:'starter', title:'起锅', fields:[
         { key:'oil', label:'用油', type:'select', options:['食用油','橄榄油','花生油','菜籽油','猪油'] },
         { key:'heat', label:'火候', type:'select', options:['中火','大火','小火','热锅冷油'] },
         { key:'aromatics', label:'爆香料', type:'multi', source:'aromatics' }
-      ]
-    },
-    '煎制': {
-      title:'起锅',
-      fields:[
+      ]},
+      { type:'main', title:'下主料', fields:[
+        { key:'ingredientId', label:'主料', type:'mainIng', source:'main' },
+        { key:'method', label:'下锅', type:'select', options:['滑入','铺平','倒入','直接下锅'] }
+      ]},
+      { type:'stir', title:'翻炒', fields:[
+        { key:'heat', label:'火候', type:'select', options:['大火','中火','小火'] },
+        { key:'duration', label:'时长', type:'select', options:['30秒','1分钟','2分钟','3分钟','5分钟'] },
+        { key:'degree', label:'程度', type:'select', options:['断生','变色','熟透','微软'] }
+      ]},
+      { type:'season', title:'调味', fields:[
+        { key:'seasonings', label:'调料', type:'multi', source:'seasonings' },
+        { key:'amount', label:'用量', type:'select', options:['适量','少许','一小勺','两大勺'] }
+      ]},
+      { type:'finish', title:'收汁出锅', fields:[
+        { key:'heat', label:'火候', type:'select', options:['大火收汁','中火','小火','直接出锅'] },
+        { key:'degree', label:'程度', type:'select', options:['浓稠','微干','爽口','装盘'] },
+        { key:'garnish', label:'点缀', type:'multi', source:'garnish' }
+      ]}
+    ],
+    '煎制': [
+      { type:'starter', title:'起锅', fields:[
         { key:'oil', label:'用油', type:'select', options:['食用油','橄榄油','黄油','猪油'] },
         { key:'heat', label:'火候', type:'select', options:['小火','中火','大火'] }
-      ]
-    },
-    '炖煮': {
-      title:'起汤',
-      fields:[
+      ]},
+      { type:'main', title:'下主料', fields:[
+        { key:'ingredientId', label:'主料', type:'mainIng', source:'main' },
+        { key:'method', label:'下锅', type:'select', options:['滑入','铺平','平铺','直接下锅'] }
+      ]},
+      { type:'flip', title:'翻面', fields:[
+        { key:'duration', label:'每面', type:'select', options:['1分钟','2分钟','3分钟','4分钟','5分钟'] },
+        { key:'degree', label:'程度', type:'select', options:['微黄','金黄','焦脆','熟透'] }
+      ]},
+      { type:'finish', title:'出锅', fields:[
+        { key:'garnish', label:'点缀', type:'multi', source:'garnish' }
+      ]}
+    ],
+    '炖煮': [
+      { type:'starter', title:'起汤', fields:[
         { key:'liquid', label:'液体', type:'select', options:['清水','高汤','料酒','啤酒'] },
         { key:'amount', label:'用量', type:'select', options:['没过食材','半锅','一碗','适量'] },
         { key:'heat', label:'火候', type:'select', options:['大火烧开','中火','小火慢炖'] }
-      ]
-    },
-    '蒸制': {
-      title:'上锅',
-      fields:[
+      ]},
+      { type:'simmer', title:'慢炖', fields:[
+        { key:'duration', label:'时长', type:'select', options:['15分钟','30分钟','45分钟','1小时','1.5小时','2小时'] },
+        { key:'heat', label:'火候', type:'select', options:['小火慢炖','中火','微火'] }
+      ]},
+      { type:'finish', title:'出锅', fields:[
+        { key:'garnish', label:'点缀', type:'multi', source:'garnish' }
+      ]}
+    ],
+    '蒸制': [
+      { type:'starter', title:'上锅', fields:[
         { key:'water', label:'水量', type:'select', options:['半锅','三分之一','适量'] },
         { key:'duration', label:'时长', type:'select', options:['5分钟','10分钟','15分钟','20分钟','30分钟','40分钟'] },
         { key:'fire', label:'火候', type:'select', options:['大火','中火'] }
-      ]
-    },
-    '烤制': {
-      title:'预热',
-      fields:[
+      ]}
+    ],
+    '烤制': [
+      { type:'starter', title:'预热', fields:[
         { key:'temp', label:'温度', type:'select', options:['160°C','180°C','200°C','220°C'] },
         { key:'duration', label:'时长', type:'select', options:['10分钟','15分钟','20分钟','25分钟','30分钟','40分钟'] }
-      ]
-    },
-    '焯水': {
-      title:'起水',
-      fields:[
+      ]}
+    ],
+    '焯水': [
+      { type:'starter', title:'起水', fields:[
         { key:'liquid', label:'液体', type:'select', options:['清水','冷水'] },
         { key:'amount', label:'用量', type:'select', options:['没过食材','半锅','适量'] },
         { key:'heat', label:'火候', type:'select', options:['大火烧开','中火'] }
-      ]
-    }
+      ]}
+    ]
   };
-  /* 创建某阶段的默认 starter 数据 */
-  function createStarter(phaseName) {
-    var tpl = phaseStarters[phaseName];
-    if (!tpl) return null;
-    var s = {};
-    tpl.fields.forEach(function (f) {
-      if (f.type === 'multi') s[f.key] = [];
-      else s[f.key] = f.options[0];
+
+  /* 创建某阶段的所有默认 module 数据 */
+  function createModules(phaseName) {
+    var tpls = phaseModules[phaseName];
+    if (!tpls || !tpls.length) return null;
+    return tpls.map(function (tpl) {
+      var data = {};
+      tpl.fields.forEach(function (f) {
+        if (f.type === 'multi') data[f.key] = [];
+        else if (f.type === 'mainIng') data[f.key] = null;
+        else data[f.key] = f.options[0];
+      });
+      return { type: tpl.type, title: tpl.title, data: data };
     });
-    return s;
   }
   var stepActions = [
     '洗净','沥干','去根','去皮',
@@ -1060,15 +1119,15 @@ body{
         '<div class="plii-meta"><div class="plii-name">' + esc(p.name) + '</div><div class="plii-alias">' + esc(p.desc) + '</div></div>';
       row.addEventListener('click', function () {
         if (phaseEditIdx >= 0) {
-          /* 改阶段时重置 starter（不同阶段 starter 配置不同） */
+          /* 改阶段时重置 modules（不同阶段模块配置不同） */
           currentSteps[phaseEditIdx].phase = p.name;
-          currentSteps[phaseEditIdx].starter = createStarter(p.name);
+          currentSteps[phaseEditIdx].modules = createModules(p.name);
           phaseEditIdx = -1;
         } else {
           currentSteps.push({
             phase: p.name,
-            starter: createStarter(p.name),
-            entries: phaseStarters[p.name] ? [] : [{ ingredientId: null, action: '切段', note: '' }]
+            modules: createModules(p.name),
+            entries: phaseModules[p.name] ? [] : [{ ingredientId: null, action: '切段', note: '' }]
           });
         }
         renderStepRows();
@@ -1103,10 +1162,12 @@ body{
           saveDraft();
         });
       });
-      /* 起锅模板卡片 */
-      if (phase.starter) {
-        var tpl = phaseStarters[phase.phase];
-        if (tpl) {
+      /* 固定模块卡片组 */
+      if (phase.modules && phase.modules.length) {
+        var tpls = phaseModules[phase.phase] || [];
+        phase.modules.forEach(function (mod, mi) {
+          var tpl = tpls[mi];
+          if (!tpl) return;
           var sc = document.createElement('div');
           sc.className = 'starter-card';
           sc.innerHTML = '<div class="starter-title">' + esc(tpl.title) + '</div>';
@@ -1121,30 +1182,47 @@ body{
               f.options.forEach(function (o) {
                 var opt = document.createElement('option');
                 opt.value = o; opt.textContent = o;
-                if (phase.starter[f.key] === o) opt.selected = true;
+                if (mod.data[f.key] === o) opt.selected = true;
                 sel.appendChild(opt);
               });
-              sel.addEventListener('change', function () { phase.starter[f.key] = this.value; saveDraft(); });
+              sel.addEventListener('change', function () { mod.data[f.key] = this.value; saveDraft(); });
               row.appendChild(sel);
+            } else if (f.type === 'mainIng') {
+              var msel = document.createElement('select');
+              var mopts = getMainIngOptions();
+              var mopt0 = document.createElement('option');
+              mopt0.value = ''; mopt0.textContent = mopts.length ? '选择主料' : '尚未添加主料';
+              msel.appendChild(mopt0);
+              mopts.forEach(function (m) {
+                var opt = document.createElement('option');
+                opt.value = m.id; opt.textContent = m.icon + ' ' + m.name;
+                if (mod.data[f.key] === m.id) opt.selected = true;
+                msel.appendChild(opt);
+              });
+              msel.addEventListener('change', function () { mod.data[f.key] = this.value ? +this.value : null; saveDraft(); });
+              row.appendChild(msel);
             } else if (f.type === 'multi') {
               var chips = document.createElement('div');
               chips.className = 'multi-chips';
-              /* 动态来源：从已添加食材中筛爆香料 */
-              var multiOpts = f.source === 'aromatics' ? getAromaticOptions() : (f.options || []);
+              var multiOpts = f.source ? getSourceOptions(f.source) : (f.options || []);
               if (!multiOpts.length) {
                 var empty = document.createElement('span');
                 empty.style.cssText = 'font-family:var(--font-mono);font-size:10px;color:var(--muted);padding:4px 0;';
-                empty.textContent = '尚未添加葱姜蒜等';
+                var emptyText = f.source === 'aromatics' ? '尚未添加葱姜蒜等'
+                  : f.source === 'seasonings' ? '尚未添加调料'
+                  : f.source === 'garnish' ? '无可点缀食材'
+                  : '暂无可选项';
+                empty.textContent = emptyText;
                 chips.appendChild(empty);
               }
               multiOpts.forEach(function (o) {
                 var chip = document.createElement('span');
-                chip.className = 'multi-chip' + (phase.starter[f.key].indexOf(o) >= 0 ? ' active' : '');
+                chip.className = 'multi-chip' + (mod.data[f.key].indexOf(o) >= 0 ? ' active' : '');
                 chip.textContent = o;
                 chip.addEventListener('click', function () {
-                  var idx = phase.starter[f.key].indexOf(o);
-                  if (idx >= 0) phase.starter[f.key].splice(idx, 1);
-                  else phase.starter[f.key].push(o);
+                  var idx = mod.data[f.key].indexOf(o);
+                  if (idx >= 0) mod.data[f.key].splice(idx, 1);
+                  else mod.data[f.key].push(o);
                   chip.classList.toggle('active');
                   saveDraft();
                 });
@@ -1155,7 +1233,7 @@ body{
             sc.appendChild(row);
           });
           card.appendChild(sc);
-        }
+        });
       }
       phase.entries.forEach(function (entry, ei) {
         var ingOpts = '<option value="">不选食材</option>';
@@ -1215,9 +1293,22 @@ body{
     if (!steps || !steps.length) return [];
     /* 已是新格式（有 phase 字段） */
     if (steps[0].phase !== undefined) return steps.map(function (ph) {
+      /* 兼容旧 starter 字段 → modules */
+      var modules = ph.modules;
+      if (!modules && ph.starter !== undefined) {
+        var tpls = phaseModules[ph.phase] || [];
+        if (tpls.length) {
+          modules = createModules(ph.phase);
+          /* 若旧 starter 存在，把数据填到第一个 module */
+          if (ph.starter && modules[0]) {
+            modules[0].data = ph.starter;
+          }
+        }
+      }
+      if (!modules) modules = createModules(ph.phase);
       return {
         phase: ph.phase,
-        starter: ph.starter || createStarter(ph.phase),
+        modules: modules,
         entries: (ph.entries || []).map(function (e) {
           return { ingredientId: e.ingredientId || null, action: e.action || '', note: e.note || '' };
         })
@@ -1229,7 +1320,7 @@ body{
       if (s.ingredientId !== undefined || s.action !== undefined) return { ingredientId: s.ingredientId || null, action: s.action || '', note: s.note || '' };
       return { ingredientId: null, action: s.type || '', note: s.text || '' };
     });
-    return [{ phase: '配菜', starter: null, entries: entries }];
+    return [{ phase: '配菜', modules: null, entries: entries }];
   }
 
   /* 加载已有菜谱：localStorage 若缺失/内容为空，自动用内置 mock 数据填充 */
@@ -1397,11 +1488,11 @@ body{
     if (!name) { showToast('请输入菜谱名称'); return; }
     var ings = currentIngredients.filter(function (x) { return x.ingredientId; }).map(function (x) { return {ingredientId:x.ingredientId, amount:x.amount||'适量'}; });
     if (!ings.length) { showToast('请至少添加一种食材'); return; }
-    /* 保留有起步模板或条目的阶段，并保留 starter 字段 */
+    /* 保留有固定模块或条目的阶段，并保留 modules 字段 */
     var steps = currentSteps.filter(function (ph) {
-      return ph && ((ph.entries && ph.entries.length) || ph.starter);
+      return ph && ((ph.entries && ph.entries.length) || (ph.modules && ph.modules.length));
     }).map(function (ph) {
-      return { phase: ph.phase, starter: ph.starter || null, entries: ph.entries || [] };
+      return { phase: ph.phase, modules: ph.modules || null, entries: ph.entries || [] };
     });
     if (!steps.length) { showToast('请至少添加一个阶段'); return; }
     if (editingId) {
@@ -1454,9 +1545,9 @@ body{
       if (currentStep < totalSteps) { currentStep++; updateWizard(); }
       else doSave();
     });
-    /* 食材/步骤变动后更新按钮状态 */
+    /* 食材/步骤变动后更新按钮状态，并刷新步骤卡片（动态选项联动） */
     var _origRenderIngRows = renderIngRows;
-    renderIngRows = function () { _origRenderIngRows(); updateWizard(); };
+    renderIngRows = function () { _origRenderIngRows(); updateWizard(); _origRenderStepRows(); };
     var _origRenderStepRows = renderStepRows;
     renderStepRows = function () { _origRenderStepRows(); updateWizard(); };
     updateWizard();
