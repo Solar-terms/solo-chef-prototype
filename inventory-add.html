@@ -358,7 +358,7 @@ body{
       el.appendChild(row);
     });
   }
-  document.getElementById('pickerSearch').addEventListener('input',function(){renderPickerItems(this.value.trim().toLowerCase());});
+  document.getElementById('pickerSearch').addEventListener('input',function(){var q=this.value.trim().toLowerCase();renderPickerCats(q);renderPickerItems(q);});
 
   /* 拍照 */
   var pw=document.getElementById('photoWrap'),pa=document.getElementById('photoAdd'),pf=document.getElementById('photoFile');
