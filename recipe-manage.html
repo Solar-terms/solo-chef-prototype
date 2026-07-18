@@ -186,6 +186,27 @@ body{
   border-radius:var(--radius-pill);padding:4px 12px;cursor:pointer;margin-top:4px;
 }
 .add-step-btn:active{opacity:.6;}
+/* 网页导入 */
+.import-section{border-top:1px solid var(--border-soft);padding-top:var(--space-4);margin-top:var(--space-4);}
+.import-section .is-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;
+  color:var(--muted);display:block;margin-bottom:8px;
+}
+.import-row{display:flex;gap:8px;}
+.import-row input{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
+  color:var(--fg);background:var(--bg);
+  border:1px solid var(--border-soft);border-radius:var(--radius-sm);
+  padding:8px 10px;outline:none;
+}
+.import-row input:focus{border-color:var(--accent);}
+.import-row button{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
+  color:#fff;background:var(--accent);border:none;
+  border-radius:var(--radius-sm);padding:8px 16px;cursor:pointer;white-space:nowrap;
+}
+.import-row button:active{opacity:.85;}
+.import-row button:disabled{opacity:.4;cursor:not-allowed;}
 
 .modal-btns{display:flex;gap:12px;margin-top:var(--space-5);}
 .modal-btns button{
@@ -254,6 +275,14 @@ body{
         <div class="m-field"><label>食材（从食材库选择）</label><div id="ingRows"></div><button class="add-ing-btn" id="addIngBtn">+ 添加食材</button></div>
         <div class="m-field"><label>步骤</label><div id="stepRows"></div><button class="add-step-btn" id="addStepBtn">+ 添加步骤</button></div>
 
+        <div class="import-section">
+          <span class="is-label">从网页导入</span>
+          <div class="import-row">
+            <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接">
+            <button id="importBtn">导入</button>
+          </div>
+        </div>
+
         <div class="modal-btns">
           <button class="btn-cancel" id="modalCancel">取消</button>
           <button class="btn-save" id="modalSave">保存</button>
@@ -309,15 +338,18 @@ body{
     { id:53,name:'榛子',cat:'坚果',icon:'🌰' },{ id:54,name:'牛奶',cat:'乳饮',icon:'🥛' },
     { id:55,name:'酸奶',cat:'乳饮',icon:'🥛' },{ id:56,name:'豆浆',cat:'乳饮',icon:'🥛' },
     { id:57,name:'盐',cat:'调味',icon:'🧂' },{ id:58,name:'蛋白粉',cat:'调味',icon:'💪' },
-    { id:59,name:'葱',cat:'调味',icon:'🧅' },{ id:60,name:'姜',cat:'调味',icon:'🧄' }
+    { id:59,name:'葱',cat:'调味',icon:'🧅' },{ id:60,name:'姜',cat:'调味',icon:'🧄' },
+    { id:61,name:'小白菜',cat:'蔬果',icon:'🥬' },{ id:62,name:'蒜',cat:'调味',icon:'🧄' },
+    { id:63,name:'食用油',cat:'调味',icon:'🫒' }
   ];
 
   var recipes = [
     { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:['鸡蛋打散加少许盐','番茄切块','热油炒鸡蛋盛出备用','炒番茄至出汁','加入鸡蛋翻炒均匀'] },
     { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:['鸡胸肉煮熟撕成丝','黄瓜番茄切丁','生菜洗净撕碎','所有食材混合','淋上油醋汁'] },
-    { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:['鸡蛋打散备用','葱切葱花','水烧开放入一半葱花','淋入蛋液搅拌','撒剩余葱花和盐出锅'] }
+    { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:['鸡蛋打散备用','葱切葱花','水烧开放入一半葱花','淋入蛋液搅拌','撒剩余葱花和盐出锅'] },
+    { id:4, name:'清炒小白菜', desc:'家常小炒，清爽鲜嫩', icon:'🥬', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g'},{ingredientId:57,amount:'2g'},{ingredientId:63,amount:'20g'}], steps:['小白菜去掉根部，切段','蒜拍碎切小粒','锅中倒油，中火炒香蒜粒','转大火，放入白菜快速翻炒','加盐炒匀，出锅'] }
   ];
-  var nextId = 4;
+  var nextId = 5;
   var editingId = null;
   var selectedIcon = '🍳';
 
@@ -447,6 +479,15 @@ body{
     stepRows.querySelectorAll('.step-row textarea').forEach(function (ta) { steps.push(ta.value); });
     steps.push('');
     renderStepRows(steps);
+  });
+
+  /* 从网页导入 */
+  document.getElementById('importBtn').addEventListener('click', function () {
+    var url = document.getElementById('importUrl').value.trim();
+    if (!url) { showToast('请粘贴食谱网页链接'); return; }
+    showToast('正在请求导入…请告知 AI 助手处理');
+    /* 将 URL 存到全局变量，供 AI 提取 */
+    window._pendingImportUrl = url;
   });
 
   /* 取消 */
