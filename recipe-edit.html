@@ -944,13 +944,21 @@ body{
 
   /* ===== 起锅模板（阶段首步） ===== */
   /* 字段类型：select（单选下拉）、multi（多选 chip） */
+  /* multi 字段可加 source:'aromatics'，动态从 currentIngredients 中筛 */
+  var AROMATIC_NAMES = ['葱','姜','蒜','干辣椒','花椒','八角','桂皮','香叶','小葱','大葱','香葱','生姜'];
+  function getAromaticOptions() {
+    return currentIngredients
+      .map(function (x) { return ingMap[x.ingredientId]; })
+      .filter(function (m) { return m && AROMATIC_NAMES.indexOf(m.name) >= 0; })
+      .map(function (m) { return m.name; });
+  }
   var phaseStarters = {
     '炒制': {
       title:'起锅',
       fields:[
         { key:'oil', label:'用油', type:'select', options:['食用油','橄榄油','花生油','菜籽油','猪油'] },
         { key:'heat', label:'火候', type:'select', options:['中火','大火','小火','热锅冷油'] },
-        { key:'aromatics', label:'爆香料', type:'multi', options:['葱','姜','蒜','干辣椒','花椒','八角','桂皮','香叶'] }
+        { key:'aromatics', label:'爆香料', type:'multi', source:'aromatics' }
       ]
     },
     '煎制': {
@@ -1121,7 +1129,15 @@ body{
             } else if (f.type === 'multi') {
               var chips = document.createElement('div');
               chips.className = 'multi-chips';
-              f.options.forEach(function (o) {
+              /* 动态来源：从已添加食材中筛爆香料 */
+              var multiOpts = f.source === 'aromatics' ? getAromaticOptions() : (f.options || []);
+              if (!multiOpts.length) {
+                var empty = document.createElement('span');
+                empty.style.cssText = 'font-family:var(--font-mono);font-size:10px;color:var(--muted);padding:4px 0;';
+                empty.textContent = '尚未添加葱姜蒜等';
+                chips.appendChild(empty);
+              }
+              multiOpts.forEach(function (o) {
                 var chip = document.createElement('span');
                 chip.className = 'multi-chip' + (phase.starter[f.key].indexOf(o) >= 0 ? ' active' : '');
                 chip.textContent = o;
