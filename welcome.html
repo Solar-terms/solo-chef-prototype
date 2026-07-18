@@ -40,6 +40,7 @@ body{
   width:100%;height:100%;
   background:var(--bg);
   transition:opacity 1200ms ease;
+  cursor:pointer;
 }
 .welcome.leaving{opacity:0;}
 .welcome-bg{
@@ -92,6 +93,14 @@ body{
   text-indent:.34em;
   margin-top:2px;
 }
+.welcome-hint{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.12em;
+  color:var(--muted);
+  animation:pulse 2s ease-in-out infinite;
+  margin-top:8px;
+}
+@keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
 </style>
 </head>
 <body>
@@ -102,6 +111,7 @@ body{
       <div class="welcome-copy">
         <h1 class="app-name">一作一食</h1>
         <p class="app-en">solo chef · sole love</p>
+        <p class="welcome-hint">点击进入</p>
       </div>
     </main>
   </div>
@@ -109,11 +119,10 @@ body{
   (function () {
     var el = document.getElementById('welcome');
     var target = 'login.html';
-    var hold = 2800;
-    setTimeout(function () {
+    el.addEventListener('click', function () {
       el.classList.add('leaving');
-      setTimeout(function () { window.location.href = target; }, 1200);
-    }, hold);
+      setTimeout(function () { window.location.href = target; }, 800);
+    });
   })();
 </script>
 </body>
