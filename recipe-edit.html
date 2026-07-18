@@ -801,25 +801,25 @@ body{
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         srcId: editingId, name: recipeName.value, icon: selectedIcon,
         time: selectedTime, difficulty: selectedDifficulty,
-        source: selectedSource, video: document.getElementById('recipeVideo').value,
+        source: selectedSource, sourceUrl: document.getElementById('importUrl').value, video: document.getElementById('recipeVideo').value,
         ingredients: currentIngredients, steps: currentSteps
       }));
     } catch(e){}
   }
   /* 默认菜谱（mock 数据，面向对象：阶段 → 条目） */
   var DEFAULT_RECIPES = [
-    { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', time:'约10分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:[
+    { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', time:'约10分钟', difficulty:'容易做', source:'懒饭', sourceUrl:'', video:'', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:[
       {phase:'配菜',entries:[{ingredientId:8,action:'',heat:'不加热',note:'打散加少许盐'},{ingredientId:16,action:'切块',heat:'不加热',note:''}]},
       {phase:'炒制',entries:[{ingredientId:8,action:'炒制',heat:'中火',note:'盛出备用'},{ingredientId:16,action:'炒制',heat:'中火',note:'炒至出汁'},{ingredientId:null,action:'调味',heat:'大火',note:'加入鸡蛋翻炒均匀'}]}
     ]},
-    { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', time:'约15分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:[
+    { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', time:'约15分钟', difficulty:'容易做', source:'懒饭', sourceUrl:'', video:'', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:[
       {phase:'配菜',entries:[{ingredientId:9,action:'',heat:'中火',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',heat:'不加热',note:''},{ingredientId:16,action:'切块',heat:'不加热',note:''},{ingredientId:42,action:'洗净',heat:'不加热',note:'撕碎'},{ingredientId:null,action:'调味',heat:'不加热',note:'淋上油醋汁'}]}
     ]},
-    { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', time:'约10分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:[
+    { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', time:'约10分钟', difficulty:'容易做', source:'懒饭', sourceUrl:'', video:'', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:[
       {phase:'配菜',entries:[{ingredientId:8,action:'',heat:'不加热',note:'打散备用'},{ingredientId:59,action:'切末',heat:'不加热',note:'切葱花'}]},
       {phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',heat:'中火',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',heat:'小火',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',heat:'不加热',note:'撒剩余葱花和盐出锅'}]}
     ]},
-    { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', time:'约10-15分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:[
+    { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', time:'约10-15分钟', difficulty:'容易做', source:'懒饭', sourceUrl:'https://lanfanapp.com/recipe/2201/', video:'', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:[
       {phase:'配菜',entries:[{ingredientId:61,action:'切段',heat:'不加热',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',heat:'不加热',note:'切蒜末'}]},
       {phase:'炒制',entries:[{ingredientId:63,action:'炒制',heat:'中火',note:'加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',heat:'大火',note:'快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',heat:'中火',note:'炒匀出锅装盘'}]}
     ]}
@@ -1519,6 +1519,7 @@ body{
       selectedDifficulty = src.difficulty || '';
       selectedSource = src.source || '懒饭';
       document.getElementById('recipeVideo').value = src.video || '';
+      document.getElementById('importUrl').value = src.sourceUrl || '';
       currentIngredients = src.ingredients.map(function (x) { return { ingredientId:x.ingredientId, amount:x.amount }; });
       currentSteps = normalizeSteps(src.steps);
       delBtn.style.display = 'block';
@@ -1545,6 +1546,7 @@ body{
     if (_draft.difficulty !== undefined) selectedDifficulty = _draft.difficulty;
     if (_draft.source !== undefined) selectedSource = _draft.source;
     if (_draft.video !== undefined) document.getElementById('recipeVideo').value = _draft.video;
+    if (_draft.sourceUrl !== undefined) document.getElementById('importUrl').value = _draft.sourceUrl;
     if (_draft.ingredients) currentIngredients = _draft.ingredients;
     /* 草稿里的 steps 可能是旧格式（无 starter），用 normalizeSteps 补齐 */
     if (_draft.steps) currentSteps = normalizeSteps(_draft.steps);
@@ -1658,6 +1660,8 @@ body{
   document.getElementById('importBtn').addEventListener('click', function () {
     var url = document.getElementById('importUrl').value.trim();
     if (!url) { showToast('请粘贴食谱链接'); return; }
+    /* 保存 URL 为 sourceUrl */
+    if (editingId) { var rr = recipes.find(function(x){return x.id===editingId;}); if(rr) rr.sourceUrl = url; }
     /* 自动识别来源 */
     if (/lanfanapp\.com/.test(url)) { selectedSource = '懒饭'; renderSource(); }
     else if (/xiachufang\.com/.test(url)) { selectedSource = '下厨房'; renderSource(); }
@@ -1702,11 +1706,11 @@ body{
     if (!steps.length) { showToast('请至少添加一个阶段'); return; }
     if (editingId) {
       var r = recipes.find(function (x) { return x.id === editingId; });
-      if (r) { r.name=name; r.icon=selectedIcon; r.time=selectedTime; r.difficulty=selectedDifficulty; r.source=selectedSource; r.video=document.getElementById('recipeVideo').value; r.ingredients=ings; r.steps=steps; }
+      if (r) { r.name=name; r.icon=selectedIcon; r.time=selectedTime; r.difficulty=selectedDifficulty; r.source=selectedSource; r.sourceUrl=r.sourceUrl||''; r.video=document.getElementById('recipeVideo').value; r.ingredients=ings; r.steps=steps; }
       showToast('已更新');
     } else {
       var maxId = recipes.reduce(function(m,x){return Math.max(m,x.id)},0);
-      recipes.push({ id:maxId+1, name:name, desc:'', icon:selectedIcon, time:selectedTime, difficulty:selectedDifficulty, source:selectedSource, video:document.getElementById('recipeVideo').value, ingredients:ings, steps:steps });
+      recipes.push({ id:maxId+1, name:name, desc:'', icon:selectedIcon, time:selectedTime, difficulty:selectedDifficulty, source:selectedSource, sourceUrl:'', video:document.getElementById('recipeVideo').value, ingredients:ings, steps:steps });
       showToast('已添加');
     }
     saveRecipes(recipes);
