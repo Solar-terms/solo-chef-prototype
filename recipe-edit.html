@@ -1256,7 +1256,8 @@ body{
     if (_draft.time !== undefined) selectedTime = _draft.time;
     if (_draft.difficulty !== undefined) selectedDifficulty = _draft.difficulty;
     if (_draft.ingredients) currentIngredients = _draft.ingredients;
-    if (_draft.steps) currentSteps = _draft.steps;
+    /* 草稿里的 steps 可能是旧格式（无 starter），用 normalizeSteps 补齐 */
+    if (_draft.steps) currentSteps = normalizeSteps(_draft.steps);
   }
 
   renderIcons();
