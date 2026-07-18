@@ -239,7 +239,13 @@ body{
     <div class="field"><label>规格 <span class="ocr-tag" id="ocrSpec">OCR</span></label><input id="spec" type="text" autocomplete="off" placeholder="如：300g/袋"></div>
     <div class="field"><label>数量（如：500g / 1瓶 / 2个）</label><input id="amt" type="text" autocomplete="off" placeholder="500g"></div>
     <div class="field-row">
-      <div class="field"><label>品牌 <span class="ocr-tag" id="ocrBrand">OCR</span></label><input id="brand" type="text" autocomplete="off" placeholder="如：盒马有机"></div>
+      <div class="field">
+        <label>品牌 <span class="ocr-tag" id="ocrBrand">OCR</span></label>
+        <div style="display:flex;gap:8px;">
+          <select id="brand" style="flex:1;font-family:var(--font-body);font-size:var(--text-base);color:var(--fg);background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:10px 12px;outline:none;"></select>
+          <a href="brand-manage.html" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-decoration:none;display:flex;align-items:center;white-space:nowrap;padding:0 4px;">管理</a>
+        </div>
+      </div>
       <div class="field"><label>价格</label><input id="price" type="text" autocomplete="off" placeholder="¥8.9"></div>
     </div>
     <div class="field"><label>采购渠道</label>
@@ -323,6 +329,14 @@ body{
 
   var KEY='yzys_inventory';
   var items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
+  /* 品牌下拉 */
+  function loadBrands(){try{return JSON.parse(localStorage.getItem('yzys_brands')||'[]');}catch(e){return[];}}
+  function renderBrandSelect(){
+    var bs=document.getElementById('brand'),brands=loadBrands();
+    bs.innerHTML='<option value="">请选择品牌</option>';
+    brands.forEach(function(b){var o=document.createElement('option');o.value=b;o.textContent=b;bs.appendChild(o);});
+  }
+  renderBrandSelect();
   var photoFiles=[];
   var selectedIngId=null;
   function rebuildMaps(){ingMap={};ALL.forEach(function(m){ingMap[m.id]=m;});ingByCat={};ALL.forEach(function(m){var cat=m.cat;if(!ingByCat[cat]) ingByCat[cat]=[];ingByCat[cat].push(m);});}

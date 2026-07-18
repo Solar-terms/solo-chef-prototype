@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&amp;family=Source+Serif+Pro:wght@400;600&amp;display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食 · 品牌管理</title>
+<style>
+:root{
+  --bg:#fbf7f0;--surface:#fffdf8;--fg:#1f1a16;--fg-2:#4b4038;
+  --muted:#7d7168;--accent:#3f7a4e;--danger:#b33a3a;
+  --border:#ded3c5;--border-soft:#eee5da;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --text-sm:14px;--text-base:18px;--text-lg:21px;
+  --space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-pill:9999px;
+  --motion-fast:180ms;--ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);background:#e9e2d8;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;width:390px;height:844px;
+  background:var(--bg);border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+@media(max-width:430px){body{background:var(--bg);}.device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}}
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;
+  padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);height:56px;
+  border-bottom:1px solid var(--border);
+}
+.topbar .brand{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.08em;}
+.topbar a{text-decoration:none;color:var(--fg);display:flex;align-items:center;margin-right:10px;}
+.topbar a:active{opacity:.5;}
+.count{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-left:auto;}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:var(--space-4) var(--space-6) var(--space-8);}
+.search-bar{margin-bottom:var(--space-4);}
+.search-bar input{
+  width:100%;font-family:var(--font-body);font-size:var(--text-sm);
+  color:var(--fg);background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:var(--radius-pill);
+  padding:9px 14px;outline:none;
+}
+.search-bar input:focus{border-color:var(--accent);}
+.brand-item{
+  display:flex;align-items:center;gap:var(--space-3);
+  background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);
+  margin-bottom:6px;
+}
+.brand-item .br-name{flex:1;font-size:var(--text-sm);color:var(--fg);}
+.brand-item .br-del{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px;}
+.brand-item .br-del:active{color:var(--danger);}
+.add-row{display:flex;gap:8px;margin-top:var(--space-4);}
+.add-row input{flex:1;font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:9px 12px;outline:none;}
+.add-row input:focus{border-color:var(--accent);}
+.add-row button{font-family:var(--font-mono);font-size:11px;color:#fff;background:var(--accent);border:none;border-radius:var(--radius-md);padding:9px 18px;cursor:pointer;}
+.empty{text-align:center;padding:var(--space-8) 0;font-family:var(--font-mono);font-size:10px;color:var(--muted);}
+.toast{
+  position:absolute;bottom:40px;left:50%;transform:translate(-50%,12px);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  background:var(--fg);color:var(--bg);padding:8px 20px;
+  border-radius:var(--radius-pill);opacity:0;transition:opacity 280ms var(--ease-standard),transform 280ms var(--ease-standard);
+  z-index:99;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div class="device">
+  <header class="topbar">
+    <a href="inventory-add.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <span class="brand">品牌管理</span>
+    <span class="count" id="count"></span>
+  </header>
+  <main class="main">
+    <div class="search-bar"><input id="search" type="text" autocomplete="off" placeholder="搜索品牌"></div>
+    <div id="list"></div>
+    <div class="add-row">
+      <input id="newName" type="text" autocomplete="off" placeholder="新品牌名称">
+      <button id="addBtn">添加</button>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+(function(){
+  var KEY='yzys_brands';
+  var DEFAULTS=['盒马有机','金龙鱼','德青源','光明','中盐','泰森','太太乐','海天','李锦记','六月鲜','老干妈','丘比'];
+  function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return[];}}
+  function save(arr){try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}}
+  if(!load().length) save(DEFAULTS);
+  var items=load();
+  var list=document.getElementById('list'),search=document.getElementById('search'),toast=document.getElementById('toast');
+  var newInput=document.getElementById('newName');
+
+  function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(function(){toast.classList.remove('show')},1800);}
+  function esc(s){return String(s||'').replace(/</g,'&lt;');}
+
+  function render(){
+    var q=(search.value||'').toLowerCase();
+    var filtered=items.filter(function(s){return s.toLowerCase().indexOf(q)>=0;});
+    list.innerHTML='';
+    if(!filtered.length) list.innerHTML='<div class="empty">'+(q?'无匹配':'暂无品牌')+'</div>';
+    filtered.forEach(function(s,i){
+      var idx=items.indexOf(s);
+      var row=document.createElement('div');row.className='brand-item';
+      row.innerHTML='<span class="br-name">'+esc(s)+'</span><button class="br-del">✕</button>';
+      row.querySelector('.br-del').addEventListener('click',function(){items.splice(idx,1);save(items);render();});
+      list.appendChild(row);
+    });
+    document.getElementById('count').textContent=items.length+' 个';
+  }
+
+  document.getElementById('addBtn').addEventListener('click',function(){
+    var v=newInput.value.trim();
+    if(!v){showToast('请输入品牌名称');return;}
+    if(items.indexOf(v)>=0){showToast('已存在');return;}
+    items.push(v);save(items);render();newInput.value='';
+  });
+  newInput.addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('addBtn').click();});
+  search.addEventListener('input',render);
+  render();
+})();
+</script>
+</body>
+</html>
