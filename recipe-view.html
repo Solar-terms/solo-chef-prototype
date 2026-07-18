@@ -181,7 +181,12 @@ body{
 
   var q=new URLSearchParams(location.search);
   var id=+q.get('id');
-  if(!id){document.getElementById('main').innerHTML='<div class="empty-view"><div class="ev-icon">📭</div><p>未指定菜谱</p><a href="recipe-manage.html">返回菜谱管理</a></div>';return;}
+  if(!id){
+    /* 跳到第一道菜的查看页 */
+    var ids=[];try{ids=JSON.parse(localStorage.getItem('yzys_recipes')||'[]').map(function(r){return r.id;}).filter(Boolean);}catch(e){}
+    if(ids.length){location.replace('recipe-view.html?id='+ids[0]);return;}
+    document.getElementById('main').innerHTML='<div class="empty-view"><div class="ev-icon">📭</div><p>暂无菜谱</p><a href="recipe-manage.html">前往菜谱管理</a></div>';return;
+  }
 
   var recipes=[];try{recipes=JSON.parse(localStorage.getItem('yzys_recipes')||'[]');}catch(e){}
   /* 自动建 mock 数据 */
