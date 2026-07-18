@@ -63,43 +63,34 @@ body{
 .inv-item{
   display:flex;align-items:center;gap:var(--space-3);
   background:var(--surface);border:1px solid var(--border-soft);
-  border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);margin-bottom:6px;
+  border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:6px;
 }
-.inv-item .iv-icon{
-  font-size:20px;flex:0 0 auto;
+.inv-item .iv-icon{font-size:22px;flex:0 0 auto;}
+
+/* FAB */
+.fab{
+  position:absolute;bottom:calc(env(safe-area-inset-bottom) + 30px);right:var(--space-6);
+  width:52px;height:52px;border-radius:50%;
+  background:var(--accent);color:#fff;border:none;font-size:26px;
+  cursor:pointer;box-shadow:0 4px 16px rgba(31,26,22,.2);
+  z-index:20;display:flex;align-items:center;justify-content:center;
+  text-decoration:none;
 }
-.inv-item .iv-name{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);flex:1;}
-.inv-item .iv-amt{
-  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
-  border:none;border-bottom:1px solid var(--border);background:transparent;
-  width:70px;text-align:center;padding:4px 2px;outline:none;
+.fab:active{opacity:.85;}
+
+/* 列表项 */
+.inv-item .iv-body{flex:1;min-width:0;}
+.inv-item .iv-name{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);}
+.inv-item .iv-info{
+  display:flex;gap:8px;margin-top:2px;
+  font-family:var(--font-mono);font-size:9px;color:var(--muted);
 }
-.inv-item .iv-amt:focus{border-bottom-color:var(--accent);}
+.inv-item .iv-info span{white-space:nowrap;}
+.inv-item .iv-amt{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);min-width:60px;text-align:right;}
 .inv-item .iv-del{
-  font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px;
+  font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px;flex:0 0 auto;
 }
 .inv-item .iv-del:active{color:var(--danger);}
-
-.add-section{margin-top:var(--space-4);}
-.add-select{
-  width:100%;font-family:var(--font-body);font-size:var(--text-sm);
-  color:var(--fg);background:var(--surface);
-  border:1px solid var(--border-soft);border-radius:var(--radius-md);
-  padding:9px 12px;outline:none;margin-bottom:8px;
-}
-.add-row{display:flex;gap:8px;}
-.add-row input{
-  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
-  color:var(--fg);background:var(--surface);
-  border:1px solid var(--border-soft);border-radius:var(--radius-md);
-  padding:9px 12px;outline:none;
-}
-.add-row input:focus,.add-select:focus{border-color:var(--accent);}
-.add-row button{
-  font-family:var(--font-mono);font-size:11px;
-  color:#fff;background:var(--accent);border:none;
-  border-radius:var(--radius-md);padding:9px 18px;cursor:pointer;
-}
 
 .empty{text-align:center;padding:var(--space-8) 0;font-family:var(--font-mono);font-size:10px;color:var(--muted);}
 
@@ -125,14 +116,8 @@ body{
   <main class="main">
     <div class="search-bar"><input id="search" type="text" autocomplete="off" placeholder="搜索食材"></div>
     <div id="list"></div>
-    <div class="add-section">
-      <select id="addSelect" class="add-select"><option value="">添加食材到库存</option></select>
-      <div class="add-row">
-        <input id="addAmt" type="text" autocomplete="off" placeholder="数量（如：500g）">
-        <button id="addBtn">添加</button>
-      </div>
-    </div>
   </main>
+  <a class="fab" href="inventory-add.html" title="添加库存">+</a>
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -163,9 +148,17 @@ body{
 
   var KEY='yzys_inventory';
   var DEFAULTS=[
-    {id:61,amt:'500g'},{id:62,amt:'200g'},{id:63,amt:'1瓶'},{id:57,amt:'1袋'},
-    {id:8,amt:'10个'},{id:16,amt:'5个'},{id:9,amt:'500g'},{id:59,amt:'1把'},
-    {id:15,amt:'3根'},{id:42,amt:'1颗'},{id:54,amt:'1L'}
+    {id:61,amt:'500g',brand:'盒马有机',price:'8.9',channel:'盒马',spec:'300g/袋'},
+    {id:62,amt:'200g',brand:'',price:'3.5',channel:'菜市场',spec:''},
+    {id:63,amt:'1瓶',brand:'金龙鱼',price:'29.9',channel:'京东',spec:'900ml'},
+    {id:57,amt:'1袋',brand:'中盐',price:'2.5',channel:'超市',spec:'400g'},
+    {id:8,amt:'10个',brand:'德青源',price:'19.9',channel:'盒马',spec:'10枚装'},
+    {id:16,amt:'5个',brand:'',price:'8',channel:'菜市场',spec:''},
+    {id:9,amt:'500g',brand:'泰森',price:'15.8',channel:'京东',spec:'500g/袋'},
+    {id:59,amt:'1把',brand:'',price:'2',channel:'菜市场',spec:''},
+    {id:54,amt:'1L',brand:'光明',price:'12.9',channel:'超市',spec:'1L'},
+    {id:42,amt:'1颗',brand:'',price:'5',channel:'菜市场',spec:''},
+    {id:15,amt:'3根',brand:'',price:'4.5',channel:'菜市场',spec:''}
   ];
   function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return[];}}
   function save(arr){try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){}}
@@ -173,60 +166,44 @@ body{
   var items=load();
   var list=document.getElementById('list'),count=document.getElementById('count');
   var search=document.getElementById('search'),toast=document.getElementById('toast');
-  var addSelect=document.getElementById('addSelect'),addAmt=document.getElementById('addAmt');
 
   function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(function(){toast.classList.remove('show')},1800);}
   function esc(s){return String(s||'').replace(/</g,'&lt;');}
 
-  /* 填充可选食材下拉 */
-  var added=items.map(function(x){return x.id;});
-  var unused=ALL_INGREDIENTS.filter(function(m){return added.indexOf(m.id)<0;});
-  unused.forEach(function(m){var o=document.createElement('option');o.value=m.id;o.textContent=m.icon+' '+m.n;addSelect.appendChild(o);});
-
   function render(){
     var q=(search.value||'').toLowerCase();
     var filtered=items.filter(function(x){var m=catMap[x.id];return m&&m.n.toLowerCase().indexOf(q)>=0;});
-    var byCat={},cats=Object.keys(catMap).sort();
+    var byCat={};
     filtered.forEach(function(x){var c=catMap[x.id].cat;if(!byCat[c]) byCat[c]=[];byCat[c].push(x);});
 
     list.innerHTML='';
-    if(!filtered.length){list.innerHTML='<div class="empty">'+ (q?'无匹配':'库存为空，添加食材吧')+'</div>';}
+    if(!filtered.length){list.innerHTML='<div class="empty">'+ (q?'无匹配':'库存为空，点右下角 + 添加')+'</div>';}
     var catOrder=['主食','蛋白','蔬果','坚果','乳饮','调味'];
     catOrder.forEach(function(cat){
       if(!byCat[cat]) return;
       list.innerHTML+='<div class="cat-title">'+cat+'</div>';
       byCat[cat].forEach(function(x){
         var m=catMap[x.id],idx=items.indexOf(x);
+        var info=[];
+        if(x.brand) info.push('品牌：'+esc(x.brand));
+        if(x.channel) info.push(esc(x.channel));
+        if(x.spec) info.push(esc(x.spec));
+        if(x.price) info.push('¥'+esc(x.price));
         list.innerHTML+=
           '<div class="inv-item"><span class="iv-icon">'+(m?m.icon:'📦')+'</span>'+
-          '<span class="iv-name">'+(m?esc(m.n):'?')+'</span>'+
-          '<input class="iv-amt" value="'+esc(x.amt)+'" data-idx="'+idx+'">'+
-          '<button class="iv-del" data-idx="'+idx+'">✕</button></div>';
+          '<div class="iv-body"><div class="iv-name">'+(m?esc(m.n):'?')+'</div>'+
+          (info.length?'<div class="iv-info">'+info.map(function(s){return'<span>'+s+'</span>';}).join('')+'</div>':'')+
+          '</div>'+
+          '<span class="iv-amt">'+esc(x.amt)+'</span>'+
+          '<button class="iv-del">✕</button>';
       });
     });
-
-    /* 绑定事件 */
-    list.querySelectorAll('.iv-amt').forEach(function(el){
-      el.addEventListener('input',function(){items[+this.dataset.idx].amt=this.value;save(items);});
-    });
-    list.querySelectorAll('.iv-del').forEach(function(el){
-      el.addEventListener('click',function(){var i=items[+this.dataset.idx];items.splice(+this.dataset.idx,1);save(items);render();showToast('已删除 '+catMap[i.id].n);});
-    });
-
+    list.querySelectorAll('.iv-del').forEach(function(el,i){el.addEventListener('click',function(){
+      var idx=items.indexOf(filtered[i]);items.splice(idx,1);save(items);render();showToast('已删除');
+    });});
     count.textContent=items.length+' 种';
-    /* 重置添加下拉 */
-    addSelect.innerHTML='<option value="">添加食材到库存</option>';
-    added=items.map(function(x){return x.id;});
-    ALL_INGREDIENTS.filter(function(m){return added.indexOf(m.id)<0;}).forEach(function(m){var o=document.createElement('option');o.value=m.id;o.textContent=m.icon+' '+m.n;addSelect.appendChild(o);});
   }
 
-  document.getElementById('addBtn').addEventListener('click',function(){
-    var id=+addSelect.value;
-    if(!id){showToast('请选择食材');return;}
-    var amt=addAmt.value.trim()||'适量';
-    if(items.some(function(x){return x.id===id;})){showToast('已在库存中');return;}
-    items.push({id:id,amt:amt});save(items);render();addAmt.value='';showToast('已添加');
-  });
   search.addEventListener('input',render);
   render();
 })();

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&amp;family=Source+Serif+Pro:wght@400;600&amp;display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>一作一食 · 添加库存</title>
+<style>
+:root{
+  --bg:#fbf7f0;--surface:#fffdf8;--fg:#1f1a16;--fg-2:#4b4038;
+  --muted:#7d7168;--accent:#3f7a4e;
+  --border:#ded3c5;--border-soft:#eee5da;
+  --font-display:Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif Pro",Georgia,serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --text-sm:14px;--text-base:18px;--text-lg:21px;
+  --space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;
+  --radius-md:8px;--radius-lg:12px;
+  --motion-fast:180ms;--ease-standard:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);background:#e9e2d8;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;
+}
+.device{
+  position:relative;width:390px;height:844px;
+  background:var(--bg);border-radius:46px;
+  box-shadow:0 30px 80px rgba(31,26,22,.22);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+@media(max-width:430px){body{background:var(--bg);}.device{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}}
+.topbar{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);height:56px;
+}
+.brand{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.08em;}
+.back-btn{text-decoration:none;color:var(--fg);display:flex;align-items:center;}
+.back-btn:active{opacity:.5;}
+
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:var(--space-6);}
+.field{margin-bottom:var(--space-4);}
+.field label{
+  display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:var(--space-1);
+}
+.field select,.field input{
+  width:100%;font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--fg);background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:var(--radius-md);
+  padding:12px;outline:none;
+}
+.field select:focus,.field input:focus{border-color:var(--accent);}
+.field-row{display:flex;gap:var(--space-3);}
+.field-row .field{flex:1;}
+
+.btn-save{
+  width:100%;font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
+  color:#fff;background:var(--accent);border:none;
+  border-radius:var(--radius-lg);padding:14px 0;cursor:pointer;margin-top:var(--space-4);
+}
+.btn-save:active{opacity:.85;}
+
+.toast{
+  position:absolute;bottom:40px;left:50%;transform:translate(-50%,12px);
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  background:var(--fg);color:var(--bg);padding:8px 20px;
+  border-radius:var(--radius-pill);opacity:0;transition:opacity 280ms var(--ease-standard),transform 280ms var(--ease-standard);
+  z-index:99;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div class="device">
+  <header class="topbar">
+    <a class="back-btn" href="inventory-manage.html">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <span class="brand">添加库存</span>
+    <span></span>
+  </header>
+  <main class="main">
+    <div class="field"><label>食材</label>
+      <select id="ing"></select>
+    </div>
+    <div class="field"><label>数量（如：500g / 1瓶 / 2个）</label>
+      <input id="amt" type="text" autocomplete="off" placeholder="500g">
+    </div>
+    <div class="field-row">
+      <div class="field"><label>品牌</label><input id="brand" type="text" autocomplete="off" placeholder="如：盒马有机"></div>
+      <div class="field"><label>价格</label><input id="price" type="text" autocomplete="off" placeholder="¥8.9"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>采购渠道</label><input id="channel" type="text" autocomplete="off" placeholder="如：盒马 / 菜市场"></div>
+      <div class="field"><label>规格</label><input id="spec" type="text" autocomplete="off" placeholder="如：300g/袋"></div>
+    </div>
+    <button class="btn-save" id="saveBtn">保存到库存</button>
+  </main>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+(function(){
+  var ALL=[
+    {id:61,n:'小白菜',icon:'🥬',cat:'蔬果'},{id:62,n:'蒜',icon:'🧄',cat:'蔬果'},{id:63,n:'食用油',icon:'🫗',cat:'调味'},
+    {id:57,n:'盐',icon:'🧂',cat:'调味'},{id:59,n:'葱',icon:'🧅',cat:'蔬果'},{id:60,n:'姜',icon:'🫚',cat:'蔬果'},
+    {id:8,n:'鸡蛋',icon:'🥚',cat:'蛋白'},{id:9,n:'鸡胸肉',icon:'🍗',cat:'蛋白'},{id:10,n:'牛腩',icon:'🥩',cat:'蛋白'},
+    {id:11,n:'牛肉',icon:'🥩',cat:'蛋白'},{id:12,n:'鸭肉',icon:'🦆',cat:'蛋白'},{id:13,n:'鱼肉',icon:'🐟',cat:'蛋白'},
+    {id:14,n:'豆腐',icon:'🧈',cat:'蛋白'},
+    {id:1,n:'燕麦',icon:'🌾',cat:'主食'},{id:2,n:'大米',icon:'🍚',cat:'主食'},{id:3,n:'面条',icon:'🍜',cat:'主食'},
+    {id:5,n:'米饭',icon:'🍚',cat:'主食'},{id:6,n:'包子',icon:'🥟',cat:'主食'},{id:7,n:'水饺',icon:'🥟',cat:'主食'},
+    {id:15,n:'黄瓜',icon:'🥒',cat:'蔬果'},{id:16,n:'番茄',icon:'🍅',cat:'蔬果'},
+    {id:18,n:'苹果',icon:'🍎',cat:'蔬果'},{id:19,n:'蓝莓',icon:'🫐',cat:'蔬果'},{id:20,n:'草莓',icon:'🍓',cat:'蔬果'},
+    {id:22,n:'脐橙',icon:'🍊',cat:'蔬果'},{id:23,n:'猕猴桃',icon:'🥝',cat:'蔬果'},
+    {id:24,n:'牛油果',icon:'🥑',cat:'蔬果'},{id:25,n:'柠檬',icon:'🍋',cat:'蔬果'},
+    {id:30,n:'芹菜',icon:'🥬',cat:'蔬果'},{id:33,n:'西兰花',icon:'🥦',cat:'蔬果'},
+    {id:36,n:'茄子',icon:'🍆',cat:'蔬果'},{id:37,n:'冬瓜',icon:'🍈',cat:'蔬果'},
+    {id:42,n:'生菜',icon:'🥬',cat:'蔬果'},{id:44,n:'菜心',icon:'🥬',cat:'蔬果'},
+    {id:47,n:'花生',icon:'🥜',cat:'坚果'},{id:48,n:'核桃',icon:'🥜',cat:'坚果'},{id:51,n:'杏仁',icon:'🥜',cat:'坚果'},
+    {id:54,n:'牛奶',icon:'🥛',cat:'乳饮'},{id:55,n:'酸奶',icon:'🥛',cat:'乳饮'},
+    {id:71,n:'土豆',icon:'🥔',cat:'蔬果'},{id:72,n:'腊肠',icon:'🥓',cat:'蛋白'},{id:73,n:'南瓜',icon:'🎃',cat:'蔬果'},
+    {id:74,n:'腊肉',icon:'🥓',cat:'蛋白'},{id:75,n:'芋头',icon:'🍠',cat:'蔬果'},
+  ];
+
+  var KEY='yzys_inventory';
+  var items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
+
+  var sel=document.getElementById('ing');
+  var cats=[],catsRendered={};
+  /* 按类别分optgroup */
+  var catOrder=['主食','蛋白','蔬果','坚果','乳饮','调味'];
+  catOrder.forEach(function(cat){
+    var group=document.createElement('optgroup');
+    group.label=cat;
+    ALL.filter(function(m){return m.cat===cat;}).forEach(function(m){
+      if(items.some(function(x){return x.id===m.id;})) return;
+      var o=document.createElement('option');o.value=m.id;o.textContent=m.icon+' '+m.n;group.appendChild(o);
+    });
+    if(group.children.length) sel.appendChild(group);
+  });
+  if(!sel.children.length){var o=document.createElement('option');o.value='';o.textContent='所有食材已入库';sel.appendChild(o);}
+
+  function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(function(){t.classList.remove('show')},1800);}
+
+  document.getElementById('saveBtn').addEventListener('click',function(){
+    var id=+sel.value;
+    if(!id){showToast('请选择食材');return;}
+    var amt=document.getElementById('amt').value.trim()||'适量';
+    items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
+    if(items.some(function(x){return x.id===id;})){showToast('已在库存中');return;}
+    items.push({
+      id:id,
+      amt:amt,
+      brand:document.getElementById('brand').value.trim(),
+      price:document.getElementById('price').value.trim(),
+      channel:document.getElementById('channel').value.trim(),
+      spec:document.getElementById('spec').value.trim()
+    });
+    try{localStorage.setItem(KEY,JSON.stringify(items));}catch(e){}
+    showToast('已添加');
+    setTimeout(function(){location.href='inventory-manage.html';},600);
+  });
+})();
+</script>
+</body>
+</html>
