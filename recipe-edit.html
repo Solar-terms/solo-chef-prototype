@@ -810,7 +810,7 @@ body{
           '<button class="ir-del" title="移除">✕</button>';
         row.querySelector('.ir-amt').addEventListener('input', function () { var i = findIngIndex(ing.ingredientId); if (i >= 0) currentIngredients[i].amount = this.value; saveDraft(); });
         row.querySelector('.ir-amt').addEventListener('click', function (e) { e.stopPropagation(); });
-        row.querySelector('.ir-del').addEventListener('click', function (e) { e.stopPropagation(); var i = findIngIndex(ing.ingredientId); if (i >= 0) { currentIngredients.splice(i,1); renderIngRows(); saveDraft(); } });
+        row.querySelector('.ir-del').addEventListener('click', function (e) { e.stopPropagation(); var i = findIngIndex(ing.ingredientId); if (i < 0) return; if (!confirm('确定删除此食材？')) return; currentIngredients.splice(i,1); renderIngRows(); saveDraft(); });
         row.addEventListener('click', function () { openPicker(applyPicked); });
         group.appendChild(row);
       });
@@ -900,6 +900,7 @@ body{
         openPhaseOverlay(pi);
       });
       card.querySelector('.phase-del').addEventListener('click', function () {
+        if (!confirm('确定删除此阶段？')) return;
         currentSteps.splice(pi, 1);
         renderStepRows();
         saveDraft();
