@@ -207,7 +207,7 @@ body{
   }
 
   /* STEPS */
-  if(r.steps&&r.steps.length){
+  if(r.steps&&r.steps.length){try{
     var hasPhase=r.steps[0]&&r.steps[0].phase!==undefined;
     if(hasPhase){
       r.steps.forEach(function(ph){
@@ -239,7 +239,7 @@ body{
         h+='</div>';
       });
     }
-  }
+  }catch(e){h+='<div class="card" style="text-align:center;font-size:10px;color:var(--muted);">步骤加载失败，刷新试试</div>';}}
 
   /* SOURCE */
   if(r.sourceUrl) h+='<a class="card" href="'+esc(r.sourceUrl)+'" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);"><span>📎</span><span>来源：'+esc(r.source)+'</span><span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-left:auto;">→</span></a>';
