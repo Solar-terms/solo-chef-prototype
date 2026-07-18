@@ -53,10 +53,34 @@ body{
 .back-btn:active{opacity:.5;}
 
 .main{
-  flex:1;overflow-y:auto;overflow-x:hidden;
+  flex:1;display:flex;flex-direction:column;min-height:0;
+  overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
-  padding:var(--space-5) var(--space-6) 100px;
+  padding:0 var(--space-6);
 }
+
+/* 进度条 —— 引导 */
+.step-bar{
+  width:140px;height:2px;margin:20px auto 0;
+  background:var(--border);border-radius:var(--radius-pill);
+  overflow:hidden;flex:0 0 auto;
+}
+.step-fill{
+  display:block;height:100%;width:25%;
+  background:var(--accent);border-radius:var(--radius-pill);
+  transition:width 280ms var(--ease-standard);
+}
+.step-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  color:var(--muted);text-align:center;margin:6px 0 var(--space-5);
+  flex:0 0 auto;
+}
+
+/* 分步 */
+.wizard{flex:1;display:flex;flex-direction:column;min-height:0;}
+.step{display:none;}
+.step.active{display:block;flex:1;overflow-y:auto;padding:var(--space-4) 0 20px;animation:stepin 320ms var(--ease-standard) both;}
+@keyframes stepin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
 /* 区块标题 */
 .section-title{
@@ -101,6 +125,32 @@ body{
   transition:all var(--motion-fast) var(--ease-standard);
 }
 .ip-item.active{border-color:var(--accent);background:color-mix(in oklab,var(--accent),transparent 90%);}
+.ip-item.wide{width:auto;padding:0 14px;font-family:var(--font-body);font-size:var(--text-sm);}
+
+/* 时间下拉 */
+.time-sel{position:relative;}
+.time-sel-btn{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
+  background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:var(--radius-md);padding:8px 12px;cursor:pointer;
+}
+.time-sel-btn::after{content:'▾';font-size:10px;color:var(--muted);margin-left:auto;}
+.time-sel-btn:focus{border-color:var(--accent);}
+.time-dropdown{
+  position:absolute;top:100%;left:0;right:0;z-index:20;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);box-shadow:0 4px 20px rgba(31,26,22,.1);
+  max-height:180px;overflow-y:auto;display:none;
+}
+.time-dropdown.show{display:block;}
+.time-dropdown-item{
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
+  padding:9px 12px;cursor:pointer;transition:background var(--motion-fast);
+}
+.time-dropdown-item:hover,.time-dropdown-item.active{
+  color:var(--accent);background:color-mix(in oklab,var(--accent),transparent 92%);
+}
 
 /* 食材行（选中后展示 + 填用量） */
 .ing-row{
@@ -150,29 +200,75 @@ body{
 }
 .add-ing-btn:active{border-color:var(--accent);background:color-mix(in oklab,var(--accent),transparent 92%);}
 
-/* 步骤 */
-.step-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
-.step-row .step-num{
-  font-family:var(--font-mono);font-size:12px;color:var(--accent);
-  padding-top:10px;flex:0 0 24px;text-align:right;font-weight:bold;
+/* 阶段卡片 */
+.phase-card{
+  background:var(--surface);border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4);
 }
-.step-row textarea{
-  flex:1;font-family:var(--font-body);font-size:var(--text-sm);line-height:1.6;
-  color:var(--fg);background:var(--surface);
-  border:1px solid var(--border-soft);border-radius:var(--radius-sm);
-  padding:10px;outline:none;resize:vertical;min-height:48px;
+.phase-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:var(--space-3);
 }
-.step-row textarea:focus{border-color:var(--accent);}
-.step-row .step-del{
-  font-family:var(--font-mono);font-size:12px;color:var(--danger);
-  background:none;border:none;cursor:pointer;padding:10px 4px;
+.phase-head .phase-name{
+  font-family:var(--font-display);font-size:var(--text-sm);color:var(--accent);
+  letter-spacing:.04em;cursor:pointer;
 }
+.phase-head .phase-name::before{content:'▸ ';font-size:10px;opacity:.6;}
+.phase-head .phase-del{
+  margin-left:auto;font-size:14px;color:var(--muted);
+  background:none;border:none;cursor:pointer;padding:2px 4px;
+}
+.phase-head .phase-del:active{color:var(--danger);}
+/* 条目行 */
+.phase-entry{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 0;border-bottom:1px solid var(--border-soft);
+}
+.phase-entry:last-child{border-bottom:none;}
+.phase-entry select{
+  font-family:var(--font-body);font-size:11px;color:var(--fg);
+  background:var(--bg);border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm);padding:5px 6px;outline:none;min-width:0;
+}
+.phase-entry select:focus{border-color:var(--accent);}
+.phase-entry input{
+  font-family:var(--font-body);font-size:11px;color:var(--fg);
+  background:var(--bg);border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm);padding:5px 6px;outline:none;min-width:0;
+}
+.phase-entry input:focus{border-color:var(--accent);}
+.phase-entry .entry-del{
+  font-size:12px;color:var(--muted);background:none;border:none;
+  cursor:pointer;padding:2px;flex:0 0 auto;
+}
+.phase-entry .entry-del:active{color:var(--danger);}
+.phase-add-entry{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;
+  color:var(--accent);background:none;border:1px dashed var(--border);
+  border-radius:var(--radius-pill);padding:4px 12px;cursor:pointer;margin-top:6px;
+  display:inline-block;
+}
+.phase-add-entry:active{opacity:.6;}
 .add-step-btn{
   font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
   color:var(--accent);background:none;border:1px dashed var(--border);
   border-radius:var(--radius-pill);padding:6px 14px;cursor:pointer;margin-top:4px;
 }
 .add-step-btn:active{opacity:.6;}
+
+/* 阶段/类型选择器（共用） */
+.step-type-popover{
+  display:none;flex-wrap:wrap;gap:6px;
+  padding:8px 0;margin-bottom:4px;
+}
+.step-type-popover.show{display:flex;}
+.step-type-chip{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;
+  color:var(--accent);background:color-mix(in oklab,var(--accent),transparent 90%);
+  border:1px solid color-mix(in oklab,var(--accent),transparent 70%);
+  border-radius:var(--radius-pill);padding:5px 12px;cursor:pointer;
+  transition:all var(--motion-fast) var(--ease-standard);
+}
+.step-type-chip:active{opacity:.6;}
 
 /* 网页导入卡片（与下方内容明显区分） */
 .import-card{
@@ -208,19 +304,22 @@ body{
 }
 .import-row button:active{opacity:.85;}
 
-/* 底部操作栏 */
-.action-bar{
-  position:absolute;bottom:0;left:0;right:0;z-index:10;
+/* 底部步进导航 */
+.wizard-nav{
+  flex:0 0 auto;
   background:var(--surface);border-top:1px solid var(--border);
   padding:var(--space-3) var(--space-6) calc(var(--space-3) + env(safe-area-inset-bottom));
   display:flex;gap:10px;
 }
-.action-bar button{
+.wizard-nav button{
   font-family:var(--font-body);font-size:var(--text-sm);
   padding:12px 0;border-radius:var(--radius-lg);border:none;cursor:pointer;
 }
-.btn-save{flex:1;background:var(--accent);color:#fff;}
+.btn-next{flex:1;background:var(--accent);color:#fff;text-align:center;}
+.btn-prev{flex:0 0 auto;background:transparent;color:var(--fg-2);border:1px solid var(--border);padding:12px 20px!important;}
+.btn-prev.hidden{display:none;}
 .btn-del{flex:0 0 auto;background:transparent;color:var(--danger);border:1px solid var(--border)!important;padding:12px 20px!important;}
+.btn-del[style*="display:none"]{display:none!important;}
 
 /* ===== 食材选择器（底部弹出，与方案管理一致） ===== */
 .picker-overlay{
@@ -330,42 +429,52 @@ body{
     </header>
 
     <main class="main">
-      <!-- 从网页导入 -->
-      <div class="import-card">
-        <div class="section-title">从网页导入 <span class="ai-badge">AI</span></div>
-        <div class="import-row">
-          <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接，AI 自动提取">
-          <button id="importBtn">导入</button>
-        </div>
-        <div class="hint">粘贴链接后点「导入」，AI 会自动提取食材与步骤填入下方</div>
+      <!-- 进度条 -->
+      <div class="step-bar"><span class="step-fill" id="stepFill"></span></div>
+      <p class="step-label" id="stepLabel">基本信息 · 1/4</p>
+
+      <div class="wizard">
+        <!-- Step 1: 基本信息 -->
+        <section class="step active" data-step="1">
+          <div class="import-card">
+            <div class="section-title">从网页导入 <span class="ai-badge">AI</span></div>
+            <div class="import-row">
+              <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接，AI 自动提取">
+              <button id="importBtn">导入</button>
+            </div>
+            <div class="hint">粘贴链接后点「导入」，AI 会自动提取食材与步骤填入下方</div>
+          </div>
+          <div class="section-title">基本信息</div>
+          <div class="field"><label>菜谱名称</label><input id="recipeName" type="text" autocomplete="off" placeholder="如：番茄炒蛋"></div>
+          <div class="field">
+            <div class="icon-head"><label>图标</label><button class="ai-icon-btn" id="aiIconBtn"><span class="ai-tag">AI</span> 智能选择</button></div>
+            <div class="icon-grid" id="iconGrid"></div>
+          </div>
+          <div class="field"><label>烹饪时间</label><div class="time-sel" id="timeSel"><span class="time-sel-btn" id="timeBtn">请选择</span><div class="time-dropdown" id="timeDropdown"></div></div></div>
+          <div class="field"><label>难度</label><div class="icon-grid" id="diffGrid"></div></div>
+        </section>
+
+        <!-- Step 2: 食材 -->
+        <section class="step" data-step="2">
+          <div class="section-title">食材</div>
+          <div id="ingRows"></div>
+          <button class="add-ing-btn" id="addIngBtn">+ 添加食材</button>
+        </section>
+
+        <!-- Step 3: 步骤 -->
+        <section class="step" data-step="3">
+          <div class="section-title">步骤</div>
+          <div id="stepRows"></div>
+          <button class="add-step-btn" id="addStepBtn">+ 添加阶段</button>
+        </section>
       </div>
 
-      <!-- 基本信息 -->
-      <div class="section-title">基本信息</div>
-      <div class="field"><label>菜谱名称</label><input id="recipeName" type="text" autocomplete="off" placeholder="如：番茄炒蛋"></div>
-      <div class="field">
-        <div class="icon-head">
-          <label>图标</label>
-          <button class="ai-icon-btn" id="aiIconBtn"><span class="ai-tag">AI</span> 智能选择</button>
-        </div>
-        <div class="icon-grid" id="iconGrid"></div>
+      <div class="wizard-nav">
+        <button class="btn-prev hidden" id="prevBtn">上一步</button>
+        <button class="btn-next" id="nextBtn">下一步</button>
+        <button class="btn-del" id="delBtn" style="display:none">删除</button>
       </div>
-
-      <!-- 食材 -->
-      <div class="section-title">食材</div>
-      <div id="ingRows"></div>
-      <button class="add-ing-btn" id="addIngBtn">+ 添加食材</button>
-
-      <!-- 步骤 -->
-      <div class="section-title">步骤</div>
-      <div id="stepRows"></div>
-      <button class="add-step-btn" id="addStepBtn">+ 添加步骤</button>
     </main>
-
-    <div class="action-bar">
-      <button class="btn-save" id="saveBtn">保存</button>
-      <button class="btn-del" id="delBtn" style="display:none;">删除</button>
-    </div>
 
     <!-- 食材选择器（底部弹出） -->
     <div class="picker-overlay" id="pickerOverlay">
@@ -384,6 +493,22 @@ body{
         <div class="picker-foot">
           <button class="pf-cancel" id="pickerCancel">取消</button>
           <button class="pf-confirm" id="pickerConfirm">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阶段选择器（底部滑出，和食材面板样式一致） -->
+    <div class="picker-overlay" id="phaseOverlay">
+      <div class="picker-box" style="height:55%;">
+        <div class="picker-head">
+          <span class="ph-title">选择阶段</span>
+          <button class="ph-close" id="phaseOverlayClose">✕</button>
+        </div>
+        <div class="picker-list">
+          <div class="picker-items" id="phaseOverlayItems"></div>
+        </div>
+        <div class="picker-foot">
+          <button class="pf-cancel" id="phaseOverlayCancel">取消</button>
         </div>
       </div>
     </div>
@@ -451,10 +576,10 @@ body{
     { id:56,name:'豆浆',cat:'乳饮',aliases:['无糖豆浆','黄豆浆','黑豆浆'],icon:'🥛' },
     { id:57,name:'盐',cat:'调味',aliases:['食盐','海盐','低钠盐'],icon:'🧂' },
     { id:58,name:'蛋白粉',cat:'调味',aliases:['乳清蛋白','大豆蛋白粉'],icon:'💪' },
-    { id:59,name:'葱',cat:'调味',aliases:['小葱','香葱','大葱','京葱'],icon:'🧅' },
-    { id:60,name:'姜',cat:'调味',aliases:['生姜','老姜','嫩姜','子姜'],icon:'🧄' },
+    { id:59,name:'葱',cat:'蔬果',aliases:['小葱','香葱','大葱','京葱'],icon:'🧅' },
+    { id:60,name:'姜',cat:'蔬果',aliases:['生姜','老姜','嫩姜','子姜'],icon:'🧄' },
     { id:61,name:'小白菜',cat:'蔬果',aliases:['青菜','油白菜','鸡毛菜'],icon:'🥬' },
-    { id:62,name:'蒜',cat:'调味',aliases:['大蒜','蒜瓣','蒜末','蒜蓉'],icon:'🧄' },
+    { id:62,name:'蒜',cat:'蔬果',aliases:['大蒜','蒜瓣','蒜末','蒜蓉'],icon:'🧄' },
     { id:63,name:'食用油',cat:'调味',aliases:['植物油','菜籽油','花生油','橄榄油'],icon:'🫗' }
   ];
   var ingMap = {}; allIngredients.forEach(function (it) { ingMap[it.id] = it; });
@@ -465,6 +590,8 @@ body{
   });
 
   var icons = ['🍳','🥗','🍜','🥩','🥘','🥪','🫕','🥧','🥬','🍲','🥚','🍤'];
+  var diffs = ['容易做', '中等难度', '有点难'];
+  var times = ['约5分钟','约10分钟','约10-15分钟','约15分钟','约15-30分钟','约30分钟','约30-60分钟','约1小时','约1-2小时','2小时以上'];
 
   /* 读写 localStorage */
   function loadRecipes() { try { return JSON.parse(localStorage.getItem('yzys_recipes')||'[]'); } catch(e){ return []; } }
@@ -477,16 +604,28 @@ body{
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         srcId: editingId, name: recipeName.value, icon: selectedIcon,
+        time: selectedTime, difficulty: selectedDifficulty,
         ingredients: currentIngredients, steps: currentSteps
       }));
     } catch(e){}
   }
-  /* 默认菜谱（mock 数据，清炒小白菜等参考 lanfanapp 整理） */
+  /* 默认菜谱（mock 数据，面向对象：阶段 → 条目） */
   var DEFAULT_RECIPES = [
-    { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:['鸡蛋打散加少许盐','番茄切块','热油炒鸡蛋盛出备用','炒番茄至出汁','加入鸡蛋翻炒均匀'] },
-    { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:['鸡胸肉煮熟撕成丝','黄瓜番茄切丁','生菜洗净撕碎','所有食材混合','淋上油醋汁'] },
-    { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:['鸡蛋打散备用','葱切葱花','水烧开放入一半葱花','淋入蛋液搅拌','撒剩余葱花和盐出锅'] },
-    { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:['小白菜去掉根部，洗净后切成约3厘米长的段，沥干水分','大蒜拍扁后切成蒜末','锅中倒入食用油，中火加热至六成热，下蒜末炒出香味','转大火，放入小白菜快速翻炒至叶片变软、微微出水','加入盐翻炒均匀，出锅装盘'] }
+    { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', time:'约10分钟', difficulty:'容易做', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:[
+      {phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散加少许盐'},{ingredientId:16,action:'切块',note:''}]},
+      {phase:'炒制',entries:[{ingredientId:8,action:'炒制',note:'盛出备用'},{ingredientId:16,action:'炒制',note:'炒至出汁'},{ingredientId:null,action:'调味',note:'加入鸡蛋翻炒均匀'}]}
+    ]},
+    { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', time:'约15分钟', difficulty:'容易做', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:[
+      {phase:'配菜',entries:[{ingredientId:9,action:'',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',note:''},{ingredientId:16,action:'切块',note:''},{ingredientId:42,action:'洗净',note:'撕碎'},{ingredientId:null,action:'调味',note:'淋上油醋汁'}]}
+    ]},
+    { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', time:'约10分钟', difficulty:'容易做', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:[
+      {phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散备用'},{ingredientId:59,action:'切末',note:'切葱花'}]},
+      {phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',note:'撒剩余葱花和盐出锅'}]}
+    ]},
+    { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', time:'约10-15分钟', difficulty:'容易做', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:[
+      {phase:'配菜',entries:[{ingredientId:61,action:'切段',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',note:'切蒜末'}]},
+      {phase:'炒制',entries:[{ingredientId:63,action:'炒制',note:'中火加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',note:'转大火快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',note:'炒匀出锅装盘'}]}
+    ]}
   ];
   /* 若 localStorage 无数据，初始化默认菜谱 */
   if (!loadRecipes().length) {
@@ -496,6 +635,8 @@ body{
   var recipes = loadRecipes();
   var editingId = null;
   var selectedIcon = '🍳';
+  var selectedDifficulty = '';
+  var selectedTime = '';
   var currentIngredients = [];
   var currentSteps = [];
 
@@ -530,6 +671,56 @@ body{
       iconGrid.appendChild(el);
     });
   }
+
+  /* 渲染难度选择 */
+  function renderDiff() {
+    var grid = document.getElementById('diffGrid');
+    grid.innerHTML = '';
+    diffs.forEach(function (d) {
+      var el = document.createElement('span');
+      el.className = 'ip-item wide' + (d === selectedDifficulty ? ' active' : '');
+      el.textContent = d;
+      el.addEventListener('click', function () {
+        selectedDifficulty = d;
+        renderDiff();
+        saveDraft();
+      });
+      grid.appendChild(el);
+    });
+  }
+
+  /* 渲染烹饪时间选择（紧凑下拉） */
+  function renderTime() {
+    document.getElementById('timeBtn').textContent = selectedTime || '请选择';
+    var dd = document.getElementById('timeDropdown');
+    dd.innerHTML = '';
+    times.forEach(function (t) {
+      var el = document.createElement('div');
+      el.className = 'time-dropdown-item' + (t === selectedTime ? ' active' : '');
+      el.textContent = t;
+      el.addEventListener('click', function () {
+        selectedTime = t;
+        renderTime();
+        saveDraft();
+        dd.classList.remove('show');
+      });
+      dd.appendChild(el);
+    });
+    /* 点击外部关闭 */
+    if (!timeSelInit) {
+      timeSelInit = true;
+      document.addEventListener('click', function (e) {
+        if (!document.getElementById('timeSel').contains(e.target)) {
+          dd.classList.remove('show');
+        }
+      });
+    }
+  }
+  var timeSelInit = false;
+  document.getElementById('timeBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    document.getElementById('timeDropdown').classList.toggle('show');
+  });
 
   /* AI 智能选择图标：依据菜名 + 食材关键词匹配最合适的图标 */
   function aiPickIcon() {
@@ -570,7 +761,6 @@ body{
   function findIngIndex(id) { return currentIngredients.findIndex(function (x) { return x.ingredientId === id; }); }
   function renderIngRows() {
     ingRows.innerHTML = '';
-    document.getElementById('rePickBtn').style.display = currentIngredients.length ? 'block' : 'none';
     if (!currentIngredients.length) {
       ingRows.innerHTML = '<div class="ing-empty">还没有食材，点击下方按钮添加</div>';
       return;
@@ -607,17 +797,160 @@ body{
     });
   }
 
-  /* 渲染步骤 */
+  /* ===== 阶段系统（大卡片 + 条目行） ===== */
+  var phaseOptions = [
+    {name:'配菜',desc:'切菜、洗菜等准备工作'},
+    {name:'腌制',desc:'入味处理'},
+    {name:'焯水',desc:'沸水预处理'},
+    {name:'炒制',desc:'大火快炒'},
+    {name:'煎制',desc:'少油慢煎'},
+    {name:'炖煮',desc:'小火慢炖'},
+    {name:'蒸制',desc:'隔水蒸熟'},
+    {name:'烤制',desc:'烤箱烘烤'},
+    {name:'收汁',desc:'浓缩汤汁'}
+  ];
+  var stepActions = [
+    '洗净','沥干','去根','去皮',
+    '切段','切块','切丝','切片','切末','切丁','拍碎','剁碎',
+    '腌制','上浆','焯水',
+    '炒制','煎制','油炸','爆香','炖煮','蒸制','煮制',
+    '调味','加盐','收汁','勾芡',
+    '装盘','出锅'
+  ];
+  /* 动作→食材类别联动 */
+  var actionsByCat = {
+    '蔬果': ['洗净','沥干','去根','去皮','切段','切块','切丝','切片','切末','切丁','拍碎','剁碎'],
+    '蛋白': ['切块','切丝','切片','切丁','腌制','上浆','焯水','炒制','煎制','油炸','炖煮','蒸制','煮制'],
+    '调味': ['切末','拍碎','剁碎','爆香','调味'],
+    '主食': ['煮制','蒸制','炒制'],
+    '坚果': ['去壳','剁碎'],
+    '乳饮': ['调味','煮制']
+  };
+  var defaultActions = ['炒制','煎制','油炸','炖煮','蒸制','煮制','调味','加盐','收汁','装盘','出锅'];
+  function getActionsForIngredient(ingId) {
+    if (!ingId) return defaultActions;
+    var meta = ingMap[ingId];
+    if (!meta) return defaultActions;
+    return actionsByCat[meta.cat] || defaultActions;
+  }
+  var phaseEditIdx = -1;
+
+  function openPhaseOverlay(editIdx) {
+    phaseEditIdx = editIdx;
+    var itemsEl = document.getElementById('phaseOverlayItems');
+    itemsEl.innerHTML = '';
+    document.getElementById('phaseOverlay').classList.add('show');
+    phaseOptions.forEach(function (p) {
+      var row = document.createElement('div');
+      row.className = 'pli-item';
+      row.innerHTML =
+        '<div class="plii-icon">▸</div>' +
+        '<div class="plii-meta"><div class="plii-name">' + esc(p.name) + '</div><div class="plii-alias">' + esc(p.desc) + '</div></div>';
+      row.addEventListener('click', function () {
+        if (phaseEditIdx >= 0) {
+          currentSteps[phaseEditIdx].phase = p.name;
+          phaseEditIdx = -1;
+        } else {
+          currentSteps.push({ phase: p.name, entries: [{ ingredientId: null, action: '切段', note: '' }] });
+        }
+        renderStepRows();
+        saveDraft();
+        closePhaseOverlay();
+      });
+      itemsEl.appendChild(row);
+    });
+  }
+  function closePhaseOverlay() {
+    document.getElementById('phaseOverlay').classList.remove('show');
+    phaseEditIdx = -1;
+  }
+  document.getElementById('phaseOverlayClose').addEventListener('click', closePhaseOverlay);
+  document.getElementById('phaseOverlayCancel').addEventListener('click', closePhaseOverlay);
+
+  /* 渲染步骤（阶段大卡片：标题 + 条目行，如「配菜」→ 对小白菜切段、对蒜切片） */
   function renderStepRows() {
     stepRows.innerHTML = '';
-    currentSteps.forEach(function (s, i) {
-      var row = document.createElement('div');
-      row.className = 'step-row';
-      row.innerHTML = '<span class="step-num">'+(i+1)+'</span><textarea placeholder="步骤 '+(i+1)+'">'+esc(s||'')+'</textarea><button class="step-del">✕</button>';
-      row.querySelector('textarea').addEventListener('input', function () { currentSteps[i] = this.value; saveDraft(); });
-      row.querySelector('.step-del').addEventListener('click', function () { currentSteps.splice(i,1); renderStepRows(); saveDraft(); });
-      stepRows.appendChild(row);
+    currentSteps.forEach(function (phase, pi) {
+      var card = document.createElement('div');
+      card.className = 'phase-card';
+      card.innerHTML = '<div class="phase-head"><span class="phase-name">' + esc(phase.phase) + '</span><button class="phase-del">✕</button></div>';
+      card.querySelector('.phase-name').addEventListener('click', function () {
+        openPhaseOverlay(pi);
+      });
+      card.querySelector('.phase-del').addEventListener('click', function () {
+        currentSteps.splice(pi, 1);
+        renderStepRows();
+        saveDraft();
+      });
+      phase.entries.forEach(function (entry, ei) {
+        var ingOpts = '<option value="">不选食材</option>';
+        currentIngredients.forEach(function (ing) {
+          var meta = ingMap[ing.ingredientId];
+          if (!meta) return;
+          /* 配菜阶段自动过滤调味料（食用油、盐等无需切洗），但保留已选项 */
+          if (phase.phase === '配菜' && meta.cat === '调味' && entry.ingredientId !== ing.ingredientId) return;
+          ingOpts += '<option value="' + ing.ingredientId + '"' + (entry.ingredientId === ing.ingredientId ? ' selected' : '') + '>' + meta.icon + ' ' + meta.name + '</option>';
+        });
+        /* 根据当前食材类别生成动作选项 */
+        function buildActOpts(ingId, selAct) {
+          return getActionsForIngredient(ingId).map(function (a) {
+            return '<option value="' + a + '"' + (a === selAct ? ' selected' : '') + '>' + a + '</option>';
+          }).join('');
+        }
+        var actOpts = buildActOpts(entry.ingredientId, entry.action);
+        var row = document.createElement('div');
+        row.className = 'phase-entry';
+        row.innerHTML =
+          '<select class="pe-ing" style="flex:2.2">' + ingOpts + '</select>' +
+          '<select class="pe-act" style="flex:1.8">' + actOpts + '</select>' +
+          '<input class="pe-note" value="' + esc(entry.note || '') + '" placeholder="备注" style="flex:3">' +
+          '<button class="entry-del">✕</button>';
+        row.querySelector('.pe-ing').addEventListener('change', function () {
+          entry.ingredientId = this.value ? +this.value : null;
+          /* 联动：更新动作选项 */
+          var newId = entry.ingredientId;
+          var keep = entry.action;
+          var avail = getActionsForIngredient(newId);
+          if (avail.indexOf(keep) < 0) { entry.action = avail[0] || ''; }
+          row.querySelector('.pe-act').innerHTML = avail.map(function (a) {
+            return '<option value="' + a + '"' + (a === entry.action ? ' selected' : '') + '>' + a + '</option>';
+          }).join('');
+          saveDraft();
+        });
+        row.querySelector('.pe-act').addEventListener('change', function () { entry.action = this.value; saveDraft(); });
+        row.querySelector('.pe-note').addEventListener('input', function () { entry.note = this.value; saveDraft(); });
+        row.querySelector('.entry-del').addEventListener('click', function () { phase.entries.splice(ei, 1); renderStepRows(); saveDraft(); });
+        card.appendChild(row);
+      });
+      var addBtn = document.createElement('button');
+      addBtn.className = 'phase-add-entry';
+      addBtn.textContent = '+ 添加条目';
+      addBtn.addEventListener('click', function () {
+        phase.entries.push({ ingredientId: null, action: '切段', note: '' });
+        renderStepRows();
+        saveDraft();
+      });
+      card.appendChild(addBtn);
+      stepRows.appendChild(card);
     });
+  }
+
+  /* 步骤规范化：向后兼容旧格式 → [{phase, entries:[{ingredientId,action,note}]}] */
+  function normalizeSteps(steps) {
+    if (!steps || !steps.length) return [];
+    /* 已是新格式（有 phase 字段） */
+    if (steps[0].phase !== undefined) return steps.map(function (ph) {
+      return { phase: ph.phase, entries: (ph.entries || []).map(function (e) {
+        return { ingredientId: e.ingredientId || null, action: e.action || '', note: e.note || '' };
+      })};
+    });
+    /* 旧格式 {ingredientId,action,note} 或 {type,text} 或字符串 → 归入单个"配菜"阶段 */
+    var entries = steps.map(function (s) {
+      if (typeof s === 'string') return { ingredientId: null, action: '', note: s };
+      if (s.ingredientId !== undefined || s.action !== undefined) return { ingredientId: s.ingredientId || null, action: s.action || '', note: s.note || '' };
+      return { ingredientId: null, action: s.type || '', note: s.text || '' };
+    });
+    return [{ phase: '配菜', entries: entries }];
   }
 
   /* 加载已有菜谱：localStorage 若缺失/内容为空，自动用内置 mock 数据填充 */
@@ -626,7 +959,7 @@ body{
     var dr = DEFAULT_RECIPES.find(function (x) { return x.id === editingId; });
     /* 找到了但食材为空 → 用默认数据填进去（深拷贝避免污染默认数据） */
     if (r && (!r.ingredients || !r.ingredients.length)) {
-      if (dr) { r.ingredients = dr.ingredients.map(function (x) { return { ingredientId:x.ingredientId, amount:x.amount }; }); r.steps = dr.steps.slice(); }
+      if (dr) { r.ingredients = dr.ingredients.map(function (x) { return { ingredientId:x.ingredientId, amount:x.amount }; }); r.steps = normalizeSteps(dr.steps); }
       saveRecipes(recipes);
     }
     /* 优先用 localStorage 数据，找不到则用默认 */
@@ -635,8 +968,10 @@ body{
       pageTitle.textContent = '编辑菜谱';
       recipeName.value = src.name;
       selectedIcon = src.icon;
+      selectedTime = src.time || '';
+      selectedDifficulty = src.difficulty || '';
       currentIngredients = src.ingredients.map(function (x) { return { ingredientId:x.ingredientId, amount:x.amount }; });
-      currentSteps = src.steps.slice();
+      currentSteps = normalizeSteps(src.steps);
       delBtn.style.display = 'block';
     }
   } else {
@@ -644,8 +979,10 @@ body{
     var tpl = DEFAULT_RECIPES[3];
     recipeName.value = tpl.name;
     selectedIcon = tpl.icon;
+    selectedTime = tpl.time || '';
+    selectedDifficulty = tpl.difficulty || '';
     currentIngredients = tpl.ingredients.map(function (x) { return { ingredientId:x.ingredientId, amount:x.amount }; });
-    currentSteps = tpl.steps.slice();
+    currentSteps = normalizeSteps(tpl.steps);
   }
 
   /* 恢复未保存草稿（防止刷新/误关丢失） */
@@ -653,11 +990,15 @@ body{
   if (_draft && _draft.srcId === editingId) {
     recipeName.value = _draft.name || '';
     if (_draft.icon) selectedIcon = _draft.icon;
+    if (_draft.time !== undefined) selectedTime = _draft.time;
+    if (_draft.difficulty !== undefined) selectedDifficulty = _draft.difficulty;
     if (_draft.ingredients) currentIngredients = _draft.ingredients;
     if (_draft.steps) currentSteps = _draft.steps;
   }
 
   renderIcons();
+  renderTime();
+  renderDiff();
   renderIngRows();
   renderStepRows();
 
@@ -677,17 +1018,13 @@ body{
   }
   /* 添加食材：打开级联选择器 */
   document.getElementById('addIngBtn').addEventListener('click', function () { openPicker(applyPicked); });
-  /* 重新选择：打开级联选择器（已选项预勾选） */
-  document.getElementById('rePickBtn').addEventListener('click', function () { openPicker(applyPicked); });
-  /* 添加步骤 */
+  /* 点击添加阶段 → 底部滑出阶段选择面板 */
   document.getElementById('addStepBtn').addEventListener('click', function () {
-    currentSteps.push('');
-    renderStepRows();
-    saveDraft();
+    openPhaseOverlay(-1);
   });
-  /* 菜名等文本输入即时存草稿 */
+  /* 菜名、时间输入即时存草稿 */
   document.querySelector('.main').addEventListener('input', function (e) {
-    if (e.target && e.target.id === 'recipeName') saveDraft();
+    if (e.target && e.target.id === 'recipeName') { saveDraft(); updateWizard(); }
   });
 
   /* ===== 级联选择器 ===== */
@@ -769,28 +1106,75 @@ body{
     window._pendingImportUrl = url;
   });
 
-  /* 保存 */
-  document.getElementById('saveBtn').addEventListener('click', function () {
-    var name = recipeName.value.trim();
-    if (!name) { showToast('请输入菜谱名称'); return; }
-    var ings = currentIngredients.filter(function (x) { return x.ingredientId; }).map(function (x) { return {ingredientId:x.ingredientId, amount:x.amount||'适量'}; });
-    if (!ings.length) { showToast('请至少添加一种食材'); return; }
-    var steps = currentSteps.filter(function (x) { return x && x.trim(); });
-    if (!steps.length) { showToast('请至少添加一个步骤'); return; }
+  /* ===== 步进导航 ===== */
+  var currentStep = 1;
+  var totalSteps = 3;
 
-    if (editingId) {
-      var r = recipes.find(function (x) { return x.id === editingId; });
-      if (r) { r.name=name; r.icon=selectedIcon; r.ingredients=ings; r.steps=steps; }
-      showToast('已更新');
+  function updateWizard() {
+    document.getElementById('stepFill').style.width = (currentStep / totalSteps * 100) + '%';
+    var labels = ['基本信息', '食材', '步骤'];
+    document.getElementById('stepLabel').textContent = labels[currentStep - 1] + ' · ' + currentStep + '/' + totalSteps;
+    document.querySelectorAll('.step').forEach(function (el) {
+      el.classList.toggle('active', +el.dataset.step === currentStep);
+    });
+    var prev = document.getElementById('prevBtn');
+    var next = document.getElementById('nextBtn');
+    prev.classList.toggle('hidden', currentStep === 1);
+    if (currentStep === totalSteps) {
+      next.textContent = '保存';
+      next.disabled = false;
     } else {
-      var maxId = recipes.reduce(function(m,x){return Math.max(m,x.id)},0);
-      recipes.push({ id:maxId+1, name:name, desc:'', icon:selectedIcon, ingredients:ings, steps:steps });
-      showToast('已添加');
+      next.textContent = '下一步';
+      /* 验证当前步 */
+      var ok = true;
+      if (currentStep === 1) { if (!recipeName.value.trim()) ok = false; }
+      if (currentStep === 2) { if (!currentIngredients.filter(function(x){return x.ingredientId;}).length) ok = false; }
+      next.disabled = !ok;
     }
-    saveRecipes(recipes);
-    clearDraft();
-    setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
+    /* 删除按钮只在编辑已有菜谱的 step 1 显示 */
+    delBtn.style.display = (editingId && currentStep === 1) ? 'block' : 'none';
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', function () {
+    if (currentStep > 1) { currentStep--; updateWizard(); }
   });
+
+  document.getElementById('nextBtn').addEventListener('click', function () {
+    if (currentStep < totalSteps) {
+      currentStep++;
+      updateWizard();
+    } else {
+      /* 保存 */
+      var name = recipeName.value.trim();
+      if (!name) { showToast('请输入菜谱名称'); return; }
+      var ings = currentIngredients.filter(function (x) { return x.ingredientId; }).map(function (x) { return {ingredientId:x.ingredientId, amount:x.amount||'适量'}; });
+      if (!ings.length) { showToast('请至少添加一种食材'); return; }
+      var steps = currentSteps.filter(function (ph) { return ph && ph.entries && ph.entries.length; });
+      if (!steps.length) { showToast('请至少添加一个阶段'); return; }
+      if (editingId) {
+        var r = recipes.find(function (x) { return x.id === editingId; });
+        if (r) { r.name=name; r.icon=selectedIcon; r.time=selectedTime; r.difficulty=selectedDifficulty; r.ingredients=ings; r.steps=steps; }
+        showToast('已更新');
+      } else {
+        var maxId = recipes.reduce(function(m,x){return Math.max(m,x.id)},0);
+        recipes.push({ id:maxId+1, name:name, desc:'', icon:selectedIcon, time:selectedTime, difficulty:selectedDifficulty, ingredients:ings, steps:steps });
+        showToast('已添加');
+      }
+      saveRecipes(recipes);
+      clearDraft();
+      setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
+    }
+  });
+
+  /* 食材/步骤变动后更新导航按钮状态 */
+  var _origApplyPicked = function(){};
+  /* 食材变化时更新 step 2 的验证 */
+  var _origRenderIngRows = renderIngRows;
+  renderIngRows = function () { _origRenderIngRows(); updateWizard(); };
+  var _origRenderStepRows = renderStepRows;
+  renderStepRows = function () { _origRenderStepRows(); updateWizard(); };
+
+  updateWizard();
 
   /* 删除 */
   delBtn.addEventListener('click', function () {
