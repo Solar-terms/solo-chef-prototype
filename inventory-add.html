@@ -359,6 +359,11 @@ body{
   }
   document.getElementById('pickerSearch').addEventListener('input',function(){var q=this.value.trim().toLowerCase();renderPickerCats(q);renderPickerItems(q);});
 
+  /* 价格自动补全两位小数 */
+  document.getElementById('price').addEventListener('blur',function(){
+    var v=parseFloat(this.value.trim());if(!isNaN(v)) this.value=v.toFixed(2);
+  });
+
   /* 拍照 */
   var pw=document.getElementById('photoWrap'),pa=document.getElementById('photoAdd'),pf=document.getElementById('photoFile');
   pa.addEventListener('click',function(){pf.click();});
