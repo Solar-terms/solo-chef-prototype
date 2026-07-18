@@ -257,6 +257,14 @@ body{
       <div class="modal-box">
         <div class="m-title" id="modalTitle">新增菜谱</div>
 
+        <div class="import-section" style="border-top:none;padding-top:0;margin-top:0;">
+          <span class="is-label">从网页导入（链接 → AI 自动提取）</span>
+          <div class="import-row">
+            <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接">
+            <button id="importBtn">导入</button>
+          </div>
+        </div>
+
         <div class="m-field"><label>菜谱名称</label><input id="modalName" type="text" autocomplete="off" placeholder="如：番茄炒蛋"></div>
         <div class="m-field"><label>简介</label><input id="modalDesc" type="text" autocomplete="off" placeholder="如：经典家常菜"></div>
         <div class="m-field"><label>图标</label>
@@ -274,14 +282,6 @@ body{
 
         <div class="m-field"><label>食材（从食材库选择）</label><div id="ingRows"></div><button class="add-ing-btn" id="addIngBtn">+ 添加食材</button></div>
         <div class="m-field"><label>步骤</label><div id="stepRows"></div><button class="add-step-btn" id="addStepBtn">+ 添加步骤</button></div>
-
-        <div class="import-section">
-          <span class="is-label">从网页导入</span>
-          <div class="import-row">
-            <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接">
-            <button id="importBtn">导入</button>
-          </div>
-        </div>
 
         <div class="modal-btns">
           <button class="btn-cancel" id="modalCancel">取消</button>
