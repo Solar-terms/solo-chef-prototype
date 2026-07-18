@@ -185,6 +185,7 @@ body{
       byCat[cat].forEach(function(x){
         var m=catMap[x.id],idx=items.indexOf(x);
         var info=[];
+        if(x.productName) info.push(esc(x.productName));
         if(x.brand) info.push(esc(x.brand));
         if(x.spec) info.push(esc(x.spec));
         if(x.price) info.push('¥'+esc(x.price));

@@ -235,6 +235,7 @@ body{
     <!-- 基本信息 -->
     <div class="section-title">基本信息</div>
     <div class="field"><label>食材</label><div class="ing-trigger" id="ingTrigger"><span class="it-icon" id="ingIcon">🥬</span><span id="ingName">选择食材</span></div></div>
+    <div class="field"><label>商品名</label><input id="productName" type="text" autocomplete="off" placeholder="如：盒马有机小白菜"></div>
     <div class="field"><label>规格 <span class="ocr-tag" id="ocrSpec">OCR</span></label><input id="spec" type="text" autocomplete="off" placeholder="如：300g/袋"></div>
     <div class="field"><label>数量（如：500g / 1瓶 / 2个）</label><input id="amt" type="text" autocomplete="off" placeholder="500g"></div>
     <div class="field-row">
@@ -399,7 +400,7 @@ body{
     var amt=document.getElementById('amt').value.trim()||'适量';
     items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
     if(false){}  /* 允许同食材多批次入库 */
-    items.push({id:id,amt:amt,brand:document.getElementById('brand').value.trim(),price:document.getElementById('price').value.trim(),channel:document.getElementById('channel').value.trim(),spec:document.getElementById('spec').value.trim(),prodDate:document.getElementById('prodDate').value.trim(),expDate:document.getElementById('expDate').value.trim(),storage:document.getElementById('storage').value});
+    items.push({id:id,amt:amt,productName:document.getElementById('productName').value.trim(),brand:document.getElementById('brand').value.trim(),price:document.getElementById('price').value.trim(),channel:document.getElementById('channel').value.trim(),spec:document.getElementById('spec').value.trim(),prodDate:document.getElementById('prodDate').value.trim(),expDate:document.getElementById('expDate').value.trim(),storage:document.getElementById('storage').value});
     try{localStorage.setItem(KEY,JSON.stringify(items));}catch(e){}
     showToast('已添加');setTimeout(function(){location.href='inventory-manage.html';},600);
   });
