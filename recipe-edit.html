@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>一作一食 · 编辑菜谱</title>
 <style>
@@ -306,9 +308,8 @@ body{
 
 /* 底部步进导航 */
 .wizard-nav{
-  flex:0 0 auto;
-  background:var(--surface);border-top:1px solid var(--border);
-  padding:var(--space-3) var(--space-6) calc(var(--space-3) + env(safe-area-inset-bottom));
+  margin-top:auto;
+  padding:var(--space-5) 0 calc(env(safe-area-inset-bottom) + var(--space-3));
   display:flex;gap:10px;
 }
 .wizard-nav button{
@@ -467,12 +468,12 @@ body{
           <div id="stepRows"></div>
           <button class="add-step-btn" id="addStepBtn">+ 添加阶段</button>
         </section>
-      </div>
 
-      <div class="wizard-nav">
-        <button class="btn-prev hidden" id="prevBtn">上一步</button>
-        <button class="btn-next" id="nextBtn">下一步</button>
-        <button class="btn-del" id="delBtn" style="display:none">删除</button>
+        <div class="wizard-nav">
+          <button class="btn-prev hidden" id="prevBtn">上一步</button>
+          <button class="btn-next" id="nextBtn">下一步</button>
+          <button class="btn-del" id="delBtn" style="display:none">删除</button>
+        </div>
       </div>
     </main>
 
