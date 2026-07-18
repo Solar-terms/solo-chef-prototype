@@ -96,14 +96,12 @@ body{
 
 /* 条目 */
 .entry{
-  display:flex;gap:var(--space-3);padding:var(--space-2) 0;
-  border-bottom:1px solid var(--border-soft);
+  display:flex;flex-direction:column;gap:2px;
+  padding:var(--space-2) 0;border-bottom:1px solid var(--border-soft);
 }
 .entry:last-child{border-bottom:none;}
-.entry .ent-num{font-family:var(--font-mono);font-size:10px;color:var(--accent);font-weight:bold;flex:0 0 16px;text-align:right;padding-top:3px;}
-.entry .ent-body{flex:1;}
-.entry .ent-main{font-size:var(--text-sm);color:var(--fg);line-height:1.5;}
-.entry .ent-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
+.entry .ent-main{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.entry .ent-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);}
 
 /* 链接 */
 .link-row{
@@ -233,13 +231,13 @@ body{
         /* entries */
         if((!ph.modules||!ph.modules.length)&&ph.entries&&ph.entries.length){
           ph.entries.forEach(function(e,i){
-            h+='<div class="entry"><span class="ent-num">'+(i+1)+'</span><div class="ent-body"><div class="ent-main">';
+            h+='<div class="entry"><div class="ent-main">';
             if(e.ingredientId) h+='<span class="ing-tag">'+icon(e.ingredientId)+' '+esc(name(e.ingredientId))+'</span>';
             if(e.action) h+='<span class="ing-tag">'+esc(e.action)+'</span>';
-            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') h+=' <span class="ent-tag">'+esc(e.heat)+'</span>';
+            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') h+=' <span class="ing-tag">'+esc(e.heat)+'</span>';
             h+='</div>';
             if(e.note) h+='<div class="ent-note">'+esc(e.note)+'</div>';
-            h+='</div></div>';
+            h+='</div>';
           });
         }
         h+='</div>';
