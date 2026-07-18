@@ -190,7 +190,7 @@ body{
       visible++;
       var card = document.createElement('a');
       card.className = 'recipe-card';
-      card.href = 'recipe-edit.html?id='+r.id;
+      card.href = 'recipe-view.html?id='+r.id;
       var ingTags = (r.ingredients||[]).map(function(x) {
         var name = ingMap[x.ingredientId] || '';
         return name ? '<span class="rc-ing-tag">'+name+'</span>' : '';

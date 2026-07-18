@@ -161,6 +161,8 @@ body{
 
   function render(){
     var q = (search.value||'').toLowerCase();
+    var recipes=[];
+    try{recipes=JSON.parse(localStorage.getItem('yzys_recipes')||'[]');}catch(e){}
     var filtered = items.filter(function(x){return x.name.toLowerCase().indexOf(q)>=0;});
     list.innerHTML='';
     if(!filtered.length){list.innerHTML='<div class="empty-state"><div class="empty-icon">📂</div><p>'+(q?'无匹配来源':'暂无来源，添加一个吧')+'</p></div>';}
@@ -168,11 +170,18 @@ body{
       var idx = items.indexOf(s);
       var card = document.createElement('div');
       card.className='src-card';
+      var refCount = recipes.filter(function(r){return r.source===s.name;}).length;
       card.innerHTML=
         '<div class="src-icon">'+(s.icon||'📋')+'</div>'+
-        '<div class="src-meta"><div class="src-name">'+s.name.replace(/</g,'&lt;')+'</div><div class="src-count">第'+(idx+1)+'个来源</div></div>'+
-        '<button class="src-del">✕</button>';
+        '<div class="src-meta"><div class="src-name">'+s.name.replace(/</g,'&lt;')+'</div><div class="src-count">'+(refCount?refCount+' 个菜谱引用':'暂无引用')+'</div></div>'+
+        (refCount?'':'<button class="src-del">✕</button>');
       card.querySelector('.src-del').addEventListener('click',function(e){e.stopPropagation();
+        /* 检查是否有菜谱引用 */
+        var recipes=[];
+        try{recipes=JSON.parse(localStorage.getItem('yzys_recipes')||'[]');}catch(e){}
+        if(recipes.some(function(r){return r.source===s.name;})){
+          showToast('有菜谱引用此来源，无法删除');return;
+        }
         items.splice(idx,1);save(items);render();showToast('已删除');});
       list.appendChild(card);
     });
