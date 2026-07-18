@@ -349,12 +349,11 @@ body{
     if(q){ALL.forEach(function(m){if(m.n.indexOf(q)>=0) list.push(m);});}
     else if(ingByCat[activePickerCat]) list=ingByCat[activePickerCat];
     list.forEach(function(m){
-      var inStock=items.some(function(x){return x.id===m.id;});
+      var stockCount=items.filter(function(x){return x.id===m.id;}).length;
       var row=document.createElement('div');
-      row.className='pli-item'+(selectedIngId===m.id?' sel':'')+(inStock?' in-stock':'');
-      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+(inStock?' (已入库)':'')+'</span><span class="plii-check">✓</span>';
-      if(inStock) row.style.opacity='.5';
-      row.addEventListener('click',function(){if(!inStock){selectedIngId=m.id;renderPickerItems(q);}});
+      row.className='pli-item'+(selectedIngId===m.id?' sel':'');
+      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+(stockCount?' (已有'+stockCount+'批)':'')+'</span><span class="plii-check">✓</span>';
+      row.addEventListener('click',function(){selectedIngId=m.id;renderPickerItems(q);});
       el.appendChild(row);
     });
   }
@@ -400,7 +399,7 @@ body{
     var id=selectedIngId;
     var amt=document.getElementById('amt').value.trim()||'适量';
     items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
-    if(items.some(function(x){return x.id===id;})){showToast('已在库存中');return;}
+    if(false){}  /* 允许同食材多批次入库 */
     items.push({id:id,amt:amt,brand:document.getElementById('brand').value.trim(),price:document.getElementById('price').value.trim(),channel:document.getElementById('channel').value.trim(),spec:document.getElementById('spec').value.trim(),prodDate:document.getElementById('prodDate').value.trim(),expDate:document.getElementById('expDate').value.trim(),storage:document.getElementById('storage').value});
     try{localStorage.setItem(KEY,JSON.stringify(items));}catch(e){}
     showToast('已添加');setTimeout(function(){location.href='inventory-manage.html';},600);
