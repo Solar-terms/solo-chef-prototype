@@ -14,9 +14,9 @@
   --font-display:Georgia,"Times New Roman",serif;
   --font-body:"Source Serif Pro",Georgia,serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --text-sm:14px;--text-base:18px;--text-lg:21px;--text-xl:26px;
+  --text-sm:14px;--text-base:18px;--text-lg:21px;
   --space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;
-  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-xl:16px;--radius-pill:9999px;
+  --radius-sm:6px;--radius-md:8px;--radius-lg:12px;--radius-pill:9999px;
   --motion-fast:180ms;--ease-standard:cubic-bezier(.22,1,.36,1);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -37,147 +37,102 @@ body{
   flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
   padding:0 var(--space-6);padding-top:max(env(safe-area-inset-top),16px);height:56px;
 }
-.back-btn{text-decoration:none;color:var(--fg);display:flex;align-items:center;}
-.back-btn:active{opacity:.5;}
-.edit-link{
+.topbar a{text-decoration:none;display:flex;align-items:center;}
+.topbar .back-btn{color:var(--fg);}
+.topbar .back-btn:active{opacity:.5;}
+.topbar .edit-link{
   font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;
-  color:var(--accent);text-decoration:none;
-  border:1px solid var(--accent);border-radius:var(--radius-pill);
+  color:var(--accent);border:1px solid var(--accent);border-radius:var(--radius-pill);
   padding:5px 14px;
 }
-.edit-link:active{opacity:.6;}
+.topbar .edit-link:active{opacity:.6;}
 
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:var(--space-4) var(--space-6) var(--space-8);}
 
 /* 头部 */
-.view-head{text-align:center;margin-bottom:var(--space-5);}
-.view-icon{font-size:56px;margin-bottom:var(--space-2);}
-.view-name{font-family:var(--font-display);font-size:var(--text-xl);color:var(--fg);letter-spacing:.06em;}
-.view-meta{
-  display:flex;justify-content:center;gap:var(--space-4);margin-top:var(--space-2);
-  font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.06em;
-}
-.view-meta span{background:color-mix(in oklab,var(--accent),transparent 92%);padding:3px 10px;border-radius:var(--radius-pill);}
+.vh{text-align:center;margin-bottom:var(--space-4);}
+.vh .vh-icon{font-size:52px;}
+.vh .vh-name{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.06em;margin-top:var(--space-2);}
+.vh .vh-tags{display:flex;justify-content:center;gap:var(--space-2);margin-top:var(--space-2);}
+.vh .vh-tag{font-family:var(--font-mono);font-size:10px;color:var(--accent);background:color-mix(in oklab,var(--accent),transparent 90%);border-radius:var(--radius-pill);padding:2px 10px;}
 
-/* 食材卡 */
-.ing-card{
+/* 卡片 */
+.card{
   background:var(--surface);border:1px solid var(--border-soft);
   border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4);
 }
-.ing-card .sec-title{
+.card-title{
   font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
   color:var(--accent);margin-bottom:var(--space-3);
 }
-.ing-tags{display:flex;flex-wrap:wrap;gap:6px;}
-.ing-tag{
+
+/* 食材 */
+.ing-row{display:flex;flex-wrap:wrap;gap:8px;}
+.ing-item{
   display:flex;align-items:center;gap:6px;
-  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
-  background:color-mix(in oklab,var(--accent),transparent 96%);
-  border:1px solid color-mix(in oklab,var(--accent),transparent 82%);
+  background:color-mix(in oklab,var(--accent),transparent 93%);
+  border:1px solid color-mix(in oklab,var(--accent),transparent 80%);
   border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
 }
-.ing-tag .it-icon{
-  width:24px;height:24px;border-radius:var(--radius-sm);
-  background:color-mix(in oklab,var(--accent),transparent 86%);
-  display:flex;align-items:center;justify-content:center;font-size:14px;
-}
-.ing-tag .it-amt{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto;}
+.ing-item .ii-icon{font-size:16px;}
+.ing-item .ii-name{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);}
+.ing-item .ii-amt{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto;}
 
-/* 阶段卡片 */
-.phase-card{
-  background:var(--surface);border:1px solid var(--border-soft);
-  border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-4);
-}
-.phase-card .ph-name{
+/* 阶段 */
+.phase-title{
   font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
-  color:var(--accent);margin-bottom:var(--space-3);
-}
-
-/* 子模块卡 */
-.module-card{
-  background:color-mix(in oklab,var(--accent),transparent 96%);
-  border:1px solid color-mix(in oklab,var(--accent),transparent 84%);
-  border-radius:var(--radius-md);padding:var(--space-3) var(--space-3);
-  margin-bottom:var(--space-2);
-}
-.module-card .mod-title{
-  font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;
   color:var(--accent);margin-bottom:var(--space-2);
 }
-.module-card .mod-row{
-  display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;
-}
-.module-card .mod-label{
-  font-family:var(--font-mono);font-size:9px;color:var(--muted);
-  flex:0 0 auto;white-space:nowrap;margin-right:4px;
-}
-.module-card .mod-val{
-  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
-}
-.module-card .mod-chips{display:flex;flex-wrap:wrap;gap:4px;}
-.module-card .mod-chip{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;
-  color:var(--accent);background:var(--bg);
-  border:1px solid color-mix(in oklab,var(--accent),transparent 65%);
-  border-radius:var(--radius-pill);padding:2px 8px;
-}
 
-/* step entry */
-.step-entry{
+/* 模块 */
+.mod{
+  background:color-mix(in oklab,var(--accent),transparent 95%);
+  border:1px solid color-mix(in oklab,var(--accent),transparent 86%);
+  border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);margin-bottom:6px;
+}
+.mod .mod-t{font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:.06em;margin-bottom:4px;}
+.mod .mod-l{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:var(--text-sm);}
+.mod .mod-chip{font-family:var(--font-mono);font-size:9px;background:var(--bg);border:1px solid var(--border-soft);border-radius:var(--radius-pill);padding:2px 7px;color:var(--fg);}
+
+/* 条目 */
+.entry{
   display:flex;gap:var(--space-3);padding:var(--space-2) 0;
   border-bottom:1px solid var(--border-soft);
 }
-.step-entry:last-child{border-bottom:none;}
-.step-entry .se-num{
-  font-family:var(--font-mono);font-size:11px;color:var(--accent);font-weight:bold;
-  flex:0 0 18px;text-align:right;padding-top:2px;
-}
-.step-entry .se-body{flex:1;}
-.se-main{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);line-height:1.5;}
-.se-tags{display:inline-flex;gap:4px;flex-wrap:wrap;margin-right:4px;}
-.se-tag{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;
-  background:color-mix(in oklab,var(--accent),transparent 92%);
-  color:var(--accent);border-radius:var(--radius-pill);padding:1px 7px;
-}
-.se-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
+.entry:last-child{border-bottom:none;}
+.entry .ent-num{font-family:var(--font-mono);font-size:10px;color:var(--accent);font-weight:bold;flex:0 0 16px;text-align:right;padding-top:3px;}
+.entry .ent-body{flex:1;}
+.entry .ent-main{font-size:var(--text-sm);color:var(--fg);line-height:1.5;}
+.entry .ent-tag{font-family:var(--font-mono);font-size:9px;background:color-mix(in oklab,var(--accent),transparent 92%);color:var(--accent);border-radius:var(--radius-pill);padding:1px 7px;}
+.entry .ent-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
 
-/* 来源 */
-.src-line{
-  text-align:center;font-family:var(--font-mono);font-size:10px;
-  color:var(--muted);letter-spacing:.06em;margin-top:var(--space-4);
+/* 链接 */
+.link-row{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--accent);
+  text-decoration:none;padding:var(--space-2) 0;
 }
-.src-line span{font-size:12px;}
-.src-line a{color:var(--accent);text-decoration:none;}
+.link-row:active{opacity:.6;}
+.link-row .lr-icon{font-size:14px;}
 
 /* 视频 */
 .video-card{
   background:var(--surface);border:1px solid var(--border-soft);
-  border-radius:var(--radius-lg);margin-top:var(--space-4);overflow:hidden;
+  border-radius:var(--radius-lg);margin-bottom:var(--space-4);overflow:hidden;
 }
-.video-card iframe{
-  width:100%;height:220px;border:none;display:block;
-}
-.video-link{
+.video-card iframe{width:100%;height:220px;border:none;display:block;}
+.video-card .vid-play{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:var(--space-5);font-family:var(--font-display);font-size:var(--text-base);
-  color:var(--accent);text-decoration:none;letter-spacing:.04em;
+  padding:var(--space-6);font-family:var(--font-body);font-size:var(--text-sm);
+  color:var(--accent);text-decoration:none;background:color-mix(in oklab,var(--accent),transparent 95%);
 }
-.video-link:active{opacity:.6;}
+.video-card .vid-play:active{opacity:.7;}
 
 /* 空状态 */
-.empty-view{
-  text-align:center;padding:var(--space-8) var(--space-5);
-  font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;
-}
-.empty-view .ev-icon{font-size:48px;margin-bottom:var(--space-3);}
-.empty-view p{margin-bottom:var(--space-4);}
-.empty-view a{
-  display:inline-block;color:var(--accent);text-decoration:none;
-  border:1px solid var(--accent);border-radius:var(--radius-pill);
-  padding:var(--space-2) var(--space-5);font-size:10px;letter-spacing:.1em;
-}
-.empty-view a:active{opacity:.6;}
+.empty{text-align:center;padding:var(--space-8) 0;}
+.empty .e-icon{font-size:40px;margin-bottom:var(--space-3);}
+.empty p{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-bottom:var(--space-4);}
+.empty a{display:inline-block;font-family:var(--font-mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--accent);border-radius:var(--radius-pill);padding:var(--space-1) var(--space-4);}
 </style>
 </head>
 <body>
@@ -192,146 +147,97 @@ body{
 </div>
 <script>
 (function(){
+  /* ---- 食材表 ---- */
   var ingMap={};
-  [{id:1,n:'大米',i:'🍚'},{id:2,n:'面粉',i:'🌾'},{id:3,n:'面条',i:'🍜'},{id:4,n:'面包',i:'🍞'},{id:5,n:'牛肉',i:'🥩'},{id:6,n:'猪肉',i:'🥓'},{id:7,n:'鸡肉',i:'🍗'},{id:8,n:'鸡蛋',i:'🥚'},{id:9,n:'鸡胸肉',i:'🍗'},{id:10,n:'三文鱼',i:'🐟'},{id:11,n:'虾仁',i:'🍤'},{id:12,n:'豆腐',i:'🧈'},{id:13,n:'白菜',i:'🥬'},{id:14,n:'番茄',i:'🍅'},{id:15,n:'黄瓜',i:'🥒'},{id:16,n:'番茄',i:'🍅'},{id:17,n:'菠菜',i:'🥬'},{id:18,n:'生菜',i:'🥬'},{id:19,n:'洋葱',i:'🧅'},{id:20,n:'土豆',i:'🥔'},{id:21,n:'胡萝卜',i:'🥕'},{id:22,n:'西兰花',i:'🥦'},{id:23,n:'青椒',i:'🫑'},{id:24,n:'红椒',i:'🌶️'},{id:25,n:'蘑菇',i:'🍄'},{id:26,n:'莲藕',i:'🪷'},{id:27,n:'山药',i:'🥖'},{id:28,n:'茄子',i:'🍆'},{id:29,n:'冬瓜',i:'🍈'},{id:30,n:'玉米',i:'🌽'},{id:31,n:'南瓜',i:'🎃'},{id:32,n:'苹果',i:'🍎'},{id:33,n:'香蕉',i:'🍌'},{id:34,n:'牛油果',i:'🥑'},{id:35,n:'蓝莓',i:'🫐'},{id:36,n:'草莓',i:'🍓'},{id:37,n:'橙子',i:'🍊'},{id:38,n:'柠檬',i:'🍋'},{id:39,n:'猕猴桃',i:'🥝'},{id:40,n:'核桃',i:'🥜'},{id:41,n:'杏仁',i:'🥜'},{id:42,n:'生菜',i:'🥬'},{id:43,n:'牛奶',i:'🥛'},{id:44,n:'酸奶',i:'🥛'},{id:45,n:'奶酪',i:'🧀'},{id:57,n:'盐',i:'🧂'},{id:58,n:'蛋白粉',i:'💊'},{id:59,n:'葱',i:'🧅'},{id:60,n:'姜',i:'🫚'},{id:61,n:'小白菜',i:'🥬'},{id:62,n:'蒜',i:'🧄'},{id:63,n:'食用油',i:'🫗'}].forEach(function(o){ingMap[o.id]={name:o.n,icon:o.i};});
-
+  [{id:1,n:'大米',i:'🍚'},{id:3,n:'面条',i:'🍜'},{id:5,n:'牛肉',i:'🥩'},{id:8,n:'鸡蛋',i:'🥚'},{id:9,n:'鸡胸肉',i:'🍗'},{id:11,n:'虾仁',i:'🍤'},{id:12,n:'豆腐',i:'🧈'},{id:14,n:'番茄',i:'🍅'},{id:15,n:'黄瓜',i:'🥒'},{id:16,n:'番茄',i:'🍅'},{id:17,n:'菠菜',i:'🥬'},{id:18,n:'生菜',i:'🥬'},{id:19,n:'洋葱',i:'🧅'},{id:20,n:'土豆',i:'🥔'},{id:22,n:'西兰花',i:'🥦'},{id:25,n:'蘑菇',i:'🍄'},{id:28,n:'茄子',i:'🍆'},{id:30,n:'玉米',i:'🌽'},{id:32,n:'苹果',i:'🍎'},{id:34,n:'牛油果',i:'🥑'},{id:35,n:'蓝莓',i:'🫐'},{id:37,n:'橙子',i:'🍊'},{id:40,n:'核桃',i:'🥜'},{id:42,n:'生菜',i:'🥬'},{id:43,n:'牛奶',i:'🥛'},{id:44,n:'酸奶',i:'🥛'},{id:57,n:'盐',i:'🧂'},{id:59,n:'葱',i:'🧅'},{id:60,n:'姜',i:'🫚'},{id:61,n:'小白菜',i:'🥬'},{id:62,n:'蒜',i:'🧄'},{id:63,n:'食用油',i:'🫗'}].forEach(function(o){ingMap[o.id]={n:o.n,i:o.i};});
+  function icon(id){var m=ingMap[id];return m?m.i:'📦';}
+  function name(id){var m=ingMap[id];return m?m.n:'食材#'+id;}
   function esc(s){return String(s||'').replace(/</g,'&lt;');}
-  function ingIcon(id){var m=ingMap[id];return m?m.icon:'📦';}
-  function ingName(id){var m=ingMap[id];return m?m.name:'食材#'+id;}
-  var q=new URLSearchParams(location.search);
-  var id=+q.get('id');
-  if(!id){
-    /* 跳到第一道菜的查看页 */
-    var ids=[];try{ids=JSON.parse(localStorage.getItem('yzys_recipes')||'[]').map(function(r){return r.id;}).filter(Boolean);}catch(e){}
-    if(ids.length){location.replace('recipe-view.html?id='+ids[0]);return;}
-    document.getElementById('main').innerHTML='<div class="empty-view"><div class="ev-icon">📭</div><p>暂无菜谱</p><a href="recipe-manage.html">前往菜谱管理</a></div>';return;
-  }
 
-  var recipes=[];try{recipes=JSON.parse(localStorage.getItem('yzys_recipes')||'[]');}catch(e){}
-  /* 自动建 mock 数据 */
+  /* ---- MOCK ---- */
+  var recipes=[];
+  try{recipes=JSON.parse(localStorage.getItem('yzys_recipes')||'[]');}catch(e){}
   if(!recipes.length){
-    recipes=[{id:1,name:'番茄炒蛋',icon:'🍳',time:'约10分钟',difficulty:'容易做',source:'懒饭',video:'',ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}],steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',heat:'不加热',note:'打散加少许盐'},{ingredientId:16,action:'切块',heat:'不加热',note:''}]},{phase:'炒制',entries:[{ingredientId:8,action:'炒制',heat:'中火',note:'盛出备用'},{ingredientId:16,action:'炒制',heat:'中火',note:'炒至出汁'},{ingredientId:null,action:'调味',heat:'大火',note:'加入鸡蛋翻炒均匀'}],modules:[{type:'starter',data:{oil:'食用油',heat:'中火',aromatics:[]}},{type:'main',data:{heat:'大火',ingredientId:[16]}},{type:'stir',data:{heat:'大火快炒',duration:'—',degree:'—'}},{type:'season',data:{seasonings:['盐适量']}},{type:'finish',data:{heat:'直接出锅',garnish:[]}}]}]},{id:2,name:'鸡胸肉沙拉',icon:'🥗',time:'约15分钟',difficulty:'容易做',source:'懒饭',video:'',ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}],steps:[{phase:'配菜',entries:[{ingredientId:9,action:'',heat:'中火',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',heat:'不加热',note:''},{ingredientId:16,action:'切块',heat:'不加热',note:''},{ingredientId:42,action:'洗净',heat:'不加热',note:'撕碎'},{ingredientId:null,action:'调味',heat:'不加热',note:'淋上油醋汁'}]}]},{id:3,name:'葱花蛋汤',icon:'🫕',time:'约10分钟',difficulty:'容易做',source:'懒饭',video:'',ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}],steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',heat:'不加热',note:'打散备用'},{ingredientId:59,action:'切末',heat:'不加热',note:'切葱花'}]},{phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',heat:'中火',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',heat:'小火',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',heat:'不加热',note:'撒剩余葱花和盐出锅'}]}]},{id:4,name:'清炒小白菜',icon:'🥬',time:'约10-15分钟',difficulty:'容易做',source:'懒饭',sourceUrl:'https://lanfanapp.com/recipe/2201/',video:'',ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}],steps:[{phase:'配菜',entries:[{ingredientId:61,action:'切段',heat:'不加热',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',heat:'不加热',note:'切蒜末'}]},{phase:'炒制',entries:[{ingredientId:63,action:'炒制',heat:'中火',note:'加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',heat:'大火',note:'快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',heat:'中火',note:'炒匀出锅装盘'}],modules:[{type:'starter',data:{oil:'食用油',heat:'中火',aromatics:['蒜15g']}},{type:'main',data:{heat:'大火',ingredientId:[61]}},{type:'stir',data:{heat:'大火快炒',duration:'1分钟',degree:'断生'}},{type:'season',data:{seasonings:['盐2g']}},{type:'finish',data:{heat:'直接出锅',garnish:[]}}]}]}];
+    recipes=[
+      {id:1,name:'番茄炒蛋',icon:'🍳',time:'约10分钟',difficulty:'容易做',source:'懒饭',sourceUrl:'',video:'',ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}],steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散加少许盐'},{ingredientId:16,action:'切块',note:''}]},{phase:'炒制',entries:[{ingredientId:8,action:'炒制',heat:'中火',note:'盛出备用'},{ingredientId:16,action:'炒制',heat:'中火',note:'炒至出汁'},{ingredientId:null,action:'调味',heat:'大火',note:'加入鸡蛋翻炒均匀'}],modules:[{type:'starter',data:{oil:'食用油',heat:'中火',aromatics:[]}},{type:'main',data:{heat:'大火',ingredientId:[16]}},{type:'stir',data:{heat:'大火快炒',duration:'—',degree:'—'}},{type:'season',data:{seasonings:['盐适量']}},{type:'finish',data:{heat:'直接出锅',garnish:[]}}]}]},
+      {id:2,name:'鸡胸肉沙拉',icon:'🥗',time:'约15分钟',difficulty:'容易做',source:'懒饭',sourceUrl:'',video:'',ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}],steps:[{phase:'配菜',entries:[{ingredientId:9,action:'',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',note:''},{ingredientId:16,action:'切块',note:''},{ingredientId:42,action:'洗净',note:'撕碎'},{ingredientId:null,action:'调味',note:'淋上油醋汁'}]}]},
+      {id:3,name:'葱花蛋汤',icon:'🫕',time:'约10分钟',difficulty:'容易做',source:'懒饭',sourceUrl:'',video:'',ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}],steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散备用'},{ingredientId:59,action:'切末',note:'切葱花'}]},{phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',heat:'中火',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',heat:'小火',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',note:'撒剩余葱花和盐出锅'}]}]},
+      {id:4,name:'清炒小白菜',icon:'🥬',time:'约10-15分钟',difficulty:'容易做',source:'懒饭',sourceUrl:'https://lanfanapp.com/recipe/2201/',video:'',ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}],steps:[{phase:'配菜',entries:[{ingredientId:61,action:'切段',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',note:'切蒜末'}]},{phase:'炒制',entries:[{ingredientId:63,action:'炒制',heat:'中火',note:'加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',heat:'大火',note:'快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',heat:'中火',note:'炒匀出锅装盘'}],modules:[{type:'starter',data:{oil:'食用油',heat:'中火',aromatics:['蒜15g']}},{type:'main',data:{heat:'大火',ingredientId:[61]}},{type:'stir',data:{heat:'大火快炒',duration:'1分钟',degree:'断生'}},{type:'season',data:{seasonings:['盐2g']}},{type:'finish',data:{heat:'直接出锅',garnish:[]}}]}]}
+    ];
     try{localStorage.setItem('yzys_recipes',JSON.stringify(recipes));}catch(e){}
     location.reload();
   }
-  var r=recipes.find(function(x){return x.id===id;});
-  if(!r){document.getElementById('main').innerHTML='<div class="empty-view"><div class="ev-icon">🔍</div><p>菜谱不存在或已删除</p><a href="recipe-manage.html">返回菜谱管理</a></div>';return;}
 
+  /* ---- ROUTE ---- */
+  var q=new URLSearchParams(location.search),id=+q.get('id');
+  if(!id){var ids=[];try{ids=JSON.parse(localStorage.getItem('yzys_recipes')||'[]').map(function(r){return r.id;}).filter(Boolean);}catch(e){}if(ids.length){location.replace('recipe-view.html?id='+ids[0]);return;}document.getElementById('main').innerHTML='<div class="empty"><div class="e-icon">📭</div><p>暂无菜谱</p><a href="recipe-manage.html">前往菜谱管理</a></div>';return;}
+  var r=recipes.find(function(x){return x.id===id;});
+  if(!r){document.getElementById('main').innerHTML='<div class="empty"><div class="e-icon">🔍</div><p>菜谱不存在或已删除</p><a href="recipe-manage.html">返回菜谱管理</a></div>';return;}
   document.getElementById('editLink').href='recipe-edit.html?id='+r.id;
 
-  var html='';
+  var h='';
+  /* HEADER */
+  h+='<div class="vh"><div class="vh-icon">'+r.icon+'</div><div class="vh-name">'+esc(r.name)+'</div><div class="vh-tags">';
+  if(r.time) h+='<span class="vh-tag">⏱ '+esc(r.time)+'</span>';
+  if(r.difficulty) h+='<span class="vh-tag">💪 '+esc(r.difficulty)+'</span>';
+  h+='</div></div>';
 
-  /* 头部 */
-  html+='<div class="view-head"><div class="view-icon">'+r.icon+'</div><div class="view-name">'+esc(r.name)+'</div>';
-  html+='<div class="view-meta">';
-  if(r.time) html+='<span>'+esc(r.time)+'</span>';
-  if(r.difficulty) html+='<span>'+esc(r.difficulty)+'</span>';
-  html+='</div></div>';
+  /* VIDEO */
+  if(r.video){
+    h+='<div class="video-card">';
+    var bvid=r.video.match(/BV\w+/);
+    if(bvid) h+='<iframe src="//player.bilibili.com/player.html?bvid='+bvid[0]+'&high_quality=1" scrolling="no" frameborder="0" allowfullscreen></iframe>';
+    else h+='<a class="vid-play" href="'+esc(r.video)+'" target="_blank">▶ 点击播放视频教程</a>';
+    h+='</div>';
+  }
 
   /* 食材 */
   if(r.ingredients&&r.ingredients.length){
-    html+='<div class="ing-card"><div class="sec-title">食材</div><div class="ing-tags">';
-    r.ingredients.forEach(function(x){
-      html+='<div class="ing-tag"><span class="it-icon">'+ingIcon(x.ingredientId)+'</span><span>'+esc(ingName(x.ingredientId))+'</span><span class="it-amt">'+esc(x.amount)+'</span></div>';
-    });
-    html+='</div></div>';
+    h+='<div class="card"><div class="card-title">食材</div><div class="ing-row">';
+    r.ingredients.forEach(function(x){h+='<div class="ing-item"><span class="ii-icon">'+icon(x.ingredientId)+'</span><span class="ii-name">'+esc(name(x.ingredientId))+'</span><span class="ii-amt">'+esc(x.amount)+'</span></div>';});
+    h+='</div></div>';
   }
 
-  /* 步骤 */
+  /* STEPS */
   if(r.steps&&r.steps.length){
     var hasPhase=r.steps[0]&&r.steps[0].phase!==undefined;
     if(hasPhase){
       r.steps.forEach(function(ph){
-        html+='<div class="phase-card"><div class="ph-name">'+esc(ph.phase)+'</div>';
-
-        /* 模块卡 */
+        h+='<div class="card"><div class="phase-title">'+esc(ph.phase)+'</div>';
+        /* modules */
         if(ph.modules&&ph.modules.length){
           ph.modules.forEach(function(mod){
             if(!mod||!mod.data) return;
-            /* 起锅 */
-            if(mod.type==='starter'){
-              html+='<div class="module-card"><div class="mod-title">起锅</div>';
-              var oil=mod.data.oil||'';if(oil) html+='<div class="mod-row"><span class="mod-label">用油</span><span class="mod-val">'+esc(oil)+'</span></div>';
-              var heat=mod.data.heat||'';if(heat) html+='<div class="mod-row"><span class="mod-label">火候</span><span class="mod-val">'+esc(heat)+'</span></div>';
-              var aromatics=mod.data.aromatics||[];if(aromatics.length) html+='<div class="mod-row"><span class="mod-label">爆香</span><div class="mod-chips">'+aromatics.map(function(a){return'<span class="mod-chip">'+esc(a)+'</span>';}).join('')+'</div></div>';
-              html+='</div>';
-            }
-            /* 下主料 */
-            if(mod.type==='main'){
-              html+='<div class="module-card"><div class="mod-title">下主料</div>';
-              var mheat=mod.data.heat||'';if(mheat) html+='<div class="mod-row"><span class="mod-label">火候</span><span class="mod-val">'+esc(mheat)+'</span></div>';
-              var mains=mod.data.ingredientId||[];if(mains.length) html+='<div class="mod-row"><span class="mod-label">主料</span><div class="mod-chips">'+mains.map(function(mid){return'<span class="mod-chip">'+esc(ingName(mid))+'</span>';}).join('')+'</div></div>';
-              html+='</div>';
-            }
-            /* 翻炒 */
-            if(mod.type==='stir'){
-              html+='<div class="module-card"><div class="mod-title">翻炒</div>';
-              var sheat=mod.data.heat||'';if(sheat) html+='<div class="mod-row"><span class="mod-label">火候</span><span class="mod-val">'+esc(sheat)+'</span></div>';
-              var dur=mod.data.duration||'';if(dur&&dur!=='—') html+='<div class="mod-row"><span class="mod-label">时长</span><span class="mod-val">'+esc(dur)+'</span></div>';
-              var deg=mod.data.degree||'';if(deg&&deg!=='—') html+='<div class="mod-row"><span class="mod-label">程度</span><span class="mod-val">'+esc(deg)+'</span></div>';
-              html+='</div>';
-            }
-            /* 调味 */
-            if(mod.type==='season'){
-              html+='<div class="module-card"><div class="mod-title">调味</div>';
-              var seasonings=mod.data.seasonings||[];if(seasonings.length) html+='<div class="mod-row"><span class="mod-label">调料</span><div class="mod-chips">'+seasonings.map(function(s){return'<span class="mod-chip">'+esc(s)+'</span>';}).join('')+'</div></div>';
-              html+='</div>';
-            }
-            /* 出锅 */
-            if(mod.type==='finish'){
-              html+='<div class="module-card"><div class="mod-title">出锅</div>';
-              var fheat=mod.data.heat||'';if(fheat) html+='<div class="mod-row"><span class="mod-label">火候</span><span class="mod-val">'+esc(fheat)+'</span></div>';
-              var garnish=mod.data.garnish||[];if(garnish.length) html+='<div class="mod-row"><span class="mod-label">点缀</span><div class="mod-chips">'+garnish.map(function(g){return'<span class="mod-chip">'+esc(g)+'</span>';}).join('')+'</div></div>';
-              html+='</div>';
-            }
+            var d=mod.data;
+            if(mod.type==='starter'){h+='<div class="mod"><div class="mod-t">起锅</div><div class="mod-l">';if(d.oil) h+=esc(d.oil)+' ';if(d.heat) h+='<span class="mod-chip">'+esc(d.heat)+'</span> ';if(d.aromatics&&d.aromatics.length) h+='<span class="mod-chip">爆香：'+d.aromatics.map(esc).join('、')+'</span>';h+='</div></div>';}
+            if(mod.type==='main'){h+='<div class="mod"><div class="mod-t">下主料</div><div class="mod-l">';if(d.heat) h+='<span class="mod-chip">'+esc(d.heat)+'</span> ';if(d.ingredientId&&d.ingredientId.length) d.ingredientId.forEach(function(mid){h+='<span class="mod-chip">'+icon(mid)+' '+esc(name(mid))+'</span>';});h+='</div></div>';}
+            if(mod.type==='stir'&&d.heat){h+='<div class="mod"><div class="mod-t">翻炒</div><div class="mod-l"><span class="mod-chip">'+esc(d.heat)+'</span>';if(d.duration&&d.duration!=='—') h+=' <span class="mod-chip">'+esc(d.duration)+'</span>';if(d.degree&&d.degree!=='—') h+=' <span class="mod-chip">'+esc(d.degree)+'</span>';h+='</div></div>';}
+            if(mod.type==='season'&&d.seasonings&&d.seasonings.length){h+='<div class="mod"><div class="mod-t">调味</div><div class="mod-l">'+d.seasonings.map(function(s){return'<span class="mod-chip">'+esc(s)+'</span>';}).join(' ')+'</div></div>';}
+            if(mod.type==='finish'){h+='<div class="mod"><div class="mod-t">出锅</div><div class="mod-l">';if(d.heat) h+='<span class="mod-chip">'+esc(d.heat)+'</span> ';if(d.garnish&&d.garnish.length) h+='<span class="mod-chip">点缀：'+d.garnish.map(esc).join('、')+'</span>';h+='</div></div>';}
           });
         }
-
-        /* 条目行（仅无模块卡时显示） */
-        if(!ph.modules||!ph.modules.length) if(ph.entries&&ph.entries.length){
+        /* entries */
+        if((!ph.modules||!ph.modules.length)&&ph.entries&&ph.entries.length){
           ph.entries.forEach(function(e,i){
-            html+='<div class="step-entry"><span class="se-num">'+(i+1)+'</span><div class="se-body">';
-            html+='<div class="se-main">';
-            if(e.ingredientId) html+=ingIcon(e.ingredientId)+' '+esc(ingName(e.ingredientId))+' ';
-            if(e.action) html+='<span class="se-tag">'+esc(e.action)+'</span>';
-            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') html+=' <span class="se-tag">'+esc(e.heat)+'</span>';
-            html+='</div>';
-            if(e.note) html+='<div class="se-note">'+esc(e.note)+'</div>';
-            html+='</div></div>';
+            h+='<div class="entry"><span class="ent-num">'+(i+1)+'</span><div class="ent-body"><div class="ent-main">';
+            if(e.ingredientId) h+=icon(e.ingredientId)+' '+esc(name(e.ingredientId))+' ';
+            if(e.action) h+='<span class="ent-tag">'+esc(e.action)+'</span>';
+            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') h+=' <span class="ent-tag">'+esc(e.heat)+'</span>';
+            h+='</div>';
+            if(e.note) h+='<div class="ent-note">'+esc(e.note)+'</div>';
+            h+='</div></div>';
           });
         }
-
-        html+='</div>';
+        h+='</div>';
       });
-    }else{
-      html+='<div class="phase-card"><div class="ph-name">步骤</div>';
-      r.steps.forEach(function(s,i){
-        var t=typeof s==='string'?s:(s.note||s.text||'');
-        html+='<div class="step-entry"><span class="se-num">'+(i+1)+'</span><div class="se-body"><div class="se-note">'+esc(t)+'</div></div></div>';
-      });
-      html+='</div>';
     }
   }
 
-  /* 源URL */
-  if(r.sourceUrl) html+='<div class="src-line"><span>📎</span> <a href="'+esc(r.sourceUrl)+'" target="_blank">查看原始食谱页面 →</a></div>';
-  else if(r.source) html+='<div class="src-line">来源：'+esc(r.source)+'</div>';
+  /* SOURCE */
+  if(r.sourceUrl) h+='<a class="card link-row" href="'+esc(r.sourceUrl)+'" target="_blank"><span class="lr-icon">📎</span> '+esc(r.sourceUrl)+'</a>';
+  else if(r.source) h+='<div class="card" style="text-align:center;font-size:10px;color:var(--muted);font-family:var(--font-mono);">来源：'+esc(r.source)+'</div>';
 
-  /* 视频 */
-  if(r.video){
-    html+='<div class="video-card">';
-    var isBili=/bilibili\.com/.test(r.video);
-    if(isBili){
-      var bvid=r.video.match(/BV\w+/);
-      if(bvid) html+='<iframe src="//player.bilibili.com/player.html?bvid='+bvid[0]+'&high_quality=1" scrolling="no" frameborder="0" allowfullscreen></iframe>';
-      else html+='<a href="'+esc(r.video)+'" target="_blank" class="video-link">🎬 点击播放视频教程</a>';
-    }else{
-      html+='<a href="'+esc(r.video)+'" target="_blank" class="video-link">🎬 点击播放视频教程</a>';
-    }
-    html+='</div>';
-  }
-
-  document.getElementById('main').innerHTML=html;
+  document.getElementById('main').innerHTML=h;
 })();
 </script>
 </body>
