@@ -133,13 +133,14 @@ body{
   flex:0 0 18px;text-align:right;padding-top:2px;
 }
 .step-entry .se-body{flex:1;}
-.se-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:2px;}
+.se-main{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);line-height:1.5;}
+.se-tags{display:inline-flex;gap:4px;flex-wrap:wrap;margin-right:4px;}
 .se-tag{
   font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;
   background:color-mix(in oklab,var(--accent),transparent 92%);
   color:var(--accent);border-radius:var(--radius-pill);padding:1px 7px;
 }
-.se-note{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);line-height:1.6;}
+.se-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
 
 /* 来源 */
 .src-line{
@@ -290,10 +291,10 @@ body{
         if(!ph.modules||!ph.modules.length) if(ph.entries&&ph.entries.length){
           ph.entries.forEach(function(e,i){
             html+='<div class="step-entry"><span class="se-num">'+(i+1)+'</span><div class="se-body">';
-            html+='<div class="se-tags">';
-            if(e.ingredientId) html+='<span class="se-tag se-ing">'+ingIcon(e.ingredientId)+' '+esc(ingName(e.ingredientId))+'</span>';
+            html+='<div class="se-main">';
+            if(e.ingredientId) html+=ingIcon(e.ingredientId)+' '+esc(ingName(e.ingredientId))+' ';
             if(e.action) html+='<span class="se-tag">'+esc(e.action)+'</span>';
-            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') html+='<span class="se-tag">'+esc(e.heat)+'</span>';
+            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') html+=' <span class="se-tag">'+esc(e.heat)+'</span>';
             html+='</div>';
             if(e.note) html+='<div class="se-note">'+esc(e.note)+'</div>';
             html+='</div></div>';
