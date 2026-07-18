@@ -67,15 +67,15 @@ body{
 }
 
 /* 食材 */
-.ing-row{display:flex;flex-wrap:wrap;gap:8px;}
-.ing-item{
-  display:flex;align-items:center;gap:6px;
+.ing-row{display:flex;flex-wrap:wrap;gap:6px;}
+.ing-item,.ing-tag{
+  display:flex;align-items:center;gap:5px;
   background:color-mix(in oklab,var(--accent),transparent 93%);
   border:1px solid color-mix(in oklab,var(--accent),transparent 80%);
   border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
 }
-.ing-item .ii-icon{font-size:16px;}
-.ing-item .ii-name{font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);}
+.ing-item .ii-icon{font-size:16px;flex:0 0 auto;}
 .ing-item .ii-amt{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto;}
 
 /* 阶段 */
@@ -91,8 +91,8 @@ body{
   border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);margin-bottom:6px;
 }
 .mod .mod-t{font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:.06em;margin-bottom:4px;}
-.mod .mod-l{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:var(--text-sm);}
-.mod .mod-chip{font-family:var(--font-mono);font-size:9px;background:var(--bg);border:1px solid var(--border-soft);border-radius:var(--radius-pill);padding:2px 7px;color:var(--fg);}
+.mod .mod-l{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.mod .ing-tag{margin:0;}
 
 /* 条目 */
 .entry{
@@ -103,7 +103,7 @@ body{
 .entry .ent-num{font-family:var(--font-mono);font-size:10px;color:var(--accent);font-weight:bold;flex:0 0 16px;text-align:right;padding-top:3px;}
 .entry .ent-body{flex:1;}
 .entry .ent-main{font-size:var(--text-sm);color:var(--fg);line-height:1.5;}
-.entry .ent-tag{font-family:var(--font-mono);font-size:9px;background:color-mix(in oklab,var(--accent),transparent 92%);color:var(--accent);border-radius:var(--radius-pill);padding:1px 7px;}
+.ent-tag{font-size:var(--text-sm);}
 .entry .ent-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
 
 /* 链接 */
@@ -209,18 +209,18 @@ body{
           ph.modules.forEach(function(mod){
             if(!mod||!mod.data) return;
             var d=mod.data;
-            if(mod.type==='starter'){h+='<div class="mod"><div class="mod-t">起锅</div><div class="mod-l">';if(d.oil) h+=esc(d.oil)+' ';if(d.heat) h+='<span class="mod-chip">'+esc(d.heat)+'</span> ';if(d.aromatics&&d.aromatics.length) h+='<span class="mod-chip">爆香：'+d.aromatics.map(esc).join('、')+'</span>';h+='</div></div>';}
-            if(mod.type==='main'){h+='<div class="mod"><div class="mod-t">下主料</div><div class="mod-l">';if(d.heat) h+='<span class="mod-chip">'+esc(d.heat)+'</span> ';if(d.ingredientId&&d.ingredientId.length) d.ingredientId.forEach(function(mid){h+='<span class="mod-chip">'+icon(mid)+' '+esc(name(mid))+'</span>';});h+='</div></div>';}
-            if(mod.type==='stir'&&d.heat){h+='<div class="mod"><div class="mod-t">翻炒</div><div class="mod-l"><span class="mod-chip">'+esc(d.heat)+'</span>';if(d.duration&&d.duration!=='—') h+=' <span class="mod-chip">'+esc(d.duration)+'</span>';if(d.degree&&d.degree!=='—') h+=' <span class="mod-chip">'+esc(d.degree)+'</span>';h+='</div></div>';}
-            if(mod.type==='season'&&d.seasonings&&d.seasonings.length){h+='<div class="mod"><div class="mod-t">调味</div><div class="mod-l">'+d.seasonings.map(function(s){return'<span class="mod-chip">'+esc(s)+'</span>';}).join(' ')+'</div></div>';}
-            if(mod.type==='finish'){h+='<div class="mod"><div class="mod-t">出锅</div><div class="mod-l">';if(d.heat) h+='<span class="mod-chip">'+esc(d.heat)+'</span> ';if(d.garnish&&d.garnish.length) h+='<span class="mod-chip">点缀：'+d.garnish.map(esc).join('、')+'</span>';h+='</div></div>';}
+            if(mod.type==='starter'){h+='<div class="mod"><div class="mod-t">起锅</div><div class="mod-l">';if(d.oil) h+=esc(d.oil)+' ';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span> ';if(d.aromatics&&d.aromatics.length) h+='<span class="ing-tag">爆香：'+d.aromatics.map(esc).join('、')+'</span>';h+='</div></div>';}
+            if(mod.type==='main'){h+='<div class="mod"><div class="mod-t">下主料</div><div class="mod-l">';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span> ';if(d.ingredientId&&d.ingredientId.length) d.ingredientId.forEach(function(mid){h+='<span class="ing-tag">'+icon(mid)+' '+esc(name(mid))+'</span>';});h+='</div></div>';}
+            if(mod.type==='stir'&&d.heat){h+='<div class="mod"><div class="mod-t">翻炒</div><div class="mod-l"><span class="ing-tag">'+esc(d.heat)+'</span>';if(d.duration&&d.duration!=='—') h+=' <span class="ing-tag">'+esc(d.duration)+'</span>';if(d.degree&&d.degree!=='—') h+=' <span class="ing-tag">'+esc(d.degree)+'</span>';h+='</div></div>';}
+            if(mod.type==='season'&&d.seasonings&&d.seasonings.length){h+='<div class="mod"><div class="mod-t">调味</div><div class="mod-l">'+d.seasonings.map(function(s){return'<span class="ing-tag">'+esc(s)+'</span>';}).join(' ')+'</div></div>';}
+            if(mod.type==='finish'){h+='<div class="mod"><div class="mod-t">出锅</div><div class="mod-l">';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span> ';if(d.garnish&&d.garnish.length) h+='<span class="ing-tag">点缀：'+d.garnish.map(esc).join('、')+'</span>';h+='</div></div>';}
           });
         }
         /* entries */
         if((!ph.modules||!ph.modules.length)&&ph.entries&&ph.entries.length){
           ph.entries.forEach(function(e,i){
             h+='<div class="entry"><span class="ent-num">'+(i+1)+'</span><div class="ent-body"><div class="ent-main">';
-            if(e.ingredientId) h+=icon(e.ingredientId)+' '+esc(name(e.ingredientId))+' ';
+            if(e.ingredientId) h+='<span class="ing-tag">'+icon(e.ingredientId)+' '+esc(name(e.ingredientId))+'</span>';
             if(e.action) h+='<span class="ent-tag">'+esc(e.action)+'</span>';
             if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') h+=' <span class="ent-tag">'+esc(e.heat)+'</span>';
             h+='</div>';
