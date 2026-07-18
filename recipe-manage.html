@@ -207,6 +207,20 @@ body{
 }
 .import-row button:active{opacity:.85;}
 .import-row button:disabled{opacity:.4;cursor:not-allowed;}
+/* 选择视图卡片 */
+.choice-grid{display:flex;flex-direction:column;gap:var(--space-4);}
+.choice-card{
+  display:flex;align-items:center;gap:var(--space-5);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);
+  cursor:pointer;
+  transition:border-color var(--motion-fast) var(--ease-standard),box-shadow var(--motion-fast) var(--ease-standard);
+}
+.choice-card:active{border-color:var(--accent);box-shadow:0 0 0 4px rgba(63,122,78,.08);}
+.choice-card .cc-icon{font-size:30px;flex:0 0 auto;width:48px;text-align:center;}
+.choice-card .cc-meta{flex:1;min-width:0;}
+.choice-card .cc-name{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.04em;margin-bottom:2px;}
+.choice-card .cc-stat{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.04em;}
 
 .modal-btns{display:flex;gap:12px;margin-top:var(--space-5);}
 .modal-btns button{
@@ -215,6 +229,12 @@ body{
 }
 .modal-btns .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);}
 .modal-btns .btn-save{background:var(--accent);color:#fff;}
+.btn-ghost{
+  font-family:var(--font-body);font-size:var(--text-sm);
+  padding:10px 0;border-radius:var(--radius-lg);
+  background:transparent;color:var(--muted);
+  border:1px solid var(--border);cursor:pointer;display:block;
+}
 .btn-delete{
   display:block;width:100%;margin-top:12px;
   font-family:var(--font-body);font-size:var(--text-sm);
@@ -259,17 +279,17 @@ body{
         <!-- 选择视图 -->
         <div id="choiceView" style="text-align:center;">
           <div class="m-title" style="margin-bottom:var(--space-6);">新增菜谱</div>
-          <div style="display:flex;flex-direction:column;gap:var(--space-4);">
-            <div id="choiceImport" style="display:flex;align-items:center;gap:var(--space-4);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);cursor:pointer;transition:border-color var(--motion-fast) var(--ease-standard);text-align:left;">
-              <span style="font-size:32px;flex:0 0 auto;">🌐</span>
-              <div><div style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);margin-bottom:2px;">从网页导入</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">粘贴食谱链接，自动提取菜谱</div></div>
+          <div class="choice-grid">
+            <div class="choice-card" id="choiceImport">
+              <div class="cc-icon">🌐</div>
+              <div class="cc-meta"><div class="cc-name">从网页导入</div><div class="cc-stat">粘贴食谱链接，自动提取菜谱</div></div>
             </div>
-            <div id="choiceManual" style="display:flex;align-items:center;gap:var(--space-4);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);cursor:pointer;transition:border-color var(--motion-fast) var(--ease-standard);text-align:left;">
-              <span style="font-size:32px;flex:0 0 auto;">✏️</span>
-              <div><div style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);margin-bottom:2px;">手动录入</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">逐项填写菜谱信息</div></div>
+            <div class="choice-card" id="choiceManual">
+              <div class="cc-icon">✏️</div>
+              <div class="cc-meta"><div class="cc-name">手动录入</div><div class="cc-stat">逐项填写菜谱信息</div></div>
             </div>
           </div>
-          <button class="btn-cancel" id="choiceCancel" style="margin-top:var(--space-5);width:100%;font-family:var(--font-body);font-size:var(--text-sm);padding:10px 0;border-radius:var(--radius-lg);border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);">取消</button>
+          <button class="btn-ghost" id="choiceCancel" style="margin-top:var(--space-5);width:100%;">取消</button>
         </div>
 
         <!-- 表单视图 -->
