@@ -242,7 +242,7 @@ body{
   }
 
   /* SOURCE */
-  if(r.sourceUrl) h+='<a class="card" href="'+esc(r.sourceUrl)+'" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);"><span>📎</span><span style="flex:1">查看原始食谱页面</span><span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(r.sourceUrl.replace(/^https?:\/\//,''))+'</span></a>';
+  if(r.sourceUrl) h+='<a class="card" href="'+esc(r.sourceUrl)+'" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);"><span>📎</span><span>来源：'+esc(r.source)+'</span><span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-left:auto;">→</span></a>';
   else if(r.source) h+='<div class="card" style="display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:var(--muted);"><span>📎</span> 来源：'+esc(r.source)+'</div>';
 
   document.getElementById('main').innerHTML=h;
