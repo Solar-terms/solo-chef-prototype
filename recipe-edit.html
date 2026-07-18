@@ -721,19 +721,19 @@ body{
   /* 默认菜谱（mock 数据，面向对象：阶段 → 条目） */
   var DEFAULT_RECIPES = [
     { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', time:'约10分钟', difficulty:'容易做', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:[
-      {phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散加少许盐'},{ingredientId:16,action:'切块',note:''}]},
-      {phase:'炒制',entries:[{ingredientId:8,action:'炒制',note:'盛出备用'},{ingredientId:16,action:'炒制',note:'炒至出汁'},{ingredientId:null,action:'调味',note:'加入鸡蛋翻炒均匀'}]}
+      {phase:'配菜',entries:[{ingredientId:8,action:'',heat:'不加热',note:'打散加少许盐'},{ingredientId:16,action:'切块',heat:'不加热',note:''}]},
+      {phase:'炒制',entries:[{ingredientId:8,action:'炒制',heat:'中火',note:'盛出备用'},{ingredientId:16,action:'炒制',heat:'中火',note:'炒至出汁'},{ingredientId:null,action:'调味',heat:'大火',note:'加入鸡蛋翻炒均匀'}]}
     ]},
     { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', time:'约15分钟', difficulty:'容易做', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:[
-      {phase:'配菜',entries:[{ingredientId:9,action:'',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',note:''},{ingredientId:16,action:'切块',note:''},{ingredientId:42,action:'洗净',note:'撕碎'},{ingredientId:null,action:'调味',note:'淋上油醋汁'}]}
+      {phase:'配菜',entries:[{ingredientId:9,action:'',heat:'中火',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',heat:'不加热',note:''},{ingredientId:16,action:'切块',heat:'不加热',note:''},{ingredientId:42,action:'洗净',heat:'不加热',note:'撕碎'},{ingredientId:null,action:'调味',heat:'不加热',note:'淋上油醋汁'}]}
     ]},
     { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', time:'约10分钟', difficulty:'容易做', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:[
-      {phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散备用'},{ingredientId:59,action:'切末',note:'切葱花'}]},
-      {phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',note:'撒剩余葱花和盐出锅'}]}
+      {phase:'配菜',entries:[{ingredientId:8,action:'',heat:'不加热',note:'打散备用'},{ingredientId:59,action:'切末',heat:'不加热',note:'切葱花'}]},
+      {phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',heat:'中火',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',heat:'小火',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',heat:'不加热',note:'撒剩余葱花和盐出锅'}]}
     ]},
     { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', time:'约10-15分钟', difficulty:'容易做', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:[
-      {phase:'配菜',entries:[{ingredientId:61,action:'切段',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',note:'切蒜末'}]},
-      {phase:'炒制',entries:[{ingredientId:63,action:'炒制',note:'中火加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',note:'转大火快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',note:'炒匀出锅装盘'}]}
+      {phase:'配菜',entries:[{ingredientId:61,action:'切段',heat:'不加热',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',heat:'不加热',note:'切蒜末'}]},
+      {phase:'炒制',entries:[{ingredientId:63,action:'炒制',heat:'中火',note:'加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',heat:'大火',note:'快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',heat:'中火',note:'炒匀出锅装盘'}]}
     ]}
   ];
   /* 若 localStorage 无数据，初始化默认菜谱 */
@@ -1078,6 +1078,7 @@ body{
     '调味','加盐','收汁','勾芡',
     '装盘','出锅'
   ];
+  var heats = ['大火', '中火', '小火', '微火', '不加热'];
   /* 动作→食材类别联动 */
   var actionsByCat = {
     '蔬果': ['洗净','沥干','去根','去皮','切段','切块','切丝','切片','切末','切丁','拍碎','剁碎'],
@@ -1127,7 +1128,7 @@ body{
           currentSteps.push({
             phase: p.name,
             modules: createModules(p.name),
-            entries: phaseModules[p.name] ? [] : [{ ingredientId: null, action: '切段', note: '' }]
+            entries: phaseModules[p.name] ? [] : [{ ingredientId: null, action: '切段', heat: '中火', note: '' }]
           });
         }
         renderStepRows();
@@ -1251,16 +1252,19 @@ body{
           }).join('');
         }
         var actOpts = buildActOpts(entry.ingredientId, entry.action);
+        var heatOpts = heats.map(function (h) {
+          return '<option value="' + h + '"' + (entry.heat === h ? ' selected' : '') + '>' + h + '</option>';
+        }).join('');
         var row = document.createElement('div');
         row.className = 'phase-entry';
         row.innerHTML =
           '<select class="pe-ing" style="flex:2.2">' + ingOpts + '</select>' +
-          '<select class="pe-act" style="flex:1.8">' + actOpts + '</select>' +
-          '<input class="pe-note" value="' + esc(entry.note || '') + '" placeholder="备注" style="flex:3">' +
+          '<select class="pe-act" style="flex:1.6">' + actOpts + '</select>' +
+          '<select class="pe-heat" style="flex:1">' + heatOpts + '</select>' +
+          '<input class="pe-note" value="' + esc(entry.note || '') + '" placeholder="备注" style="flex:2">' +
           '<button class="entry-del">✕</button>';
         row.querySelector('.pe-ing').addEventListener('change', function () {
           entry.ingredientId = this.value ? +this.value : null;
-          /* 联动：更新动作选项 */
           var newId = entry.ingredientId;
           var keep = entry.action;
           var avail = getActionsForIngredient(newId, phase.phase);
@@ -1271,6 +1275,7 @@ body{
           saveDraft();
         });
         row.querySelector('.pe-act').addEventListener('change', function () { entry.action = this.value; saveDraft(); });
+        row.querySelector('.pe-heat').addEventListener('change', function () { entry.heat = this.value; saveDraft(); });
         row.querySelector('.pe-note').addEventListener('input', function () { entry.note = this.value; saveDraft(); });
         row.querySelector('.entry-del').addEventListener('click', function () { showConfirm('确定删除此条目？\n此操作无法撤销。', function () { phase.entries.splice(ei, 1); renderStepRows(); saveDraft(); }); });
         card.appendChild(row);
@@ -1279,7 +1284,7 @@ body{
       addBtn.className = 'phase-add-entry';
       addBtn.textContent = '+ 添加条目';
       addBtn.addEventListener('click', function () {
-        phase.entries.push({ ingredientId: null, action: '切段', note: '' });
+        phase.entries.push({ ingredientId: null, action: '切段', heat: '中火', note: '' });
         renderStepRows();
         saveDraft();
       });
@@ -1299,10 +1304,7 @@ body{
         var tpls = phaseModules[ph.phase] || [];
         if (tpls.length) {
           modules = createModules(ph.phase);
-          /* 若旧 starter 存在，把数据填到第一个 module */
-          if (ph.starter && modules[0]) {
-            modules[0].data = ph.starter;
-          }
+          if (ph.starter && modules[0]) { modules[0].data = ph.starter; }
         }
       }
       if (!modules) modules = createModules(ph.phase);
@@ -1310,15 +1312,15 @@ body{
         phase: ph.phase,
         modules: modules,
         entries: (ph.entries || []).map(function (e) {
-          return { ingredientId: e.ingredientId || null, action: e.action || '', note: e.note || '' };
+          return { ingredientId: e.ingredientId || null, action: e.action || '', heat: e.heat || '中火', note: e.note || '' };
         })
       };
     });
     /* 旧格式 {ingredientId,action,note} 或 {type,text} 或字符串 → 归入单个"配菜"阶段 */
     var entries = steps.map(function (s) {
-      if (typeof s === 'string') return { ingredientId: null, action: '', note: s };
-      if (s.ingredientId !== undefined || s.action !== undefined) return { ingredientId: s.ingredientId || null, action: s.action || '', note: s.note || '' };
-      return { ingredientId: null, action: s.type || '', note: s.text || '' };
+      if (typeof s === 'string') return { ingredientId: null, action: '', heat: '中火', note: s };
+      if (s.ingredientId !== undefined || s.action !== undefined) return { ingredientId: s.ingredientId || null, action: s.action || '', heat: s.heat || '中火', note: s.note || '' };
+      return { ingredientId: null, action: s.type || '', heat: '中火', note: s.text || '' };
     });
     return [{ phase: '配菜', modules: null, entries: entries }];
   }
