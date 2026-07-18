@@ -916,9 +916,14 @@ body{
     '坚果': ['去壳','剁碎'],
     '乳饮': ['调味','煮制']
   };
+  /* 特定食材的动作覆盖（按 id 精确匹配） */
+  var actionsByIng = {
+    62: ['切小粒','切片','蒜末'] /* 蒜 */
+  };
   var defaultActions = ['炒制','煎制','油炸','炖煮','蒸制','煮制','调味','加盐','收汁','装盘','出锅'];
   function getActionsForIngredient(ingId) {
     if (!ingId) return defaultActions;
+    if (actionsByIng[ingId]) return actionsByIng[ingId];
     var meta = ingMap[ingId];
     if (!meta) return defaultActions;
     return actionsByCat[meta.cat] || defaultActions;
