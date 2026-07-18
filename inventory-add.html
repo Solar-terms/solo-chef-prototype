@@ -340,9 +340,10 @@ body{
     closePicker();
   });
 
-  function renderPickerCats(){
+  function renderPickerCats(q){
     var el=document.getElementById('pickerCats');el.innerHTML='';
-    catOrder.forEach(function(c){var d=document.createElement('div');d.className='pc-item'+(c===activePickerCat?' active':'');d.textContent=c;d.addEventListener('click',function(){activePickerCat=c;renderPickerCats();renderPickerItems();});el.appendChild(d);});
+    if(q){el.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);padding:12px 8px;text-align:center;">搜索</div>';}
+    else{catOrder.forEach(function(c){var d=document.createElement('div');d.className='pc-item'+(c===activePickerCat?' active':'');d.textContent=c;d.addEventListener('click',function(){activePickerCat=c;renderPickerCats();renderPickerItems();});el.appendChild(d);});}
   }
   function renderPickerItems(q){
     var el=document.getElementById('pickerItems');el.innerHTML='';var list=[];
@@ -352,7 +353,7 @@ body{
       var stockCount=items.filter(function(x){return x.id===m.id;}).length;
       var row=document.createElement('div');
       row.className='pli-item'+(selectedIngId===m.id?' sel':'');
-      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+(stockCount?' (已有'+stockCount+'批)':'')+'</span><span class="plii-check">✓</span>';
+      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+(q?' ('+m.cat+')':'')+(stockCount?' 已有'+stockCount+'批':'')+'</span><span class="plii-check">✓</span>';
       row.addEventListener('click',function(){selectedIngId=m.id;renderPickerItems(q);});
       el.appendChild(row);
     });
