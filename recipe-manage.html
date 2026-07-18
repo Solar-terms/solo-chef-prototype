@@ -254,40 +254,61 @@ body{
 
     <!-- 编辑弹窗 -->
     <div class="modal-overlay" id="modalOverlay">
-      <div class="modal-box">
-        <div class="m-title" id="modalTitle">新增菜谱</div>
+      <div class="modal-box" style="padding-bottom:var(--space-5);">
 
-        <div class="import-section" style="border-top:none;padding-top:0;margin-top:0;">
-          <span class="is-label">从网页导入（链接 → AI 自动提取）</span>
-          <div class="import-row">
-            <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接">
-            <button id="importBtn">导入</button>
+        <!-- 选择视图 -->
+        <div id="choiceView" style="text-align:center;">
+          <div class="m-title" style="margin-bottom:var(--space-6);">新增菜谱</div>
+          <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+            <div id="choiceImport" style="display:flex;align-items:center;gap:var(--space-4);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);cursor:pointer;transition:border-color var(--motion-fast) var(--ease-standard);text-align:left;">
+              <span style="font-size:32px;flex:0 0 auto;">🌐</span>
+              <div><div style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);margin-bottom:2px;">从网页导入</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">粘贴食谱链接，自动提取菜谱</div></div>
+            </div>
+            <div id="choiceManual" style="display:flex;align-items:center;gap:var(--space-4);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-5) var(--space-6);cursor:pointer;transition:border-color var(--motion-fast) var(--ease-standard);text-align:left;">
+              <span style="font-size:32px;flex:0 0 auto;">✏️</span>
+              <div><div style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);margin-bottom:2px;">手动录入</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">逐项填写菜谱信息</div></div>
+            </div>
           </div>
+          <button class="btn-cancel" id="choiceCancel" style="margin-top:var(--space-5);width:100%;font-family:var(--font-body);font-size:var(--text-sm);padding:10px 0;border-radius:var(--radius-lg);border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);">取消</button>
         </div>
 
-        <div class="m-field"><label>菜谱名称</label><input id="modalName" type="text" autocomplete="off" placeholder="如：番茄炒蛋"></div>
-        <div class="m-field"><label>简介</label><input id="modalDesc" type="text" autocomplete="off" placeholder="如：经典家常菜"></div>
-        <div class="m-field"><label>图标</label>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;" id="iconPicker">
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🍳</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥗</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🍜</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥩</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥘</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥪</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🫕</span>
-            <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥧</span>
+        <!-- 表单视图 -->
+        <div id="formView" style="display:none;">
+          <div class="m-title" id="modalTitle">新增菜谱</div>
+
+          <div class="import-section" style="border-top:none;padding-top:0;margin-top:0;">
+            <span class="is-label">从网页导入（链接 → AI 自动提取）</span>
+            <div class="import-row">
+              <input id="importUrl" type="url" autocomplete="off" placeholder="粘贴食谱网页链接">
+              <button id="importBtn">导入</button>
+            </div>
           </div>
+
+          <div class="m-field"><label>菜谱名称</label><input id="modalName" type="text" autocomplete="off" placeholder="如：番茄炒蛋"></div>
+          <div class="m-field"><label>简介</label><input id="modalDesc" type="text" autocomplete="off" placeholder="如：经典家常菜"></div>
+          <div class="m-field"><label>图标</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;" id="iconPicker">
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🍳</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥗</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🍜</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥩</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥘</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥪</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🫕</span>
+              <span class="ip-item" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border-soft);cursor:pointer;font-size:18px;transition:all var(--motion-fast) var(--ease-standard);">🥧</span>
+            </div>
+          </div>
+
+          <div class="m-field"><label>食材（从食材库选择）</label><div id="ingRows"></div><button class="add-ing-btn" id="addIngBtn">+ 添加食材</button></div>
+          <div class="m-field"><label>步骤</label><div id="stepRows"></div><button class="add-step-btn" id="addStepBtn">+ 添加步骤</button></div>
+
+          <div class="modal-btns" style="margin-top:var(--space-4);">
+            <button class="btn-cancel" id="modalCancel">取消</button>
+            <button class="btn-save" id="modalSave">保存</button>
+          </div>
+          <button class="btn-delete" id="modalDelete" style="display:none;">删除此菜谱</button>
         </div>
 
-        <div class="m-field"><label>食材（从食材库选择）</label><div id="ingRows"></div><button class="add-ing-btn" id="addIngBtn">+ 添加食材</button></div>
-        <div class="m-field"><label>步骤</label><div id="stepRows"></div><button class="add-step-btn" id="addStepBtn">+ 添加步骤</button></div>
-
-        <div class="modal-btns">
-          <button class="btn-cancel" id="modalCancel">取消</button>
-          <button class="btn-save" id="modalSave">保存</button>
-        </div>
-        <button class="btn-delete" id="modalDelete" style="display:none;">删除此菜谱</button>
       </div>
     </div>
 
@@ -443,11 +464,27 @@ body{
     renderIngRows(r.ingredients);
     renderStepRows(r.steps);
     modalDelete.style.display = 'block';
+    showFormView();
     overlay.classList.add('show');
   }
 
+  /* 选择视图控制 */
+  var choiceView = document.getElementById('choiceView');
+  var formView = document.getElementById('formView');
+
+  function showFormView() { choiceView.style.display = 'none'; formView.style.display = 'block'; }
+  function showChoiceView() { choiceView.style.display = 'block'; formView.style.display = 'none'; }
+
   /* 新增 */
   document.getElementById('addBtn').addEventListener('click', function () {
+    editingId = null;
+    modalTitle.textContent = '新增菜谱';
+    showChoiceView();
+    overlay.classList.add('show');
+  });
+
+  /* 选择：手动录入 */
+  document.getElementById('choiceManual').addEventListener('click', function () {
     editingId = null;
     modalTitle.textContent = '新增菜谱';
     modalName.value = ''; modalDesc.value = '';
@@ -459,8 +496,29 @@ body{
     renderIngRows([{ingredientId:0,amount:''}]);
     renderStepRows(['']);
     modalDelete.style.display = 'none';
-    overlay.classList.add('show');
+    showFormView();
+    document.getElementById('modalName').focus();
   });
+
+  /* 选择：从网页导入 */
+  document.getElementById('choiceImport').addEventListener('click', function () {
+    editingId = null;
+    modalTitle.textContent = '从网页导入';
+    modalName.value = ''; modalDesc.value = '';
+    selectedIcon = '🍳';
+    document.querySelectorAll('.ip-item').forEach(function (el) {
+      el.style.borderColor = el.textContent === '🍳' ? 'var(--accent)' : 'var(--border-soft)';
+      el.style.background = el.textContent === '🍳' ? 'color-mix(in oklab,var(--accent),transparent 90%)' : 'transparent';
+    });
+    renderIngRows([{ingredientId:0,amount:''}]);
+    renderStepRows(['']);
+    modalDelete.style.display = 'none';
+    showFormView();
+    document.getElementById('importUrl').focus();
+  });
+
+  /* 选择视图的取消 */
+  document.getElementById('choiceCancel').addEventListener('click', function () { overlay.classList.remove('show'); });
 
   /* 添加食材行 */
   document.getElementById('addIngBtn').addEventListener('click', function () {
@@ -490,9 +548,14 @@ body{
     window._pendingImportUrl = url;
   });
 
-  /* 取消 */
-  document.getElementById('modalCancel').addEventListener('click', function () { overlay.classList.remove('show'); });
-  overlay.addEventListener('click', function (e) { if (e.target===overlay) overlay.classList.remove('show'); });
+  /* 取消 / 返回 */
+  document.getElementById('modalCancel').addEventListener('click', function () {
+    if (editingId) { overlay.classList.remove('show'); return; }
+    showChoiceView();
+  });
+  overlay.addEventListener('click', function (e) {
+    if (e.target===overlay) { showChoiceView(); overlay.classList.remove('show'); }
+  });
 
   /* 保存 */
   document.getElementById('modalSave').addEventListener('click', function () {
