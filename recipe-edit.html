@@ -322,6 +322,21 @@ body{
 .btn-del{flex:0 0 auto;background:transparent;color:var(--danger);border:1px solid var(--border)!important;padding:12px 20px!important;}
 .btn-del[style*="display:none"]{display:none!important;}
 
+/* 编辑模式：去除步骤限制，平铺展示 */
+.mode-edit .step-bar,.mode-edit .step-label{display:none;}
+.mode-edit .wizard-nav{display:none;}
+.mode-edit .step{display:block;flex:none;}
+.mode-edit .step + .step{margin-top:var(--space-6);}
+.mode-edit .step+.step::before{content:'';display:block;height:1px;background:var(--border-soft);margin-bottom:var(--space-5);}
+.mode-edit .wizard{overflow-y:auto;padding-bottom:40px;}
+.edit-bar{
+  display:none;margin-top:auto;
+  padding:var(--space-3) 0 calc(env(safe-area-inset-bottom) + var(--space-3));
+  gap:10px;
+}
+.mode-edit .edit-bar{display:flex;}
+.btn-save{flex:1;background:var(--accent);color:#fff;}
+
 /* ===== 食材选择器（底部弹出，与方案管理一致） ===== */
 .picker-overlay{
   position:absolute;inset:0;z-index:30;
@@ -472,6 +487,10 @@ body{
         <div class="wizard-nav">
           <button class="btn-prev hidden" id="prevBtn">上一步</button>
           <button class="btn-next" id="nextBtn">下一步</button>
+        </div>
+
+        <div class="edit-bar">
+          <button class="btn-save" id="editSaveBtn">保存</button>
           <button class="btn-del" id="delBtn" style="display:none">删除</button>
         </div>
       </div>
@@ -1025,7 +1044,7 @@ body{
   });
   /* 菜名、时间输入即时存草稿 */
   document.querySelector('.main').addEventListener('input', function (e) {
-    if (e.target && e.target.id === 'recipeName') { saveDraft(); updateWizard(); }
+    if (e.target && e.target.id === 'recipeName') { saveDraft(); if (!isEdit) updateWizard(); }
   });
 
   /* ===== 级联选择器 ===== */
@@ -1107,75 +1126,75 @@ body{
     window._pendingImportUrl = url;
   });
 
-  /* ===== 步进导航 ===== */
+  /* ===== 步进导航（仅新增模式） ===== */
   var currentStep = 1;
   var totalSteps = 3;
+  var isEdit = !!editingId;
 
-  function updateWizard() {
-    document.getElementById('stepFill').style.width = (currentStep / totalSteps * 100) + '%';
-    var labels = ['基本信息', '食材', '步骤'];
-    document.getElementById('stepLabel').textContent = labels[currentStep - 1] + ' · ' + currentStep + '/' + totalSteps;
-    document.querySelectorAll('.step').forEach(function (el) {
-      el.classList.toggle('active', +el.dataset.step === currentStep);
-    });
-    var prev = document.getElementById('prevBtn');
-    var next = document.getElementById('nextBtn');
-    prev.classList.toggle('hidden', currentStep === 1);
-    if (currentStep === totalSteps) {
-      next.textContent = '保存';
-      next.disabled = false;
+  function doSave() {
+    var name = recipeName.value.trim();
+    if (!name) { showToast('请输入菜谱名称'); return; }
+    var ings = currentIngredients.filter(function (x) { return x.ingredientId; }).map(function (x) { return {ingredientId:x.ingredientId, amount:x.amount||'适量'}; });
+    if (!ings.length) { showToast('请至少添加一种食材'); return; }
+    var steps = currentSteps.filter(function (ph) { return ph && ph.entries && ph.entries.length; });
+    if (!steps.length) { showToast('请至少添加一个阶段'); return; }
+    if (editingId) {
+      var r = recipes.find(function (x) { return x.id === editingId; });
+      if (r) { r.name=name; r.icon=selectedIcon; r.time=selectedTime; r.difficulty=selectedDifficulty; r.ingredients=ings; r.steps=steps; }
+      showToast('已更新');
     } else {
-      next.textContent = '下一步';
-      /* 验证当前步 */
-      var ok = true;
-      if (currentStep === 1) { if (!recipeName.value.trim()) ok = false; }
-      if (currentStep === 2) { if (!currentIngredients.filter(function(x){return x.ingredientId;}).length) ok = false; }
-      next.disabled = !ok;
+      var maxId = recipes.reduce(function(m,x){return Math.max(m,x.id)},0);
+      recipes.push({ id:maxId+1, name:name, desc:'', icon:selectedIcon, time:selectedTime, difficulty:selectedDifficulty, ingredients:ings, steps:steps });
+      showToast('已添加');
     }
-    /* 删除按钮只在编辑已有菜谱的 step 1 显示 */
-    delBtn.style.display = (editingId && currentStep === 1) ? 'block' : 'none';
+    saveRecipes(recipes);
+    clearDraft();
+    setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
   }
 
-  document.getElementById('prevBtn').addEventListener('click', function () {
-    if (currentStep > 1) { currentStep--; updateWizard(); }
-  });
-
-  document.getElementById('nextBtn').addEventListener('click', function () {
-    if (currentStep < totalSteps) {
-      currentStep++;
-      updateWizard();
-    } else {
-      /* 保存 */
-      var name = recipeName.value.trim();
-      if (!name) { showToast('请输入菜谱名称'); return; }
-      var ings = currentIngredients.filter(function (x) { return x.ingredientId; }).map(function (x) { return {ingredientId:x.ingredientId, amount:x.amount||'适量'}; });
-      if (!ings.length) { showToast('请至少添加一种食材'); return; }
-      var steps = currentSteps.filter(function (ph) { return ph && ph.entries && ph.entries.length; });
-      if (!steps.length) { showToast('请至少添加一个阶段'); return; }
-      if (editingId) {
-        var r = recipes.find(function (x) { return x.id === editingId; });
-        if (r) { r.name=name; r.icon=selectedIcon; r.time=selectedTime; r.difficulty=selectedDifficulty; r.ingredients=ings; r.steps=steps; }
-        showToast('已更新');
+  if (isEdit) {
+    /* 编辑模式：平铺所有内容 */
+    document.querySelector('.main').classList.add('mode-edit');
+    document.querySelectorAll('.step').forEach(function (el) { el.classList.add('active'); });
+    document.getElementById('delBtn').style.display = 'block';
+    document.getElementById('editSaveBtn').addEventListener('click', doSave);
+  } else {
+    /* 新增模式：步进向导 */
+    function updateWizard() {
+      document.getElementById('stepFill').style.width = (currentStep / totalSteps * 100) + '%';
+      var labels = ['基本信息', '食材', '步骤'];
+      document.getElementById('stepLabel').textContent = labels[currentStep - 1] + ' · ' + currentStep + '/' + totalSteps;
+      document.querySelectorAll('.step').forEach(function (el) {
+        el.classList.toggle('active', +el.dataset.step === currentStep);
+      });
+      var prev = document.getElementById('prevBtn');
+      var next = document.getElementById('nextBtn');
+      prev.classList.toggle('hidden', currentStep === 1);
+      if (currentStep === totalSteps) {
+        next.textContent = '保存';
+        next.disabled = false;
       } else {
-        var maxId = recipes.reduce(function(m,x){return Math.max(m,x.id)},0);
-        recipes.push({ id:maxId+1, name:name, desc:'', icon:selectedIcon, time:selectedTime, difficulty:selectedDifficulty, ingredients:ings, steps:steps });
-        showToast('已添加');
+        next.textContent = '下一步';
+        var ok = true;
+        if (currentStep === 1) { if (!recipeName.value.trim()) ok = false; }
+        if (currentStep === 2) { if (!currentIngredients.filter(function(x){return x.ingredientId;}).length) ok = false; }
+        next.disabled = !ok;
       }
-      saveRecipes(recipes);
-      clearDraft();
-      setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
     }
-  });
-
-  /* 食材/步骤变动后更新导航按钮状态 */
-  var _origApplyPicked = function(){};
-  /* 食材变化时更新 step 2 的验证 */
-  var _origRenderIngRows = renderIngRows;
-  renderIngRows = function () { _origRenderIngRows(); updateWizard(); };
-  var _origRenderStepRows = renderStepRows;
-  renderStepRows = function () { _origRenderStepRows(); updateWizard(); };
-
-  updateWizard();
+    document.getElementById('prevBtn').addEventListener('click', function () {
+      if (currentStep > 1) { currentStep--; updateWizard(); }
+    });
+    document.getElementById('nextBtn').addEventListener('click', function () {
+      if (currentStep < totalSteps) { currentStep++; updateWizard(); }
+      else doSave();
+    });
+    /* 食材/步骤变动后更新按钮状态 */
+    var _origRenderIngRows = renderIngRows;
+    renderIngRows = function () { _origRenderIngRows(); updateWizard(); };
+    var _origRenderStepRows = renderStepRows;
+    renderStepRows = function () { _origRenderStepRows(); updateWizard(); };
+    updateWizard();
+  }
 
   /* 删除 */
   delBtn.addEventListener('click', function () {
