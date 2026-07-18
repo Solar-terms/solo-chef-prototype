@@ -360,7 +360,7 @@ body{
           <p class="invite-link" id="doneLink"></p>
           <button type="button" class="copy-btn" id="doneCopy">复制分享</button>
         </div>
-        <a class="done-link" href="login.html">进入一作一食</a>
+        <a class="done-link" id="doneLinkEnter" href="zuo_home.html">进入一作一食</a>
       </section>
 
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -488,6 +488,9 @@ body{
         doneDesc.textContent = '把这条链接发给 ta，ta 注册完成，你们就正式成对。';
         doneShare.classList.remove('vanish');
       }
+      /* 注册成功 → 保存登录状态并跳转到对应主页 */
+      try { localStorage.setItem('yzys_logged_in', '1'); localStorage.setItem('yzys_mode', current); } catch (e) {}
+      document.getElementById('doneLinkEnter').href = current === 'zuo' ? 'zuo_home.html' : 'ingredients.html';
       regHead.classList.add('vanish');
       document.getElementById('regForm').classList.add('vanish');
       loginEntry.classList.add('vanish');
