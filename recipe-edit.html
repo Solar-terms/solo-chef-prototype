@@ -425,6 +425,40 @@ body{
 .picker-foot .pf-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);}
 .picker-foot .pf-confirm{background:var(--accent);color:#fff;}
 
+/* 确认弹窗（全站统一风格） */
+.modal-overlay{
+  position:absolute;inset:0;z-index:40;
+  background:rgba(31,26,22,.35);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 220ms var(--ease-standard);
+}
+.modal-overlay.show{opacity:1;pointer-events:auto;}
+.modal-box{
+  background:var(--surface);border-radius:var(--radius-lg);
+  padding:var(--space-8) var(--space-6);
+  width:260px;text-align:center;
+  box-shadow:0 20px 60px rgba(31,26,22,.18);
+  transform:translateY(8px);
+  transition:transform 220ms var(--ease-standard);
+}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-box .m-title{
+  font-family:var(--font-display);font-size:var(--text-base);
+  color:var(--fg);margin-bottom:var(--space-3);
+}
+.modal-box .m-msg{
+  font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg-2);
+  line-height:1.6;margin-bottom:var(--space-5);white-space:pre-line;
+}
+.modal-btns{display:flex;gap:12px;}
+.modal-btns button{
+  flex:1;font-family:var(--font-body);font-size:var(--text-sm);
+  padding:10px 0;border-radius:var(--radius-lg);border:none;cursor:pointer;
+}
+.modal-btns .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.modal-btns .btn-danger{background:var(--danger);color:#fff;}
+
 .toast{
   position:absolute;bottom:80px;left:50%;transform:translate(-50%,12px);
   font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
@@ -535,6 +569,18 @@ body{
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- 确认弹窗（全站统一风格） -->
+    <div class="modal-overlay" id="confirmOverlay">
+      <div class="modal-box">
+        <div class="m-title" id="confirmTitle">确认删除</div>
+        <p class="m-msg" id="confirmMsg"></p>
+        <div class="modal-btns">
+          <button class="btn-cancel" id="confirmCancel">取消</button>
+          <button class="btn-danger" id="confirmOk">删除</button>
+        </div>
+      </div>
+    </div>
   </div>
 <script>
 (function () {
@@ -677,6 +723,29 @@ body{
   function showToast(m) { var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(showToast._t); showToast._t=setTimeout(function(){t.classList.remove('show')},2000); }
   function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+  /* ===== 确认弹窗（替代系统 confirm） ===== */
+  var confirmCallback = null;
+  function showConfirm(msg, onOk, opts) {
+    opts = opts || {};
+    document.getElementById('confirmTitle').textContent = opts.title || '确认删除';
+    document.getElementById('confirmMsg').textContent = msg;
+    var okBtn = document.getElementById('confirmOk');
+    okBtn.textContent = opts.okText || '删除';
+    confirmCallback = onOk;
+    document.getElementById('confirmOverlay').classList.add('show');
+  }
+  function closeConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('show');
+    confirmCallback = null;
+  }
+  document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+  document.getElementById('confirmOverlay').addEventListener('click', function (e) { if (e.target === this) closeConfirm(); });
+  document.getElementById('confirmOk').addEventListener('click', function () {
+    var cb = confirmCallback;
+    closeConfirm();
+    if (typeof cb === 'function') cb();
+  });
+
   /* 渲染图标选择 */
   function renderIcons() {
     iconGrid.innerHTML = '';
@@ -810,7 +879,7 @@ body{
           '<button class="ir-del" title="移除">✕</button>';
         row.querySelector('.ir-amt').addEventListener('input', function () { var i = findIngIndex(ing.ingredientId); if (i >= 0) currentIngredients[i].amount = this.value; saveDraft(); });
         row.querySelector('.ir-amt').addEventListener('click', function (e) { e.stopPropagation(); });
-        row.querySelector('.ir-del').addEventListener('click', function (e) { e.stopPropagation(); var i = findIngIndex(ing.ingredientId); if (i < 0) return; if (!confirm('确定删除此食材？')) return; currentIngredients.splice(i,1); renderIngRows(); saveDraft(); });
+        row.querySelector('.ir-del').addEventListener('click', function (e) { e.stopPropagation(); var i = findIngIndex(ing.ingredientId); if (i < 0) return; showConfirm('确定删除此食材？\n此操作无法撤销。', function () { currentIngredients.splice(i,1); renderIngRows(); saveDraft(); }); });
         row.addEventListener('click', function () { openPicker(applyPicked); });
         group.appendChild(row);
       });
@@ -900,10 +969,11 @@ body{
         openPhaseOverlay(pi);
       });
       card.querySelector('.phase-del').addEventListener('click', function () {
-        if (!confirm('确定删除此阶段？')) return;
-        currentSteps.splice(pi, 1);
-        renderStepRows();
-        saveDraft();
+        showConfirm('确定删除此阶段？\n此操作无法撤销。', function () {
+          currentSteps.splice(pi, 1);
+          renderStepRows();
+          saveDraft();
+        });
       });
       phase.entries.forEach(function (entry, ei) {
         var ingOpts = '<option value="">不选食材</option>';
@@ -1203,12 +1273,13 @@ body{
   /* 删除 */
   delBtn.addEventListener('click', function () {
     if (!editingId) return;
-    if (!confirm('确定删除此菜谱？')) return;
-    recipes = recipes.filter(function (x) { return x.id !== editingId; });
-    saveRecipes(recipes);
-    clearDraft();
-    showToast('已删除');
-    setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
+    showConfirm('确定删除此菜谱？\n此操作无法撤销。', function () {
+      recipes = recipes.filter(function (x) { return x.id !== editingId; });
+      saveRecipes(recipes);
+      clearDraft();
+      showToast('已删除');
+      setTimeout(function(){ location.href = 'recipe-manage.html'; }, 600);
+    });
   });
 })();
 </script>
