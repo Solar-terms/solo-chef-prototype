@@ -248,6 +248,16 @@ body{
       <div class="field"><label>生产日期 <span class="ocr-tag" id="ocrProd">OCR</span></label><input id="prodDate" type="text" autocomplete="off" placeholder="2024-03-15"></div>
       <div class="field"><label>保质期 <span class="ocr-tag" id="ocrExp">OCR</span></label><input id="expDate" type="text" autocomplete="off" placeholder="12个月 / 至2025-03"></div>
     </div>
+    <div class="field"><label>储藏条件</label>
+      <select id="storage">
+        <option value="">请选择</option>
+        <option value="常温">常温</option>
+        <option value="冷藏">冷藏（0-4°C）</option>
+        <option value="冷冻">冷冻（-18°C）</option>
+        <option value="避光">避光</option>
+        <option value="干燥">干燥</option>
+      </select>
+    </div>
     <button class="btn-save" id="saveBtn">保存到库存</button>
   </main>
 
@@ -391,7 +401,7 @@ body{
     var amt=document.getElementById('amt').value.trim()||'适量';
     items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
     if(items.some(function(x){return x.id===id;})){showToast('已在库存中');return;}
-    items.push({id:id,amt:amt,brand:document.getElementById('brand').value.trim(),price:document.getElementById('price').value.trim(),channel:document.getElementById('channel').value.trim(),spec:document.getElementById('spec').value.trim(),prodDate:document.getElementById('prodDate').value.trim(),expDate:document.getElementById('expDate').value.trim()});
+    items.push({id:id,amt:amt,brand:document.getElementById('brand').value.trim(),price:document.getElementById('price').value.trim(),channel:document.getElementById('channel').value.trim(),spec:document.getElementById('spec').value.trim(),prodDate:document.getElementById('prodDate').value.trim(),expDate:document.getElementById('expDate').value.trim(),storage:document.getElementById('storage').value});
     try{localStorage.setItem(KEY,JSON.stringify(items));}catch(e){}
     showToast('已添加');setTimeout(function(){location.href='inventory-manage.html';},600);
   });

@@ -191,6 +191,7 @@ body{
         if(x.channel) info.push(esc(x.channel));
         if(x.prodDate) info.push('生产：'+esc(x.prodDate));
         if(x.expDate) info.push('保质：'+esc(x.expDate));
+        if(x.storage) info.push('['+esc(x.storage)+']');
         list.innerHTML+=
           '<div class="inv-item"><span class="iv-icon">'+(m?m.icon:'📦')+'</span>'+
           '<div class="iv-body"><div class="iv-name">'+(m?esc(m.n):'?')+'</div>'+
