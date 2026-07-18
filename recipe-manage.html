@@ -88,8 +88,14 @@ body{
 }
 .recipe-card .rc-meta{flex:1;min-width:0;}
 .recipe-card .rc-name{font-family:var(--font-display);font-size:var(--text-lg);color:var(--fg);letter-spacing:.04em;}
-.recipe-card .rc-desc{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:2px;}
-.recipe-card .rc-info{display:flex;gap:16px;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.04em;}
+.recipe-card .rc-ingredients{
+  display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;
+  font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.04em;
+}
+.recipe-card .rc-ing-tag{
+  background:color-mix(in oklab,var(--accent),transparent 92%);
+  border-radius:var(--radius-pill);padding:2px 7px;white-space:nowrap;
+}
 
 /* 新增按钮 */
 .add-btn{
@@ -137,13 +143,29 @@ body{
 (function () {
   /* 读写 localStorage */
   function loadRecipes() { try { return JSON.parse(localStorage.getItem('yzys_recipes')||'[]'); } catch(e){ return []; } }
+  /* 食材名称速查表 */
+  var INGREDIENT_LOOKUP = [
+    {id:1,name:'大米'},{id:2,name:'面粉'},{id:3,name:'面条'},{id:4,name:'面包'},
+    {id:5,name:'牛肉'},{id:6,name:'猪肉'},{id:7,name:'鸡肉'},{id:8,name:'鸡蛋'},{id:9,name:'鸡胸肉'},
+    {id:10,name:'三文鱼'},{id:11,name:'虾仁'},{id:12,name:'豆腐'},
+    {id:13,name:'白菜'},{id:14,name:'番茄'},{id:15,name:'黄瓜'},{id:16,name:'番茄'},{id:17,name:'菠菜'},
+    {id:18,name:'生菜'},{id:19,name:'洋葱'},{id:20,name:'土豆'},{id:21,name:'胡萝卜'},{id:22,name:'西兰花'},
+    {id:23,name:'青椒'},{id:24,name:'红椒'},{id:25,name:'蘑菇'},{id:26,name:'莲藕'},{id:27,name:'山药'},
+    {id:28,name:'茄子'},{id:29,name:'冬瓜'},{id:30,name:'玉米'},{id:31,name:'南瓜'},
+    {id:32,name:'苹果'},{id:33,name:'香蕉'},{id:34,name:'牛油果'},{id:35,name:'蓝莓'},{id:36,name:'草莓'},
+    {id:37,name:'橙子'},{id:38,name:'柠檬'},{id:39,name:'猕猴桃'},
+    {id:40,name:'核桃'},{id:41,name:'杏仁'},{id:42,name:'生菜'},
+    {id:43,name:'牛奶'},{id:44,name:'酸奶'},{id:45,name:'奶酪'},
+    {id:57,name:'盐'},{id:58,name:'蛋白粉'},{id:59,name:'葱'},{id:60,name:'姜'},
+    {id:61,name:'小白菜'},{id:62,name:'蒜'},{id:63,name:'食用油'}
+  ];
   if (!loadRecipes().length) {
     /* 初始化默认菜谱 */
     var defaults = [
-      { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', time:'约10分钟', difficulty:'容易做', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散加少许盐'},{ingredientId:16,action:'切块',note:''}]},{phase:'炒制',entries:[{ingredientId:8,action:'炒制',note:'盛出备用'},{ingredientId:16,action:'炒制',note:'炒至出汁'},{ingredientId:null,action:'调味',note:'加入鸡蛋翻炒均匀'}]}] },
-      { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', time:'约15分钟', difficulty:'容易做', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:[{phase:'配菜',entries:[{ingredientId:9,action:'',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',note:''},{ingredientId:16,action:'切块',note:''},{ingredientId:42,action:'洗净',note:'撕碎'},{ingredientId:null,action:'调味',note:'淋上油醋汁'}]}] },
-      { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', time:'约10分钟', difficulty:'容易做', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散备用'},{ingredientId:59,action:'切末',note:'切葱花'}]},{phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',note:'撒剩余葱花和盐出锅'}]}] },
-      { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', time:'约10-15分钟', difficulty:'容易做', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:[{phase:'配菜',entries:[{ingredientId:61,action:'切段',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',note:'切蒜末'}]},{phase:'炒制',entries:[{ingredientId:63,action:'炒制',note:'中火加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',note:'转大火快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',note:'炒匀出锅装盘'}]}] }
+      { id:1, name:'番茄炒蛋', desc:'经典家常菜', icon:'🍳', time:'约10分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:8,amount:'3 个'},{ingredientId:16,amount:'2 个'},{ingredientId:57,amount:'适量'}], steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散加少许盐'},{ingredientId:16,action:'切块',note:''}]},{phase:'炒制',entries:[{ingredientId:8,action:'炒制',note:'盛出备用'},{ingredientId:16,action:'炒制',note:'炒至出汁'},{ingredientId:null,action:'调味',note:'加入鸡蛋翻炒均匀'}]}] },
+      { id:2, name:'鸡胸肉沙拉', desc:'低脂健康', icon:'🥗', time:'约15分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:9,amount:'1 块'},{ingredientId:15,amount:'半根'},{ingredientId:16,amount:'1 个'},{ingredientId:42,amount:'适量'}], steps:[{phase:'配菜',entries:[{ingredientId:9,action:'',note:'煮熟撕成丝'},{ingredientId:15,action:'切丁',note:''},{ingredientId:16,action:'切块',note:''},{ingredientId:42,action:'洗净',note:'撕碎'},{ingredientId:null,action:'调味',note:'淋上油醋汁'}]}] },
+      { id:3, name:'葱花蛋汤', desc:'暖心暖胃', icon:'🫕', time:'约10分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:8,amount:'2 个'},{ingredientId:59,amount:'适量'},{ingredientId:57,amount:'适量'}], steps:[{phase:'配菜',entries:[{ingredientId:8,action:'',note:'打散备用'},{ingredientId:59,action:'切末',note:'切葱花'}]},{phase:'炖煮',entries:[{ingredientId:null,action:'炖煮',note:'水烧开放入一半葱花'},{ingredientId:8,action:'炖煮',note:'淋入蛋液搅拌'},{ingredientId:null,action:'调味',note:'撒剩余葱花和盐出锅'}]}] },
+      { id:4, name:'清炒小白菜', desc:'清淡爽口', icon:'🥬', time:'约10-15分钟', difficulty:'容易做', source:'懒饭', video:'', ingredients:[{ingredientId:61,amount:'300g'},{ingredientId:62,amount:'15g（约2瓣）'},{ingredientId:63,amount:'20g'},{ingredientId:57,amount:'2g'}], steps:[{phase:'配菜',entries:[{ingredientId:61,action:'切段',note:'去掉根部，洗净沥干'},{ingredientId:62,action:'拍碎',note:'切蒜末'}]},{phase:'炒制',entries:[{ingredientId:63,action:'炒制',note:'中火加热至六成热，下蒜末爆香'},{ingredientId:61,action:'炒制',note:'转大火快速翻炒至叶片变软'},{ingredientId:null,action:'加盐',note:'炒匀出锅装盘'}]}] }
     ];
     try { localStorage.setItem('yzys_recipes', JSON.stringify(defaults)); } catch(e){}
   }
@@ -155,6 +177,9 @@ body{
 
   function esc(s){return (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+  /* 食材名称速查 */
+  var ingMap = {};
+  INGREDIENT_LOOKUP.forEach(function(m){ ingMap[m.id]=m.name; });
   function render() {
     var q = (searchInput.value||'').trim().toLowerCase();
     var visible = 0;
@@ -166,9 +191,13 @@ body{
       var card = document.createElement('a');
       card.className = 'recipe-card';
       card.href = 'recipe-edit.html?id='+r.id;
+      var ingTags = (r.ingredients||[]).map(function(x) {
+        var name = ingMap[x.ingredientId] || '';
+        return name ? '<span class="rc-ing-tag">'+name+'</span>' : '';
+      }).join('');
       card.innerHTML =
-        '<div class="rc-head"><div class="rc-icon">'+r.icon+'</div><div class="rc-meta"><div class="rc-name">'+esc(r.name)+'</div><div class="rc-desc">'+esc(r.desc)+'</div></div></div>'+
-        '<div class="rc-info"><span>'+r.steps.length+' 步</span><span>'+r.ingredients.length+' 种食材</span></div>';
+        '<div class="rc-head"><div class="rc-icon">'+r.icon+'</div><div class="rc-meta"><div class="rc-name">'+esc(r.name)+'</div></div></div>'+
+        (ingTags ? '<div class="rc-ingredients">'+ingTags+'</div>' : '');
       recipeList.appendChild(card);
     });
     recipeCount.textContent = visible+' 道菜谱';
