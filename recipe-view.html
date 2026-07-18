@@ -274,7 +274,7 @@ body{
             html+='<div class="step-entry"><span class="se-num">'+(i+1)+'</span><div class="se-body">';
             html+='<div class="se-tags">';
             if(e.action) html+='<span class="se-tag">'+esc(e.action)+'</span>';
-            if(e.heat) html+='<span class="se-tag">'+esc(e.heat)+'</span>';
+            if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') html+='<span class="se-tag">'+esc(e.heat)+'</span>';
             html+='</div>';
             if(e.note) html+='<div class="se-note">'+esc(e.note)+'</div>';
             html+='</div></div>';
