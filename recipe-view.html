@@ -252,7 +252,7 @@ body{
 
   /* SOURCE */
   if(r.sourceUrl) h+='<a class="card link-row" href="'+esc(r.sourceUrl)+'" target="_blank"><span class="lr-icon">📎</span> '+esc(r.sourceUrl)+'</a>';
-  else if(r.source) h+='<div class="card" style="text-align:center;font-size:10px;color:var(--muted);font-family:var(--font-mono);">来源：'+esc(r.source)+'</div>';
+  else if(r.source) h+='<a class="card link-row" href="'+(r.sourceUrl||'#')+'" target="_blank" style="justify-content:center;"><span class="lr-icon">📎</span> 来源：'+esc(r.source)+'</a>';
 
   document.getElementById('main').innerHTML=h;
 })();
