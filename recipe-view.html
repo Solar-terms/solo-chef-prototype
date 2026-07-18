@@ -76,7 +76,7 @@ body{
   font-family:var(--font-body);font-size:var(--text-sm);color:var(--fg);
 }
 .ing-item .ii-icon{font-size:16px;flex:0 0 auto;}
-.ing-item .ii-amt{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:auto;}
+.ing-item .ii-amt{font-family:var(--font-mono);font-size:10px;color:var(--muted);}
 
 /* 阶段 */
 .phase-title{
@@ -103,7 +103,6 @@ body{
 .entry .ent-num{font-family:var(--font-mono);font-size:10px;color:var(--accent);font-weight:bold;flex:0 0 16px;text-align:right;padding-top:3px;}
 .entry .ent-body{flex:1;}
 .entry .ent-main{font-size:var(--text-sm);color:var(--fg);line-height:1.5;}
-.ent-tag{font-size:var(--text-sm);}
 .entry .ent-note{font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-top:1px;}
 
 /* 链接 */
@@ -153,6 +152,21 @@ body{
   function icon(id){var m=ingMap[id];return m?m.i:'📦';}
   function name(id){var m=ingMap[id];return m?m.n:'食材#'+id;}
   function esc(s){return String(s||'').replace(/</g,'&lt;');}
+  /* 从食材列表中查用量 */
+  var ingIdFromName={};
+  Object.keys(ingMap).forEach(function(k){ingIdFromName[ingMap[k].n]=+k;});
+  function ingTag(id){
+    var n=name(id);var i=icon(id);
+    var ings=r.ingredients||[];
+    var found=ings.find(function(x){return x.ingredientId===id;});
+    var amt=found&&found.amount?found.amount:'';
+    return '<span class="ing-tag">'+i+' '+esc(n)+(amt?' '+amt:'')+'</span>';
+  }
+  function ingTagByName(s){
+    var id=ingIdFromName[s];
+    if(id) return ingTag(id);
+    return '<span class="ing-tag">'+esc(s)+'</span>';
+  }
 
   /* ---- MOCK ---- */
   var recipes=[];
@@ -209,8 +223,8 @@ body{
           ph.modules.forEach(function(mod){
             if(!mod||!mod.data) return;
             var d=mod.data;
-            if(mod.type==='starter'){h+='<div class="mod"><div class="mod-t">起锅</div><div class="mod-l">';if(d.oil) h+=esc(d.oil)+' ';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span> ';if(d.aromatics&&d.aromatics.length) h+='<span class="ing-tag">爆香：'+d.aromatics.map(esc).join('、')+'</span>';h+='</div></div>';}
-            if(mod.type==='main'){h+='<div class="mod"><div class="mod-t">下主料</div><div class="mod-l">';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span> ';if(d.ingredientId&&d.ingredientId.length) d.ingredientId.forEach(function(mid){h+='<span class="ing-tag">'+icon(mid)+' '+esc(name(mid))+'</span>';});h+='</div></div>';}
+            if(mod.type==='starter'){h+='<div class="mod"><div class="mod-t">起锅</div><div class="mod-l">';if(d.oil) h+=ingTagByName(d.oil);if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span>';if(d.aromatics&&d.aromatics.length) h+='<span class="ing-tag">爆香：'+d.aromatics.map(esc).join('、')+'</span>';h+='</div></div>';}
+            if(mod.type==='main'){h+='<div class="mod"><div class="mod-t">下主料</div><div class="mod-l">';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span>';if(d.ingredientId&&d.ingredientId.length) d.ingredientId.forEach(function(mid){h+=ingTag(mid);});h+='</div></div>';}
             if(mod.type==='stir'&&d.heat){h+='<div class="mod"><div class="mod-t">翻炒</div><div class="mod-l"><span class="ing-tag">'+esc(d.heat)+'</span>';if(d.duration&&d.duration!=='—') h+=' <span class="ing-tag">'+esc(d.duration)+'</span>';if(d.degree&&d.degree!=='—') h+=' <span class="ing-tag">'+esc(d.degree)+'</span>';h+='</div></div>';}
             if(mod.type==='season'&&d.seasonings&&d.seasonings.length){h+='<div class="mod"><div class="mod-t">调味</div><div class="mod-l">'+d.seasonings.map(function(s){return'<span class="ing-tag">'+esc(s)+'</span>';}).join(' ')+'</div></div>';}
             if(mod.type==='finish'){h+='<div class="mod"><div class="mod-t">出锅</div><div class="mod-l">';if(d.heat) h+='<span class="ing-tag">'+esc(d.heat)+'</span> ';if(d.garnish&&d.garnish.length) h+='<span class="ing-tag">点缀：'+d.garnish.map(esc).join('、')+'</span>';h+='</div></div>';}
@@ -221,7 +235,7 @@ body{
           ph.entries.forEach(function(e,i){
             h+='<div class="entry"><span class="ent-num">'+(i+1)+'</span><div class="ent-body"><div class="ent-main">';
             if(e.ingredientId) h+='<span class="ing-tag">'+icon(e.ingredientId)+' '+esc(name(e.ingredientId))+'</span>';
-            if(e.action) h+='<span class="ent-tag">'+esc(e.action)+'</span>';
+            if(e.action) h+='<span class="ing-tag">'+esc(e.action)+'</span>';
             if(e.heat&&ph.phase!=='配菜'&&e.heat!=='不加热') h+=' <span class="ent-tag">'+esc(e.heat)+'</span>';
             h+='</div>';
             if(e.note) h+='<div class="ent-note">'+esc(e.note)+'</div>';
