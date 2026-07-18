@@ -242,7 +242,18 @@ body{
       <div class="field"><label>品牌 <span class="ocr-tag" id="ocrBrand">OCR</span></label><input id="brand" type="text" autocomplete="off" placeholder="如：盒马有机"></div>
       <div class="field"><label>价格</label><input id="price" type="text" autocomplete="off" placeholder="¥8.9"></div>
     </div>
-    <div class="field"><label>采购渠道</label><input id="channel" type="text" autocomplete="off" placeholder="盒马 / 菜市场"></div>
+    <div class="field"><label>采购渠道</label>
+      <select id="channel">
+        <option value="">请选择</option>
+        <option value="山姆">山姆</option>
+        <option value="盒马">盒马</option>
+        <option value="奥乐齐">奥乐齐</option>
+        <option value="菜市场">菜市场</option>
+        <option value="超市">超市</option>
+        <option value="京东">京东</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
     <div class="field-row">
       <div class="field"><label>生产日期 <span class="ocr-tag" id="ocrProd">OCR</span></label><input id="prodDate" type="text" autocomplete="off" placeholder="2024-03-15"></div>
       <div class="field"><label>保质期 <span class="ocr-tag" id="ocrExp">OCR</span></label><input id="expDate" type="text" autocomplete="off" placeholder="12个月 / 至2025-03"></div>
