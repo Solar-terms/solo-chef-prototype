@@ -185,10 +185,12 @@ body{
       byCat[cat].forEach(function(x){
         var m=catMap[x.id],idx=items.indexOf(x);
         var info=[];
-        if(x.brand) info.push('品牌：'+esc(x.brand));
-        if(x.channel) info.push(esc(x.channel));
+        if(x.brand) info.push(esc(x.brand));
         if(x.spec) info.push(esc(x.spec));
         if(x.price) info.push('¥'+esc(x.price));
+        if(x.channel) info.push(esc(x.channel));
+        if(x.prodDate) info.push('生产：'+esc(x.prodDate));
+        if(x.expDate) info.push('保质：'+esc(x.expDate));
         list.innerHTML+=
           '<div class="inv-item"><span class="iv-icon">'+(m?m.icon:'📦')+'</span>'+
           '<div class="iv-body"><div class="iv-name">'+(m?esc(m.n):'?')+'</div>'+
