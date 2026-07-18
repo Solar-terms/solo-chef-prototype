@@ -140,6 +140,74 @@ body{
   z-index:99;pointer-events:none;
 }
 .toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* 选择器面板 */
+.picker-overlay{
+  position:absolute;inset:0;z-index:60;
+  background:rgba(31,26,22,.5);
+  display:none;align-items:flex-end;
+}
+.picker-overlay.show{display:flex;}
+.picker-box{
+  width:100%;background:var(--bg);
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  padding-bottom:calc(env(safe-area-inset-bottom) + var(--space-3));
+  max-height:70%;display:flex;flex-direction:column;
+}
+.picker-head{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:var(--space-4) var(--space-6);
+  border-bottom:1px solid var(--border);font-size:var(--text-sm);
+}
+.picker-close{font-size:16px;background:none;border:none;color:var(--muted);cursor:pointer;}
+.picker-search{width:100%;padding:10px 16px;border:none;outline:none;font-family:var(--font-body);font-size:var(--text-sm);background:var(--bg);}
+.picker-search-wrap{padding:var(--space-3) var(--space-6);border-bottom:1px solid var(--border);}
+.picker-list{
+  flex:1;display:flex;overflow:hidden;min-height:0;
+}
+.picker-cats{
+  flex:0 0 80px;overflow-y:auto;background:var(--bg);
+  border-right:1px solid var(--border-soft);
+}
+.picker-cats .pc-item{
+  padding:12px 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;
+  color:var(--muted);cursor:pointer;text-align:center;
+}
+.picker-cats .pc-item.active{color:var(--accent);background:var(--surface);font-weight:bold;}
+.picker-items{
+  flex:1;overflow-y:auto;
+}
+.picker-items .pli-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  cursor:pointer;border-bottom:1px solid var(--border-soft);
+}
+.picker-items .pli-item:active{background:color-mix(in oklab,var(--accent),transparent 95%);}
+.plii-icon{font-size:20px;}
+.plii-name{font-size:var(--text-sm);color:var(--fg);}
+.plii-check{font-size:14px;color:var(--accent);margin-left:auto;opacity:0;}
+.pli-item.sel .plii-check{opacity:1;}
+.picker-foot{
+  flex:0 0 auto;display:flex;gap:10px;padding:var(--space-3) var(--space-6);
+  border-top:1px solid var(--border);
+}
+.picker-foot button{
+  font-family:var(--font-mono);font-size:11px;padding:10px 0;border-radius:var(--radius-md);
+  border:none;cursor:pointer;
+}
+.pf-cancel{flex:1;background:transparent;color:var(--muted);border:1px solid var(--border)!important;}
+.pf-confirm{flex:1;background:var(--accent);color:#fff;}
+.pf-confirm:disabled{opacity:.4;}
+
+/* 食材选择触发按钮 */
+.ing-trigger{
+  display:flex;align-items:center;gap:8px;
+  width:100%;font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--fg);background:var(--surface);
+  border:1px solid var(--border-soft);border-radius:var(--radius-md);
+  padding:10px 12px;cursor:pointer;
+}
+.ing-trigger::after{content:'▾';color:var(--muted);font-size:12px;margin-left:auto;}
+.ing-trigger .it-icon{font-size:20px;}
 </style>
 </head>
 <body>
@@ -166,7 +234,7 @@ body{
 
     <!-- 基本信息 -->
     <div class="section-title">基本信息</div>
-    <div class="field"><label>食材</label><select id="ing"></select></div>
+    <div class="field"><label>食材</label><div class="ing-trigger" id="ingTrigger"><span class="it-icon" id="ingIcon">🥬</span><span id="ingName">选择食材</span></div></div>
     <div class="field"><label>数量（如：500g / 1瓶 / 2个）</label><input id="amt" type="text" autocomplete="off" placeholder="500g"></div>
     <div class="field-row">
       <div class="field"><label>品牌 <span class="ocr-tag" id="ocrBrand">OCR</span></label><input id="brand" type="text" autocomplete="off" placeholder="如：盒马有机"></div>
@@ -190,6 +258,22 @@ body{
       <div class="ocr-sub" id="ocrSub"></div>
     </div>
   </div>
+  <!-- 食材选择面板 -->
+  <div class="picker-overlay" id="pickerOverlay">
+    <div class="picker-box">
+      <div class="picker-head"><span>选择食材</span><button class="picker-close" id="pickerClose">✕</button></div>
+      <div class="picker-search-wrap"><input class="picker-search" id="pickerSearch" type="text" autocomplete="off" placeholder="搜索食材名称"></div>
+      <div class="picker-list">
+        <div class="picker-cats" id="pickerCats"></div>
+        <div class="picker-items" id="pickerItems"></div>
+      </div>
+      <div class="picker-foot">
+        <button class="pf-cancel" id="pickerCancel">取消</button>
+        <button class="pf-confirm" id="pickerConfirm">确定</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -218,17 +302,53 @@ body{
   var KEY='yzys_inventory';
   var items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
   var photoFiles=[];
+  var selectedIngId=null;
+  var ingMap={};ALL.forEach(function(m){ingMap[m.id]=m;});
 
-  var sel=document.getElementById('ing');
-  ['主食','蛋白','蔬果','坚果','乳饮','调味'].forEach(function(cat){
-    var g=document.createElement('optgroup');g.label=cat;
-    ALL.filter(function(m){return m.cat===cat;}).forEach(function(m){
-      if(items.some(function(x){return x.id===m.id;})) return;
-      var o=document.createElement('option');o.value=m.id;o.textContent=m.icon+' '+m.n;g.appendChild(o);
-    });
-    if(g.children.length) sel.appendChild(g);
+  /* 食材面板 */
+  var ingByCat={};ALL.forEach(function(m){var cat=m.cat;if(!ingByCat[cat]) ingByCat[cat]=[];ingByCat[cat].push(m);});
+  var activePickerCat='';
+  var catOrder=['主食','蛋白','蔬果','坚果','乳饮','调味'];
+
+  function openPicker(){
+    activePickerCat=catOrder[0];
+    renderPickerCats();
+    renderPickerItems();
+    document.getElementById('pickerOverlay').classList.add('show');
+    document.getElementById('pickerSearch').value='';
+  }
+  function closePicker(){document.getElementById('pickerOverlay').classList.remove('show');}
+  document.getElementById('ingTrigger').addEventListener('click',openPicker);
+  document.getElementById('pickerClose').addEventListener('click',closePicker);
+  document.getElementById('pickerCancel').addEventListener('click',closePicker);
+  document.getElementById('pickerConfirm').addEventListener('click',function(){
+    if(selectedIngId){
+      var m=ingMap[selectedIngId];
+      document.getElementById('ingIcon').textContent=m.icon;
+      document.getElementById('ingName').textContent=m.n;
+    }
+    closePicker();
   });
-  if(!sel.children.length) sel.innerHTML='<option value="">所有食材已入库</option>';
+
+  function renderPickerCats(){
+    var el=document.getElementById('pickerCats');el.innerHTML='';
+    catOrder.forEach(function(c){var d=document.createElement('div');d.className='pc-item'+(c===activePickerCat?' active':'');d.textContent=c;d.addEventListener('click',function(){activePickerCat=c;renderPickerCats();renderPickerItems();});el.appendChild(d);});
+  }
+  function renderPickerItems(q){
+    var el=document.getElementById('pickerItems');el.innerHTML='';var list=[];
+    if(q){ALL.forEach(function(m){if(m.n.indexOf(q)>=0) list.push(m);});}
+    else if(ingByCat[activePickerCat]) list=ingByCat[activePickerCat];
+    list.forEach(function(m){
+      var inStock=items.some(function(x){return x.id===m.id;});
+      var row=document.createElement('div');
+      row.className='pli-item'+(selectedIngId===m.id?' sel':'')+(inStock?' in-stock':'');
+      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+(inStock?' (已入库)':'')+'</span><span class="plii-check">✓</span>';
+      if(inStock) row.style.opacity='.5';
+      row.addEventListener('click',function(){if(!inStock){selectedIngId=m.id;renderPickerItems(q);}});
+      el.appendChild(row);
+    });
+  }
+  document.getElementById('pickerSearch').addEventListener('input',function(){renderPickerItems(this.value.trim().toLowerCase());});
 
   /* 拍照 */
   var pw=document.getElementById('photoWrap'),pa=document.getElementById('photoAdd'),pf=document.getElementById('photoFile');
@@ -266,7 +386,8 @@ body{
 
   /* 保存 */
   document.getElementById('saveBtn').addEventListener('click',function(){
-    var id=+sel.value;if(!id){showToast('请选择食材');return;}
+    if(!selectedIngId){showToast('请选择食材');return;}
+    var id=selectedIngId;
     var amt=document.getElementById('amt').value.trim()||'适量';
     items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
     if(items.some(function(x){return x.id===id;})){showToast('已在库存中');return;}
