@@ -318,15 +318,15 @@ body{
     {id:71,n:'土豆',icon:'🥔',cat:'蔬果'},{id:72,n:'腊肠',icon:'🥓',cat:'蛋白'},{id:73,n:'南瓜',icon:'🎃',cat:'蔬果'},
     {id:74,n:'腊肉',icon:'🥓',cat:'蛋白'},{id:75,n:'芋头',icon:'🍠',cat:'蔬果'},
   ];
+  /* 加载用户自建的食材 */
+  try{var CUSTOM_INGREDIENTS=JSON.parse(localStorage.getItem('yzys_custom_ings')||'[]');ALL=ALL.concat(CUSTOM_INGREDIENTS);}catch(e){}
 
   var KEY='yzys_inventory';
   var items=[];try{items=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
   var photoFiles=[];
   var selectedIngId=null;
-  var ingMap={};ALL.forEach(function(m){ingMap[m.id]=m;});
-
-  /* 食材面板 */
-  var ingByCat={};ALL.forEach(function(m){var cat=m.cat;if(!ingByCat[cat]) ingByCat[cat]=[];ingByCat[cat].push(m);});
+  function rebuildMaps(){ingMap={};ALL.forEach(function(m){ingMap[m.id]=m;});ingByCat={};ALL.forEach(function(m){var cat=m.cat;if(!ingByCat[cat]) ingByCat[cat]=[];ingByCat[cat].push(m);});}
+  var ingMap={},ingByCat={};rebuildMaps();
   var activePickerCat='';
   var catOrder=['主食','蛋白','蔬果','坚果','乳饮','调味'];
 
@@ -367,6 +367,20 @@ body{
       row.addEventListener('click',function(){selectedIngId=m.id;renderPickerItems(q);});
       el.appendChild(row);
     });
+    /* 搜索无结果时 → 快速创建食材 */
+    if(q&&!list.length){
+      var createRow=document.createElement('div');
+      createRow.className='pli-item';createRow.style.cssText='justify-content:center;color:var(--accent);font-weight:bold;';
+      createRow.textContent='+ 创建食材「'+q+'」';
+      createRow.addEventListener('click',function(){
+        var newIng={id:Date.now(),n:q,icon:'🥬',cat:'蔬果'};
+        ALL.push(newIng);
+        try{localStorage.setItem('yzys_custom_ings',JSON.stringify(ALL.filter(function(m){return m.id>=1e12;})));}catch(e){}
+        rebuildMaps();renderPickerCats(q);
+        selectedIngId=newIng.id;renderPickerItems(q);showToast('已创建 '+q);
+      });
+      el.appendChild(createRow);
+    }
   }
   document.getElementById('pickerSearch').addEventListener('input',function(){var q=this.value.trim().toLowerCase();renderPickerCats(q);renderPickerItems(q);});
 
