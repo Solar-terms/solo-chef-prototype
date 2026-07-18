@@ -920,9 +920,14 @@ body{
   var actionsByIng = {
     62: ['切小粒','切片','蒜末'] /* 蒜 */
   };
+  /* 特定「阶段 + 食材」组合的动作覆盖：key = phase + '|' + ingId */
+  var actionsByPhaseIng = {
+    '炒制|63': ['中火','大火','小火','爆香','热油'] /* 炒制阶段的食用油 */
+  };
   var defaultActions = ['炒制','煎制','油炸','炖煮','蒸制','煮制','调味','加盐','收汁','装盘','出锅'];
-  function getActionsForIngredient(ingId) {
+  function getActionsForIngredient(ingId, phaseName) {
     if (!ingId) return defaultActions;
+    if (phaseName && actionsByPhaseIng[phaseName + '|' + ingId]) return actionsByPhaseIng[phaseName + '|' + ingId];
     if (actionsByIng[ingId]) return actionsByIng[ingId];
     var meta = ingMap[ingId];
     if (!meta) return defaultActions;
@@ -991,7 +996,7 @@ body{
         });
         /* 根据当前食材类别生成动作选项 */
         function buildActOpts(ingId, selAct) {
-          return getActionsForIngredient(ingId).map(function (a) {
+          return getActionsForIngredient(ingId, phase.phase).map(function (a) {
             return '<option value="' + a + '"' + (a === selAct ? ' selected' : '') + '>' + a + '</option>';
           }).join('');
         }
@@ -1008,7 +1013,7 @@ body{
           /* 联动：更新动作选项 */
           var newId = entry.ingredientId;
           var keep = entry.action;
-          var avail = getActionsForIngredient(newId);
+          var avail = getActionsForIngredient(newId, phase.phase);
           if (avail.indexOf(keep) < 0) { entry.action = avail[0] || ''; }
           row.querySelector('.pe-act').innerHTML = avail.map(function (a) {
             return '<option value="' + a + '"' + (a === entry.action ? ' selected' : '') + '>' + a + '</option>';
