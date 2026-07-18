@@ -145,6 +145,20 @@ body{
   color:var(--muted);letter-spacing:.06em;margin-top:var(--space-4);
 }
 .src-line a{color:var(--accent);text-decoration:none;}
+
+/* 空状态 */
+.empty-view{
+  text-align:center;padding:var(--space-8) var(--space-5);
+  font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;
+}
+.empty-view .ev-icon{font-size:48px;margin-bottom:var(--space-3);}
+.empty-view p{margin-bottom:var(--space-4);}
+.empty-view a{
+  display:inline-block;color:var(--accent);text-decoration:none;
+  border:1px solid var(--accent);border-radius:var(--radius-pill);
+  padding:var(--space-2) var(--space-5);font-size:10px;letter-spacing:.1em;
+}
+.empty-view a:active{opacity:.6;}
 </style>
 </head>
 <body>
@@ -167,11 +181,11 @@ body{
 
   var q=new URLSearchParams(location.search);
   var id=+q.get('id');
-  if(!id){document.getElementById('main').innerHTML='<div class="ing-card" style="text-align:center;padding:var(--space-8);font-family:var(--font-mono);font-size:10px;color:var(--muted);">未指定菜谱</div>';return;}
+  if(!id){document.getElementById('main').innerHTML='<div class="empty-view"><div class="ev-icon">📭</div><p>未指定菜谱</p><a href="recipe-manage.html">返回菜谱管理</a></div>';return;}
 
   var recipes=[];try{recipes=JSON.parse(localStorage.getItem('yzys_recipes')||'[]');}catch(e){}
   var r=recipes.find(function(x){return x.id===id;});
-  if(!r){document.getElementById('main').innerHTML='<div class="ing-card" style="text-align:center;padding:var(--space-8);font-family:var(--font-mono);font-size:10px;color:var(--muted);">菜谱不存在</div>';return;}
+  if(!r){document.getElementById('main').innerHTML='<div class="empty-view"><div class="ev-icon">🔍</div><p>菜谱不存在或已删除</p><a href="recipe-manage.html">返回菜谱管理</a></div>';return;}
 
   document.getElementById('editLink').href='recipe-edit.html?id='+r.id;
 
