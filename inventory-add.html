@@ -234,7 +234,15 @@ body{
 
     <!-- 基本信息 -->
     <div class="section-title">基本信息</div>
-    <div class="field"><label>食材</label><div class="ing-trigger" id="ingTrigger"><span class="it-icon" id="ingIcon">🥬</span><span id="ingName">选择食材</span></div></div>
+    <div class="field"><label>食材</label>
+      <div style="position:relative;">
+        <input id="ingInput" type="text" autocomplete="off" placeholder="输入食材名称搜索" style="width:100%;font-family:var(--font-body);font-size:var(--text-base);color:var(--fg);background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:10px 12px;outline:none;">
+        <div id="ingSuggest" style="position:absolute;top:100%;left:0;right:0;z-index:30;background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius-md) var(--radius-md);max-height:200px;overflow-y:auto;display:none;"></div>
+      </div>
+      <div id="ingSelected" style="margin-top:8px;display:none;align-items:center;gap:8px;font-size:var(--text-sm);color:var(--fg);">
+        <span id="ingSelIcon"></span><span id="ingSelName"></span><span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);cursor:pointer;" id="ingClear">✕ 重选</span>
+      </div>
+    </div>
     <div class="field"><label>商品名</label><input id="productName" type="text" autocomplete="off" placeholder="如：盒马有机小白菜"></div>
     <div class="field"><label>规格 <span class="ocr-tag" id="ocrSpec">OCR</span></label><input id="spec" type="text" autocomplete="off" placeholder="如：300g/袋"></div>
     <div class="field"><label>数量（如：500g / 1瓶 / 2个）</label><input id="amt" type="text" autocomplete="off" placeholder="500g"></div>
@@ -284,22 +292,6 @@ body{
       <div class="ocr-sub" id="ocrSub"></div>
     </div>
   </div>
-  <!-- 食材选择面板 -->
-  <div class="picker-overlay" id="pickerOverlay">
-    <div class="picker-box">
-      <div class="picker-head"><span>选择食材</span><button class="picker-close" id="pickerClose">✕</button></div>
-      <div class="picker-search-wrap"><input class="picker-search" id="pickerSearch" type="text" autocomplete="off" placeholder="搜索食材名称"></div>
-      <div class="picker-list">
-        <div class="picker-cats" id="pickerCats"></div>
-        <div class="picker-items" id="pickerItems"></div>
-      </div>
-      <div class="picker-foot">
-        <button class="pf-cancel" id="pickerCancel">取消</button>
-        <button class="pf-confirm" id="pickerConfirm">确定</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -341,62 +333,55 @@ body{
   var selectedIngId=null;
   function rebuildMaps(){ingMap={};ALL.forEach(function(m){ingMap[m.id]=m;});ingByCat={};ALL.forEach(function(m){var cat=m.cat;if(!ingByCat[cat]) ingByCat[cat]=[];ingByCat[cat].push(m);});}
   var ingMap={},ingByCat={};rebuildMaps();
-  var activePickerCat='';
-  var catOrder=['主食','蛋白','蔬果','坚果','乳饮','调味'];
 
-  function openPicker(){
-    activePickerCat=catOrder[0];
-    renderPickerCats();
-    renderPickerItems();
-    document.getElementById('pickerOverlay').classList.add('show');
-    document.getElementById('pickerSearch').value='';
-  }
-  function closePicker(){document.getElementById('pickerOverlay').classList.remove('show');}
-  document.getElementById('ingTrigger').addEventListener('click',openPicker);
-  document.getElementById('pickerClose').addEventListener('click',closePicker);
-  document.getElementById('pickerCancel').addEventListener('click',closePicker);
-  document.getElementById('pickerConfirm').addEventListener('click',function(){
-    if(selectedIngId){
-      var m=ingMap[selectedIngId];
-      document.getElementById('ingIcon').textContent=m.icon;
-      document.getElementById('ingName').textContent=m.n;
+  /* 食材自动补全 */
+  var ingInput=document.getElementById('ingInput'),ingSuggest=document.getElementById('ingSuggest');
+  ingInput.addEventListener('input',function(){
+    var q=this.value.trim().toLowerCase();
+    ingSuggest.innerHTML='';ingSuggest.style.display='none';
+    if(!q) return;
+    var matches=ALL.filter(function(m){return m.n.indexOf(q)>=0;}).slice(0,8);
+    if(!matches.length){
+      ingSuggest.innerHTML='<div class="pli-item" style="justify-content:center;color:var(--accent);font-weight:bold;">+ 创建食材「'+q+'」</div>';
+      ingSuggest.style.display='block';
+      return;
     }
-    closePicker();
-  });
-
-  function renderPickerCats(q){
-    var el=document.getElementById('pickerCats');el.innerHTML='';
-    if(q){el.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);padding:12px 8px;text-align:center;">搜索</div>';}
-    else{catOrder.forEach(function(c){var d=document.createElement('div');d.className='pc-item'+(c===activePickerCat?' active':'');d.textContent=c;d.addEventListener('click',function(){activePickerCat=c;renderPickerCats();renderPickerItems();});el.appendChild(d);});}
-  }
-  function renderPickerItems(q){
-    var el=document.getElementById('pickerItems');el.innerHTML='';var list=[];
-    if(q){ALL.forEach(function(m){if(m.n.indexOf(q)>=0) list.push(m);});}
-    else if(ingByCat[activePickerCat]) list=ingByCat[activePickerCat];
-    list.forEach(function(m){
+    matches.forEach(function(m){
       var stockCount=items.filter(function(x){return x.id===m.id;}).length;
       var row=document.createElement('div');
-      row.className='pli-item'+(selectedIngId===m.id?' sel':'');
-      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+(q?' ('+m.cat+')':'')+(stockCount?' 已有'+stockCount+'批':'')+'</span><span class="plii-check">✓</span>';
-      row.addEventListener('click',function(){selectedIngId=m.id;renderPickerItems(q);});
-      el.appendChild(row);
+      row.className='pli-item';
+      row.innerHTML='<span class="plii-icon">'+m.icon+'</span><span class="plii-name">'+m.n+' ('+m.cat+')'+(stockCount?' 已有'+stockCount+'批':'')+'</span>';
+      row.addEventListener('click',function(){selectIngredient(m);});
+      ingSuggest.appendChild(row);
     });
-    /* 搜索无结果时 → 快速创建食材 */
-    if(q&&!list.length){
-      var createRow=document.createElement('div');
-      createRow.className='pli-item';createRow.style.cssText='justify-content:center;color:var(--accent);font-weight:bold;';
-      createRow.textContent='+ 创建食材「'+q+'」';
-      createRow.addEventListener('click',function(){
-        var newIng={id:Date.now(),n:q,icon:'🥬',cat:'蔬果'};
-        ALL.push(newIng);
-        try{localStorage.setItem('yzys_custom_ings',JSON.stringify(ALL.filter(function(m){return m.id>=1e12;})));}catch(e){}
-        rebuildMaps();renderPickerCats(q);
-        selectedIngId=newIng.id;renderPickerItems(q);showToast('已创建 '+q);
-      });
-      el.appendChild(createRow);
+    ingSuggest.style.display='block';
+  });
+  /* 创建食材 */
+  ingSuggest.addEventListener('click',function(e){
+    if(e.target.textContent.indexOf('创建食材')>=0){
+      var q=ingInput.value.trim();
+      var newIng={id:Date.now(),n:q,icon:'🥬',cat:'蔬果'};
+      ALL.push(newIng);
+      try{localStorage.setItem('yzys_custom_ings',JSON.stringify(ALL.filter(function(m){return m.id>=1e12;})));}catch(e){}
+      rebuildMaps();selectIngredient(newIng);showToast('已创建 '+q);
     }
+  });
+  function selectIngredient(m){
+    selectedIngId=m.id;
+    document.getElementById('ingSelIcon').textContent=m.icon;
+    document.getElementById('ingSelName').textContent=m.n;
+    document.getElementById('ingSelected').style.display='flex';
+    document.getElementById('ingInput').style.display='none';
+    ingSuggest.style.display='none';
   }
-  document.getElementById('pickerSearch').addEventListener('input',function(){var q=this.value.trim().toLowerCase();renderPickerCats(q);renderPickerItems(q);});
+  document.getElementById('ingClear').addEventListener('click',function(){
+    selectedIngId=null;
+    document.getElementById('ingSelected').style.display='none';
+    document.getElementById('ingInput').style.display='block';
+    document.getElementById('ingInput').value='';
+  });
+  /* 点击外部关闭建议 */
+  document.addEventListener('click',function(e){if(!ingInput.contains(e.target)&&!ingSuggest.contains(e.target)) ingSuggest.style.display='none';});
 
   /* 价格自动补全两位小数 */
   document.getElementById('price').addEventListener('blur',function(){
