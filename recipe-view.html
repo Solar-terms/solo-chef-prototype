@@ -270,8 +270,8 @@ body{
           });
         }
 
-        /* 条目行 */
-        if(ph.entries&&ph.entries.length){
+        /* 条目行（仅无模块卡时显示） */
+        if(!ph.modules||!ph.modules.length) if(ph.entries&&ph.entries.length){
           ph.entries.forEach(function(e,i){
             html+='<div class="step-entry"><span class="se-num">'+(i+1)+'</span><div class="se-body">';
             html+='<div class="se-tags">';
